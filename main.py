@@ -28,6 +28,8 @@ def did_sai_win(board):
     for i in range(6):
         for j in range(7):
             if board[i,j] == -1:
+                print(i)
+                print(j)
                 if i < 3 and j < 4:     #down right diagonal condition. not possible for i >=3 and j >= 4
                     if board[i+1,j+1] == -1 and board[i+2,j+2] == -1 and board[i+3,j+3] == -1:
                         return -1
@@ -48,13 +50,13 @@ def mcts_thinker(board):
     mess_with_me = board.copy()
     num_simulations = 50
     #total_reward = 0
-    #best_reward = -100
-    #best_move = 0
+    best_reward = -100
+    best_move = 0
     for j in range (7): #I have 7 possible moves
 
         total_reward = 0
-        best_reward = -100
-        best_move = 0
+        #best_reward = -100
+        #best_move = 0
 
         ##if you can't make that move, you are lost. (incorrect logic?)
         #if mess_with_me[0,j] != 0:
@@ -62,15 +64,26 @@ def mcts_thinker(board):
 
         #if the move is possible, make the move
         #else:
-        if mess_with_me[0,j] == 0:
-            for i in range(6):
-                if mess_with_me[5-i,j] == 0:
-                    mess_with_me[5-i,j] == -1
-                    break
+        #if mess_with_me[0,j] == 0:
+        #    for i in range(6):
+        #        if mess_with_me[5-i,j] == 0:
+        #            mess_with_me[5-i,j] == -1
+        #            break
 
         #simulating randomly from now onwards
-        turn = 1 # 1 for ivana and -1 for sai
+        turn = -1 # 1 for ivana and -1 for sai
         for lol in range(num_simulations):
+            mess_with_me = board.copy()
+            if mess_with_me[0,j] != 0:
+                break
+
+            #mess_with_me = board.copy()
+            if mess_with_me[0,j] == 0:
+                for i in range(6):
+                    if mess_with_me[5-i,j] == 0:
+                        mess_with_me[5-i,j] == -1
+                        turn = 1
+                        break
             while(did_sai_win(mess_with_me) == 0 or did_ivana_win(mess_with_me) == 0):
 
                 col = random.randint(0,6)
@@ -85,6 +98,9 @@ def mcts_thinker(board):
                                 break
                     if(did_ivana_win(mess_with_me) == 1):
                         total_reward = total_reward - 1
+                        print(lol)
+                        print("ivana wins in simulation\n")
+                        print(mess_with_me)
                         break
                     else:
                         turn = -1
@@ -101,13 +117,21 @@ def mcts_thinker(board):
 
                     if(did_sai_win(mess_with_me) == -1):
                         total_reward = total_reward + 1
+                        print(lol)
+                        print("sai wins in simulation\n")
+                        print(mess_with_me)
                         break
                     else:
                         turn = 1
+        print(j)
+        print(total_reward)
+        print(best_reward)
 
         if total_reward > best_reward:
             best_reward = total_reward
             best_move = j
+
+        print("best move is %d\n",best_move)
 
     if board[0,best_move] != 0:
         print("Draw?\n")
