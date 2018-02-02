@@ -4,7 +4,7 @@ import random
 gamma = 0.9 #discount factor
 
 def initialize():
-    board = np.zeros((6,7))
+    board = np.zeros((6,7)) #note that (0,0) corresponds on top left and (5,6) corresponds to bottom right
     return board
 
 def did_white_win(board):
@@ -57,22 +57,7 @@ def mcts_thinker(board):
     for j in range (7): #I have 7 possible moves
 
         total_reward = 0
-        #best_reward = -100
-        #best_move = 0
 
-        ##if you can't make that move, you are lost. (incorrect logic?)
-        #if mess_with_me[0,j] != 0:
-        #    total_reward = total_reward - 1;
-
-        #if the move is possible, make the move
-        #else:
-        #if mess_with_me[0,j] == 0:
-        #    for i in range(6):
-        #        if mess_with_me[5-i,j] == 0:
-        #            mess_with_me[5-i,j] == -1
-        #            break
-
-        #simulating randomly from now onwards
         turn = -1 # 1 for white and -1 for black
         for lol in range(num_simulations):
             num_turns = 0
@@ -91,9 +76,7 @@ def mcts_thinker(board):
                 num_turns = num_turns + 1
                 col = random.randint(0,6)
                 if turn == 1:
-                    #if mess_with_me[0,col] != 0:
-                    #    total_reward = total_reward + 1
-                    #else:
+
                     if mess_with_me[0,col] == 0:
                         for i in range(6):
                             if mess_with_me[5-i,col] == 0:
@@ -109,9 +92,6 @@ def mcts_thinker(board):
                         turn = -1
 
                 else:
-                    #if mess_with_me[0,col] != 0:
-                    #    total_reward = total_reward - 1
-                    #else:
                     if mess_with_me[0,col] == 0:
                         for i in range(6):
                             if mess_with_me[5-i,col] == 0:
