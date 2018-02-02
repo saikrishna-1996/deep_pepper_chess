@@ -149,25 +149,19 @@ def mcts_thinker(board):
 board = initialize()
 while(did_black_win(board) == 0 or did_white_win(board) == 0):
     movestring = input('Enter Whites move:   ')
-    move = int(movestring)
-    col = move%10
-    #print(col)
-    row = (move-col)/10
-    row = int(row)
-    if board[row,col] == 0:
-        board[row,col] = 1
-    else:
-        print("illegal move, piece already existant\n")
+    move = int(movestring)      #just enter the column number as input
+    if board[0, move] != 0:
+        print("Invalid move\n")
+    for lol in range(6):
+        if board[5-lol,move] == 0:
+            board[5-lol, move] = 1
+            break
+
     print(board)
     if(did_white_win(board) == 1):
         print("White wins\n ")
         break
 
-    #movestring2 = input('Enter blacks move:    ')
-    #move2 = int(movestring2)
-    #col2 = move2%10
-    #row2 = (move2-col2)/10
-    #row2 = int(row2)
     row2, col2 = mcts_thinker(board)
     if board[row2,col2] == 0:
         board[row2,col2] = -1
