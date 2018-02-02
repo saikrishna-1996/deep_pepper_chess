@@ -1,11 +1,13 @@
 import numpy as np
 import random
 
+gamma = 0.9 #discount factor
+
 def initialize():
     board = np.zeros((6,7))
     return board
 
-def did_ivana_win(board):
+def did_white_win(board):
     for i in range(6):
         for j in range(7):
             if board[i,j] == 1:
@@ -24,12 +26,12 @@ def did_ivana_win(board):
 
     return 0
 
-def did_sai_win(board):
+def did_black_win(board):
     for i in range(6):
         for j in range(7):
             if board[i,j] == -1:
-                print(i)
-                print(j)
+                #print(i)
+                #print(j)
                 if i < 3 and j < 4:     #down right diagonal condition. not possible for i >=3 and j >= 4
                     if board[i+1,j+1] == -1 and board[i+2,j+2] == -1 and board[i+3,j+3] == -1:
                         return -1
@@ -71,8 +73,9 @@ def mcts_thinker(board):
         #            break
 
         #simulating randomly from now onwards
-        turn = -1 # 1 for ivana and -1 for sai
+        turn = -1 # 1 for white and -1 for black
         for lol in range(num_simulations):
+            num_turns = 0
             mess_with_me = board.copy()
             if mess_with_me[0,j] != 0:
                 break
@@ -84,8 +87,8 @@ def mcts_thinker(board):
                         mess_with_me[5-i,j] == -1
                         turn = 1
                         break
-            while(did_sai_win(mess_with_me) == 0 or did_ivana_win(mess_with_me) == 0):
-
+            while(did_black_win(mess_with_me) == 0 or did_white_win(mess_with_me) == 0):
+                num_turns = num_turns + 1
                 col = random.randint(0,6)
                 if turn == 1:
                     #if mess_with_me[0,col] != 0:
@@ -96,11 +99,11 @@ def mcts_thinker(board):
                             if mess_with_me[5-i,col] == 0:
                                 mess_with_me[5-i,col] = 1
                                 break
-                    if(did_ivana_win(mess_with_me) == 1):
-                        total_reward = total_reward - 1
-                        print(lol)
-                        print("ivana wins in simulation\n")
-                        print(mess_with_me)
+                    if(did_white_win(mess_with_me) == 1):
+                        total_reward = total_reward - 1.*(gamma**num_turns)
+                        #print(lol)
+                        print("white wins in simulation\n")
+                        #print(mess_with_me)
                         break
                     else:
                         turn = -1
@@ -115,11 +118,11 @@ def mcts_thinker(board):
                                 mess_with_me[5-i,col] = -1
                                 break
 
-                    if(did_sai_win(mess_with_me) == -1):
-                        total_reward = total_reward + 1
-                        print(lol)
-                        print("sai wins in simulation\n")
-                        print(mess_with_me)
+                    if(did_black_win(mess_with_me) == -1):
+                        total_reward = total_reward + 1.*(gamma**num_turns)
+                        #print(lol)
+                        print("Black wins in simulation\n")
+                        #print(mess_with_me)
                         break
                     else:
                         turn = 1
@@ -144,8 +147,8 @@ def mcts_thinker(board):
 
 
 board = initialize()
-while(did_sai_win(board) == 0 or did_ivana_win(board) == 0):
-    movestring = input('Enter ivanas move:   ')
+while(did_black_win(board) == 0 or did_white_win(board) == 0):
+    movestring = input('Enter Whites move:   ')
     move = int(movestring)
     col = move%10
     #print(col)
@@ -156,11 +159,11 @@ while(did_sai_win(board) == 0 or did_ivana_win(board) == 0):
     else:
         print("illegal move, piece already existant\n")
     print(board)
-    if(did_ivana_win(board) == 1):
-        print("Ivana wins\n ")
+    if(did_white_win(board) == 1):
+        print("White wins\n ")
         break
 
-    #movestring2 = input('Enter sais move:    ')
+    #movestring2 = input('Enter blacks move:    ')
     #move2 = int(movestring2)
     #col2 = move2%10
     #row2 = (move2-col2)/10
@@ -171,6 +174,6 @@ while(did_sai_win(board) == 0 or did_ivana_win(board) == 0):
     else:
         print("illegal move, piece already existant\n")
     print(board)
-    if(did_sai_win(board) == -1):
-        print("Sai wins\n ")
+    if(did_black_win(board) == -1):
+        print("Black wins\n ")
         break
