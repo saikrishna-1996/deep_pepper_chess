@@ -95,8 +95,8 @@ def mcts_thinker(board):
                             turn = 1
                             break
 
-    #           if did_black_win(mess_with_me) == -1:
-    #               total_reward = 100 #if we are immediately winning with the text move, then, we shouldn't bother about any other moves, and immediately play this move. Hence, we assign it a very high positive reward
+                if did_black_win(mess_with_me) == -1:
+                    total_reward = 100 #if we are immediately winning with the text move, then, we shouldn't bother about any other moves, and immediately play this move. Hence, we assign it a very high positive reward
 
                 while(did_black_win(mess_with_me) == 0 and did_white_win(mess_with_me) == 0 and is_it_draw(mess_with_me) == 0):
                     num_turns = num_turns + 1
