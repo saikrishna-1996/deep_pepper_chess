@@ -1,7 +1,24 @@
+import argparse
+from itertools import count
+from collections import namedtuple
 import numpy as np
 import random
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.autograd import Variable
+from torch.distributions import Categorical
+
+#parser = argparse.ArgumentParser(description='solving the connect4')
+#parser.add_argument('--gamma', type=float, default=0.99, metavar = 'G',
+#        help = 'discount factor (default = 0.99)' )
+
 gamma = 0.9 #discount factor
+
+#class ActorCritic(nn.Module):
+
 
 def initialize():
     board = np.zeros((6,7)) #note that (0,0) corresponds on top left and (5,6) corresponds to bottom right
