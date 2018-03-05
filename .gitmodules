@@ -1,0 +1,3 @@
+[submodule "Giraffe"]
+	path = Giraffe
+	url = https://github.com/ianfab/Giraffe
