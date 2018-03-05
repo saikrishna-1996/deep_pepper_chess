@@ -314,3 +314,10 @@ def replace_tags_board(board_san):
 
 def is_black_turn(fen):
     return fen.split(" ")[1] == 'b'
+
+
+def main():
+    print("Hello world!")
+
+if __name__ == "__main__":
+    main()
