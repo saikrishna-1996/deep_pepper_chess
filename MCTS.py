@@ -31,6 +31,12 @@ def termination(state):
 
 class Leaf(Board):
 
+    #This class inherit the Board class which control the board representation, find legale move and next board represenation.
+    #It has the ability to store and update for each leaf the number of state-action N(s,a), Q(s,a) and P(s,a) 
+    
+    
+    
+    
     def __init__(board, init_W, init_P, init_N, explore_factor):
 
         self.board = board
@@ -66,10 +72,20 @@ class Leaf(Board):
         self.P = new_P
 
 
-#state is array
-def MCTS(state,explore_factor,temp):#we can add here all our hyper-parameters
+#state type and shape does not matter 
 
-    leafs=[] #history of leafs for all previous runs
+
+def MCTS(state,explore_factor,temp):#we can add here all our hyper-parameters
+    # Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm 
+    # argumentes: state: the root state from where the stimulation start .
+    #             explore_factor: hyper parameter to tune the exploration range in UCT
+    #             temp: temperature constant for the optimum policy to control the level of exploration in the Play policy
+    #             optional : dirichlet noise 
+    # return: pi: vector of policy(action) with the same shape of legale move.
+            
+    
+    #history of leafs for all previous runs  
+    leafs=[] 
     for simulation in range (800):
         state_action_list=[]#list of leafs in the same run
         while not Termination(state):
