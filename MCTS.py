@@ -94,7 +94,7 @@ def MCTS(state,explore_factor,temp):#we can add here all our hyper-parameters
                 state_action_list.append(leafs[index])
             else:
                 state_action_list.append(Leaf(state, init_W, alpha_prob(state), init_N, explore_factor)) #check the initialization strategy
-
+                leafs.append(state_action_list[-1])
 
             if  Termination(state):
                 for i in list(reversed(range(len(state_action_list)))):
