@@ -22,16 +22,34 @@ class PolicyNetwork_Full(nn.module):
         y_out = F.sigmoid(self.linear3(h2_relu)) #We use sigmoid at the output coz we output probability measures
         return y_out
 
+class PolicyNetwork_Giraffe(nn.module):
+
 
 bs = 1  #batch size
 d_in = 363
 h1 = 1024   #neurons in first hidden layer
 h2 = 2048   #nuerons in second hidden layer
-d_out = 4096
+d_out = 4096 #without including under promotions. otherwise we have to increase
+
+#splitting the giraffe's feature vector to be input to the network
+global_features = 17
+## the following constitute the global features:
+# side to move = 1
+# castling rights = 4
+# material configuration = 12
+piece_centric = 218
+## the following constitute the piece-centric features:
+# piece lists with their properties = 2*(1+1+2+2+2+8)*5 = 160
+# sldiing pieces mobility = 2*(8+4+4+4+4) = 48
+# And, I just added extra 10 because, otherwise they are not adding up to 363. Someone pls recheck this.
+sqaure_centric = 128
+## the following constitute the square-centric features:
+# attack map = 64
+# defend map = 64
 
 # x is your 363-dimensional input. and y is our output. We are randomly initializing them here.
 x = Variable(torch.randn(bs, d_in))
 y = Variable(torch.randn(bs, d_out), requires_grad=False)
 
 model = PolicyNetwork_Full(d_in, h1, h2, d_out)
-
+model2 = PolicyNetwork_Giraffe(d_in, global_features, piece_centric, square_centric,
