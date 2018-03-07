@@ -2,6 +2,118 @@ import chess
 import chess.uci
 import numpy as np
 
+def get_north_mobility(board, pos):
+    cpos = pos.copy()
+    bean = 0
+    while(cpos <= 63):
+        cpos = cpos + 8
+        if(board.piece_type_at(cpos) == 0):
+            bean = bean + 1
+        else:
+            break
+    return bean
+
+def get_south_mobility(board, pos):
+    cpos = pos.copy()
+    bean = 0
+    while(cpos >= 0):
+        cpos = cpos - 8
+        if(board.piece_type_at(cpos) == 0):
+            bean = bean + 1
+        else:
+            break
+    return bean
+
+def get_east_mobility(board, pos):
+    cpos = pos.copy()
+    row = cpos/8
+    col = cpos%8
+    bean = 0
+    while(col < 8):
+        col = col + 1
+        cpos = row*8 + col
+        if(board.piece_type_at(cpos) == 0):
+            bean = bean + 1
+        else:
+            break
+    return bean
+
+def get_west_mobility(board, pos):
+    cpos = pos.copy()
+    row = cpos/8
+    col = cpos%8
+    bean = 0
+    while(col >= 0):
+        col = col-1
+        cpos = row*8 + col
+        if(board.piece_type_at(cpos) == 0):
+            bean = bean + 1
+        else:
+            break
+    return bean
+
+def get_north_east_mobility(board, pos):
+    cpos = pos.copy()
+    row = cpos/8
+    col = cpos%8
+    bean = 0
+    while(col < 8 & row < 8):
+        row = row + 1
+        col = col + 1
+        cpos = row*8 + col
+        if(board.piece_type_at(cpos) == 0):
+            bean = bean + 1
+        else:
+            break
+    return bean
+
+def get_south_east_mobility(board, pos):
+    cpos = pos.copy()
+    row = cpos/8
+    col = cpos%8
+    bean = 0
+    while(col < 8 & row >= 0):
+        row = row - 1
+        col = col + 1
+        cpos = row*8 + col
+        if(board.piece_type_at(cpos) == 0):
+            bean = bean + 1
+        else:
+            break
+    return bean
+
+def get_south_west_mobility(board, pos):
+    cpos = pos.copy()
+    row = cpos/8
+    col = cpos%8
+    bean = 0
+    while(col >= 0 & row >= 0):
+        row = row - 1
+        col = col - 1
+        cpos = row*8 + col
+        if(board.piece_type_at(cpos) == 0):
+            bean = bean + 1
+        else:
+            break
+    return bean
+
+def get_north_west_mobility(board, pos):
+    cpos = pos.copy()
+    row = cpos/8
+    col = cpos%8
+    bean = 0
+    while(col >= 0 & row < 8):
+        row = row + 1
+        col = col - 1
+        cpos = row*8 + col
+        if(board.piece_type_at(cpos) == 0):
+            bean = bean + 1
+        else:
+            break
+    return bean
+
+
+
 def BoardToFeature(board):
 
     feature = np.zeros(384)
@@ -65,6 +177,10 @@ def BoardToFeature(board):
     pos = list(wq_squares)[0]
     row = pos/8
     col = pos%8
+
+    #feature[177] =
+
+
     feature[23] = float(row)/8.0
     feature[24] = float(col)/8.0
 
