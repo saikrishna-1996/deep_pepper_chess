@@ -7,7 +7,6 @@ def get_north_mobility(board, pos):
     bean = 0
     cpos = cpos + 8
     while(cpos <= 63):
-        #cpos = cpos + 8
         if(board.piece_type_at(cpos) == 0):
             bean = bean + 1
         else:
@@ -20,7 +19,6 @@ def get_south_mobility(board, pos):
     bean = 0
     cpos = cpos - 8
     while(cpos >= 0):
-        #cpos = cpos - 8
         if(board.piece_type_at(cpos) == 0):
             bean = bean + 1
         else:
@@ -35,7 +33,6 @@ def get_east_mobility(board, pos):
     bean = 0
     col = col + 1
     while(col < 8):
-        #col = col + 1
         cpos = row*8 + col
         if(board.piece_type_at(cpos) == 0):
             bean = bean + 1
@@ -51,7 +48,6 @@ def get_west_mobility(board, pos):
     bean = 0
     col = col - 1
     while(col >= 0):
-        #col = col-1
         cpos = row*8 + col
         if(board.piece_type_at(cpos) == 0):
             bean = bean + 1
@@ -61,19 +57,14 @@ def get_west_mobility(board, pos):
     return bean
 
 def get_north_east_mobility(board, pos):
-    #print(pos)
     cpos = int(pos)
     row = int(int(cpos)/int(8))
-    #print(row)
     col = cpos%8
     bean = 0
     row = row + 1
     col = col + 1
     while(col < 8 and row < 8):
-        #row = row + 1
-        #col = col + 1
         cpos = row*8 + col
-        #print(cpos)
         if(board.piece_type_at(cpos) == 0):
             bean = bean + 1
         else:
@@ -90,8 +81,6 @@ def get_south_east_mobility(board, pos):
     row = row - 1
     col = col + 1
     while(col < 8 and row >= 0):
-        #row = row - 1
-        #col = col + 1
         cpos = row*8 + col
         if(board.piece_type_at(cpos) == 0):
             bean = bean + 1
@@ -109,8 +98,6 @@ def get_south_west_mobility(board, pos):
     row = row - 1
     col = col - 1
     while(col >= 0 and row >= 0):
-        #row = row - 1
-        #col = col - 1
         cpos = row*8 + col
         if(board.piece_type_at(cpos) == 0):
             bean = bean + 1
@@ -128,10 +115,7 @@ def get_north_west_mobility(board, pos):
     row = row + 1
     col = col - 1
     while(col >= 0 and row < 8):
-        #row = row + 1
-        #col = col - 1
         cpos = row*8 + col
-        #print(bean, row, col, cpos)
         if(board.piece_type_at(cpos) == 0):
             bean = bean + 1
         else:
@@ -183,7 +167,7 @@ def BoardToFeature(board):
     feature[19] = float(col)/8.0
 
     white_attack = list(board.attackers(chess.WHITE, pos))
-    min_val = 1000
+    min_val = 10
     for lol in range(len(white_attack)):
         curr_val = board.piece_type_at(white_attack[lol])
         if curr_val < min_val:
@@ -191,7 +175,7 @@ def BoardToFeature(board):
     feature[20] = min_val
 
     black_attack = list(board.attackers(chess.BLACK, pos))
-    min_val = 1000
+    min_val = 10
     for lol in range(len(black_attack)):
         curr_val = board.piece_type_at(black_attack[lol])
         if curr_val < min_val:
@@ -224,7 +208,7 @@ def BoardToFeature(board):
         feature[24] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -232,7 +216,7 @@ def BoardToFeature(board):
         feature[25] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -260,7 +244,7 @@ def BoardToFeature(board):
         feature[29] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
     	    curr_val = board.piece_type_at(white_attack[lol])
     	    if curr_val < min_val:
@@ -268,7 +252,7 @@ def BoardToFeature(board):
         feature[30] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -288,7 +272,7 @@ def BoardToFeature(board):
         feature[29] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -296,7 +280,7 @@ def BoardToFeature(board):
         feature[30] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -315,7 +299,7 @@ def BoardToFeature(board):
         feature[34] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -323,7 +307,7 @@ def BoardToFeature(board):
         feature[35] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -352,7 +336,7 @@ def BoardToFeature(board):
         feature[39] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -360,7 +344,7 @@ def BoardToFeature(board):
         feature[40] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -380,7 +364,7 @@ def BoardToFeature(board):
         feature[39] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -388,7 +372,7 @@ def BoardToFeature(board):
         feature[40] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -407,7 +391,7 @@ def BoardToFeature(board):
         feature[44] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -415,7 +399,7 @@ def BoardToFeature(board):
         feature[45] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -438,7 +422,7 @@ def BoardToFeature(board):
         feature[49] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -446,7 +430,7 @@ def BoardToFeature(board):
         feature[50] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -462,7 +446,7 @@ def BoardToFeature(board):
         feature[49] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -470,7 +454,7 @@ def BoardToFeature(board):
         feature[50] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -485,7 +469,7 @@ def BoardToFeature(board):
         feature[54] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -493,7 +477,7 @@ def BoardToFeature(board):
         feature[55] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -517,7 +501,7 @@ def BoardToFeature(board):
             feature[fc+2] = float(col)/8.0
 
             white_attack = list(board.attackers(chess.WHITE, pos))
-            min_val = 1000
+            min_val = 10
             for lol2 in range(len(white_attack)):
                 curr_val = board.piece_type_at(white_attack[lol2])
                 if curr_val < min_val:
@@ -525,7 +509,7 @@ def BoardToFeature(board):
             feature[fc+3] = min_val
 
             black_attack = list(board.attackers(chess.BLACK, pos))
-            min_val = 1000
+            min_val = 10
             for lol2 in range(len(black_attack)):
                 curr_val = board.piece_type_at(black_attack[lol2])
                 if curr_val < min_val:
@@ -545,7 +529,7 @@ def BoardToFeature(board):
     feature[99] = float(col)/8.0
 
     white_attack = list(board.attackers(chess.WHITE, pos))
-    min_val = 1000
+    min_val = 10
     for lol in range(len(white_attack)):
         curr_val = board.piece_type_at(white_attack[lol])
         if curr_val < min_val:
@@ -553,7 +537,7 @@ def BoardToFeature(board):
     feature[100] = min_val
 
     black_attack = list(board.attackers(chess.BLACK, pos))
-    min_val = 1000
+    min_val = 10
     for lol in range(len(black_attack)):
         curr_val = board.piece_type_at(black_attack[lol])
         if curr_val < min_val:
@@ -583,7 +567,7 @@ def BoardToFeature(board):
         feature[104] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -591,7 +575,7 @@ def BoardToFeature(board):
         feature[105] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -621,7 +605,7 @@ def BoardToFeature(board):
         feature[109] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -629,7 +613,7 @@ def BoardToFeature(board):
         feature[110] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -650,7 +634,7 @@ def BoardToFeature(board):
         feature[109] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -658,7 +642,7 @@ def BoardToFeature(board):
         feature[110] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -678,7 +662,7 @@ def BoardToFeature(board):
         feature[114] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -686,7 +670,7 @@ def BoardToFeature(board):
         feature[115] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -716,7 +700,7 @@ def BoardToFeature(board):
         feature[119] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -724,7 +708,7 @@ def BoardToFeature(board):
         feature[120] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -745,7 +729,7 @@ def BoardToFeature(board):
         feature[119] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -753,7 +737,7 @@ def BoardToFeature(board):
         feature[120] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -773,7 +757,7 @@ def BoardToFeature(board):
         feature[124] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -781,7 +765,7 @@ def BoardToFeature(board):
         feature[125] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -804,7 +788,7 @@ def BoardToFeature(board):
         feature[129] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -812,7 +796,7 @@ def BoardToFeature(board):
         feature[130] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -828,7 +812,7 @@ def BoardToFeature(board):
         feature[129] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -836,7 +820,7 @@ def BoardToFeature(board):
         feature[130] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -851,7 +835,7 @@ def BoardToFeature(board):
         feature[134] = float(col)/8.0
 
         white_attack = list(board.attackers(chess.WHITE, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(white_attack)):
             curr_val = board.piece_type_at(white_attack[lol])
             if curr_val < min_val:
@@ -859,7 +843,7 @@ def BoardToFeature(board):
         feature[135] = min_val
 
         black_attack = list(board.attackers(chess.BLACK, pos))
-        min_val = 1000
+        min_val = 10
         for lol in range(len(black_attack)):
             curr_val = board.piece_type_at(black_attack[lol])
             if curr_val < min_val:
@@ -883,7 +867,7 @@ def BoardToFeature(board):
             feature[fc+2] = float(col)/8.0
 
             white_attack = list(board.attackers(chess.WHITE, pos))
-            min_val = 1000
+            min_val = 10
             for lol2 in range(len(white_attack)):
                 curr_val = board.piece_type_at(white_attack[lol2])
                 if curr_val < min_val:
@@ -891,7 +875,7 @@ def BoardToFeature(board):
             feature[fc+3] = min_val
 
             black_attack = list(board.attackers(chess.BLACK, pos))
-            min_val = 1000
+            min_val = 10
             for lol2 in range(len(black_attack)):
                 curr_val = board.piece_type_at(black_attack[lol2])
                 if curr_val < min_val:
@@ -906,7 +890,7 @@ def BoardToFeature(board):
     #White-attacker
     for i in range(63):
         shooters = list(board.attackers(chess.WHITE, i))
-        min_val = 1000
+        min_val = 10
         for j in range(len(shooters)):
             curr_val = board.piece_type_at(shooters[j])
             if curr_val < min_val:
@@ -914,9 +898,9 @@ def BoardToFeature(board):
         feature[225+i] = min_val
 
     #Black-attacker
-    for j in range(63):
+    for i in range(63):
         shooters = list(board.attackers(chess.BLACK, i))
-        min_val = 1000
+        min_val = 10
         for j in range(len(shooters)):
             curr_val = board.piece_type_at(shooters[j])
             if curr_val < min_val:
