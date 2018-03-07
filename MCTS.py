@@ -10,6 +10,9 @@ import stockfish_eval
 import stockfish_move
 
 
+def Termination(board):
+    return board.is_game_over(claim_draw=False)
+
 def state_visited(list,state):
     if not list:
         return False, None
@@ -62,7 +65,9 @@ class Leaf(board):
 
     @property
     def next_board(self):
-        return self.render_action(self.board, self.best_action)#assuming the function you did
+        mymove = chess.Move.from_uci(self.best_action)
+        return board.push(mymove)
+        #return self.render_action(self.board, self.best_action)#assuming the function you did
         #Do chess.Move()
 
     def N_update(self,action_index):
@@ -92,7 +97,7 @@ def MCTS(state, init_W, init_N, explore_factor,temp):#we can add here all our hy
     leafs=[]
     for simulation in range (800):
         state_action_list=[]#list of leafs in the same run
-        while not Termination(state):
+        while not Termination(state_copy):
             visited, index = state_visited(leafs,state_copy)
             if visited:
                 state_action_list.append(leafs[index])
