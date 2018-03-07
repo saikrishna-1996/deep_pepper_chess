@@ -7,6 +7,7 @@ import value-network
 from chess import Board
 import stockfish_eval
 from features import BoardToFeature
+from config import ALLMOVESMAP
 
 
 def Termination(board):
@@ -73,7 +74,21 @@ class Leaf(board):
     def P_update(self, new_P):
         self.P = new_P
 
-
+def legal_mask(board,all_move_probs):
+    legal_moves = board.legal_moves
+    mask = np.zeros_like(all_move_probs)
+    total_p = 0
+    for legal_move in legal_moves:
+        legal_move_uci = legal_move.uci()
+        ind = ALLMOVESMAP[legal_move_uci]
+        mask[ind] = 1
+        all_moves_prob += 1e-6
+        total_p += all_move_probs[ind]
+    
+    legal_moves_prob =  np.multiply(mask,all_move_probs) 
+    legal_moves_prob = np.divide(legal_move_probs,total_p) 
+    return p_legal_moves
+    
 #state type and shape does not matter
 
 def MCTS(state, init_W, init_N, explore_factor,temp,alpha_prob,alpha_eval):#we can add here all our hyper-parameters
@@ -97,7 +112,9 @@ def MCTS(state, init_W, init_N, explore_factor,temp,alpha_prob,alpha_eval):#we c
                 state_action_list.append(leafs[index])
             else:
                 giraffe_features = BoardToFeature(state_copy)
-                state_action_list.append(Leaf(state_copy, init_W, alpha_probs.forward(giraffe_features), init_N, explore_factor)) #check the initialization strategy
+                all_move_probs = alpha_probs.forward(giraffe_features)
+                legal_move_probs = legal_mask(state_copy,all_move_probs)
+                state_action_list.append(Leaf(state_copy, init_W, legal_move_probs, init_N, explore_factor)) #check the initialization strategy
                 leafs.append(state_action_list[-1])
 
             if  Termination(state_copy):
