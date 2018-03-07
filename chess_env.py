@@ -2,6 +2,7 @@ import enum
 import chess.pgn
 import numpy as np
 import copy
+from config import SQUAREMAP
 
 from logging import getLogger
 
@@ -69,7 +70,9 @@ class ChessEnv:
         if check_over and action is None:
             self._resign()
             return
-
+        if ((action[3]=='8' and action[1]=='7' and self.board.piece_at(SQUAREMAP[action[action[0:1]]])=='P')\
+             or ((action[3]=='1' and action[1]=='2'and self.board.piece_at(SQUAREMAP[action[action[0:1]]])=='p'))):
+             action += 'q'
         self.board.push_uci(action)
         self.update_state_count()
 

@@ -2,8 +2,8 @@ import numpy as np
 
 #this is hypothetical functions and classes that should be created by teamates.
 import chess.uci
-import policy-network
-import value-network
+import policy_network
+import value_network
 from chess import Board
 import stockfish_eval
 from features import BoardToFeature
@@ -22,10 +22,8 @@ def state_visited(state_list,state):
             return True, i
     return False, None
 
-
 def Q(N,W):
     return W/float(N)
-
 
 def termination(state):
     if state:
@@ -38,16 +36,18 @@ class Leaf(board):
     #This class inherit the Board class which control the board representation, find legale move and next board represenation.
     #It has the ability to store and update for each leaf the number of state-action N(s,a), Q(s,a) and P(s,a)
     def __init__(self, board, init_W, init_P, init_N, explore_factor):
-
+        assert init_N.shape = (4096,1)
+        assert init_W.shape = (4096,1)
+        assert init_P.shape = (4096,1)
         self.board = board
         self.W = init_W
         self.P = init_P
         self.N = init_N
-        self.explore_factor =explore_factor
+        self.explore_factor = explore_factor
 
     @property
     def Q(self):
-        return self.W/self.N
+        return np.divide(self.W,self.N)
 
     @property
     def U(self):
@@ -99,7 +99,7 @@ def MCTS(state, init_W, init_N, explore_factor,temp,alpha_prob,alpha_eval):#we c
     #             optional : dirichlet noise
     #             alpha_prob: current policy-network
     #             alpha_eval: current value-network
-    # return: pi: vector of policy(action) with the same shape of legale move.
+    # return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
 
     #history of leafs for all previous runs
     state_copy = state.copy()
