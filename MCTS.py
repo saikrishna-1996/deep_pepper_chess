@@ -1,31 +1,29 @@
 import numpy as np
 
 #this is hypothetical functions and classes that should be created by teamates.
-import Board
-import chess
 import chess.uci
-import alpha_move
-import alpha_prob
+import policy-network
+import value-network
+from chess import Board
 import stockfish_eval
-import stockfish_move
+from features import BoardToFeature
 
 
 def Termination(board):
     return board.is_game_over(claim_draw=False)
 
-def state_visited(list,state):
-    if not list:
+
+def state_visited(state_list,state):
+    if not state_list:
         return False, None
-    for i in range(len(list)):
-        if  np.array_equal(list[i].board, state):
-            break
+    for i in range(len(state_list)):
+        if  np.array_equal(state_list[i].board, state):
             return True, i
     return False, None
 
 
-
 def Q(N,W):
-    return W/N
+    return W/float(N)
 
 
 def termination(state):
@@ -38,10 +36,6 @@ class Leaf(board):
 
     #This class inherit the Board class which control the board representation, find legale move and next board represenation.
     #It has the ability to store and update for each leaf the number of state-action N(s,a), Q(s,a) and P(s,a)
-
-
-
-
     def __init__(self, board, init_W, init_P, init_N, explore_factor):
 
         self.board = board
@@ -71,7 +65,7 @@ class Leaf(board):
         #Do chess.Move()
 
     def N_update(self,action_index):
-        self.N[index]+=1
+        self.N[action_index]+=1
 
     def W_update(self, V_next, action_index):
         self.W[action_index]+=V_next
@@ -82,15 +76,15 @@ class Leaf(board):
 
 #state type and shape does not matter
 
-
-def MCTS(state, init_W, init_N, explore_factor,temp):#we can add here all our hyper-parameters
+def MCTS(state, init_W, init_N, explore_factor,temp,alpha_prob,alpha_eval):#we can add here all our hyper-parameters
     # Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
     # argumentes: state: the root state from where the stimulation start .
     #             explore_factor: hyper parameter to tune the exploration range in UCT
     #             temp: temperature constant for the optimum policy to control the level of exploration in the Play policy
     #             optional : dirichlet noise
+    #             alpha_prob: current policy-network
+    #             alpha_eval: current value-network
     # return: pi: vector of policy(action) with the same shape of legale move.
-
 
     #history of leafs for all previous runs
     state_copy = state.copy()
@@ -102,7 +96,8 @@ def MCTS(state, init_W, init_N, explore_factor,temp):#we can add here all our hy
             if visited:
                 state_action_list.append(leafs[index])
             else:
-                state_action_list.append(Leaf(state_copy, init_W, alpha_prob(state_copy), init_N, explore_factor)) #check the initialization strategy
+                giraffe_features = BoardToFeature(state_copy)
+                state_action_list.append(Leaf(state_copy, init_W, alpha_probs.forward(giraffe_features), init_N, explore_factor)) #check the initialization strategy
                 leafs.append(state_action_list[-1])
 
             if  Termination(state_copy):
@@ -113,7 +108,8 @@ def MCTS(state, init_W, init_N, explore_factor,temp):#we can add here all our hy
                     if i == len(state_action_list) -1:
                         state_action_list[i].W_update(stock_fish_eval(state_action_list[i].next_board), action_index)
                         continue
-                    state_action_list[i].W_update( alpha_eval(state_action_list[i].next_board) , action_index)
+                    giraffe_features = state_action_list[i].next_board
+                    state_action_list[i].W_update( alpha_eval.forward(giraffe_features) , action_index)
             state_copy = state_action_list[-1].next_board
     N = leafs[0].N
 
