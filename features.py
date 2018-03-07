@@ -873,5 +873,26 @@ def BoardToFeature(board):
         fc = fc+5
 
 
+    "START: Attack and Defend Maps (square-centric features)"
+
+    #White-attacker
+    for i in range(63):
+        shooters = list(board.attackers(chess.WHITE, i))
+        min_val = 0
+        for j in range(len(shooters)):
+            curr_val = board.piece_type_at(shooters[j])
+            if curr_val < min_val:
+                min_val = curr_val
+        feature[225+i] = min_val
+
+    #Black-attacker
+    for j in range(63):
+        shooters = list(board.attackers(chess.BLACK, i))
+        min_val = 0
+        for j in range(len(shooters)):
+            curr_val = board.piece_type_at(shooters[j])
+            if curr_val < min_val:
+                min_val = curr_val
+        feature[289+i] = min_val
 
     #We should make sure that bishops are not messed up.
