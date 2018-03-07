@@ -6,10 +6,10 @@ import torch.nn.functional as F
 
 #fully connected (including the first layer to hidden layer neurons. so, this is different from giraffe network) network with 2 hidden layers.
 
-class PolicyValNetwork_Giraffe(nn.module):
+class Critic_Giraffe(nn.module):
     def __init__(self, d_in, gf, pc, sc, h1a, h1b, h1c,  h2, eval_out=1):
         "We instantiate various modules"
-        super(PolicyValNetwork_Giraffe, self).__init__()
+        super(Critic_Giraffe, self).__init__()
         self.linear1a = nn.Linear(gf, h1a)
         self.linear1b = nn.Linear(pc, h1b)
         self.linear1c = nn.Linear(sc, h1c)
@@ -37,9 +37,9 @@ class PolicyValNetwork_Giraffe(nn.module):
 
 
 
-class PolicyValNetwork_Full(nn.module):
+class Critic_FCGiraffe(nn.module):
     def __init_(self, d_in, h1, h2,eval_out=1):
-        super(PolicyValNetwork_Full, self).__init__()
+        super(Critic_FCGiraffe, self).__init__()
         self.linear1 = nn.Linear(d_in, h1)
         self.linear2 = nn.Linear(h1, h2)
         self.linear3 = nn.Linear(h2, eval_out)
