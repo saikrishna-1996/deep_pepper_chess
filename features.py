@@ -171,44 +171,61 @@ def BoardToFeature(board):
     feature[21] = min_val
 
     #white queen
-    if feature[6] >= 1:
+    if feature[6] < 1:
+        feature[22] = 0
+        feature[177:184] = 0
+    else:
         feature[22] = 1
-    wq_squares = board.pieces(chess.KING, chess.WHITE)
-    pos = list(wq_squares)[0]
-    row = pos/8
-    col = pos%8
+        wq_squares = board.pieces(chess.KING, chess.WHITE)
+        pos = list(wq_squares)[0]
+        row = pos/8
+        col = pos%8
 
-    #feature[177] =
+        #since you got the queen pose, add the mobility of queen
+        feature[177] = get_north_mobility(board, pos)
+        feature[178] = get_north_east_mobility(board, pos)
+        feature[179] = get_east_mobility(board, pos)
+        feature[180] = get_south_east_mobility(board, pos)
+        feature[181] = get_south_mobility(board, pos)
+        feature[182] = get_south_west_mobility(board, pos)
+        feature[183] = get_west_mobility(board, pos)
+        feature[184] = get_north_west_mobility(board, pos)
 
 
-    feature[23] = float(row)/8.0
-    feature[24] = float(col)/8.0
+        feature[23] = float(row)/8.0
+        feature[24] = float(col)/8.0
 
-    white_attack = list(board.attackers(chess.WHITE, pos))
-    min_val = 0
-    for lol in range(len(white_attack)):
-        curr_val = board.piece_type_at(white_attack[lol])
-        if curr_val < min_val:
-            min_val = curr_val
-    feature[25] = min_val
+        white_attack = list(board.attackers(chess.WHITE, pos))
+        min_val = 0
+        for lol in range(len(white_attack)):
+            curr_val = board.piece_type_at(white_attack[lol])
+            if curr_val < min_val:
+                min_val = curr_val
+        feature[25] = min_val
 
-    black_attack = list(board.attackers(chess.BLACK, pos))
-    min_val = 0
-    for lol in range(len(black_attack)):
-        curr_val = board.piece_type_at(black_attack[lol])
-        if curr_val < min_val:
-            min_val = curr_val
-    feature[26] = min_val
+        black_attack = list(board.attackers(chess.BLACK, pos))
+        min_val = 0
+        for lol in range(len(black_attack)):
+            curr_val = board.piece_type_at(black_attack[lol])
+            if curr_val < min_val:
+                min_val = curr_val
+        feature[26] = min_val
 
     #white rooks
     wr_squares = list(board.pieces(chess.ROOK, chess.WHITE))
     wr_num = len(wr_squares)
     if wr_num == 0:
         feature[27:36] = 0
+        feature[185:192] = 0
     elif wr_num == 1:
         feature[32:36] = 0
+        feature[189:192] = 0
         feature[27] = 1
         pos = wr_squares[0]
+        feature[185] = get_north_mobility(board, pos)
+        feature[186] = get_east_mobility(board, pos)
+        feature[187] = get_south_mobility(board, pos)
+        feature[188] = get_west_mobility(board, pos)
         row = pos/8
         col = pos%8
         feature[28] = float(row)/8.0
@@ -233,6 +250,10 @@ def BoardToFeature(board):
     else:
         feature[27] = 1
         pos = wr_squares[0]
+        feature[185] = get_north_mobility(board, pos)
+        feature[186] = get_east_mobility(board, pos)
+        feature[187] = get_south_mobility(board, pos)
+        feature[188] = get_west_mobility(board, pos)
         row = pos/8
         col = pos%8
         feature[28] = float(row)/8.0
@@ -256,6 +277,10 @@ def BoardToFeature(board):
 
         feature[32] = 1
         pos = wr_squares[1]
+        feature[189] = get_north_mobility(board, pos)
+        feature[190] = get_east_mobility(board, pos)
+        feature[191] = get_south_mobility(board, pos)
+        feature[192] = get_west_mobility(board, pos)
         row = pos/8
         col = pos%8
         feature[33] = float(row)/8.0
@@ -283,10 +308,16 @@ def BoardToFeature(board):
     wb_num = len(wb_squares)
     if wb_num == 0:
         feature[37:46] = 0
+        feature[193:200] = 0
     elif wb_num == 1:
         feature[42:46] = 0
+        feature[197:200] = 0
         feature[37] = 1
         pos = wb_squares[0]
+        feature[193] = get_north_east_mobility(board, pos)
+        feature[194] = get_south_east_mobility(board, pos)
+        feature[195] = get_south_west_mobility(board, pos)
+        feature[196] = get_north_west_mobility(board, pos)
         row = pos/8
         col = pos%8
         feature[38] = float(row)/8.0
@@ -311,6 +342,10 @@ def BoardToFeature(board):
     else:
         feature[37] = 1
         pos = wb_squares[0]
+        feature[193] = get_north_east_mobility(board, pos)
+        feature[194] = get_south_east_mobility(board, pos)
+        feature[195] = get_south_west_mobility(board, pos)
+        feature[196] = get_north_west_mobility(board, pos)
         row = pos/8
         col = pos%8
         feature[38] = float(row)/8.0
@@ -334,6 +369,10 @@ def BoardToFeature(board):
 
         feature[42] = 1
         pos = wb_squares[1]
+        feature[197] = get_north_east_mobility(board, pos)
+        feature[198] = get_south_east_mobility(board, pos)
+        feature[199] = get_south_west_mobility(board, pos)
+        feature[200] = get_north_west_mobility(board, pos)
         row = pos/8
         col = pos%8
         feature[43] = float(row)/8.0
@@ -494,40 +533,60 @@ def BoardToFeature(board):
     feature[101] = min_val
 
     #black queen
-    if feature[12] >= 1:  #check this
+    if feature[12] == 0:  #check this
+        feature[102] = 0
+        feature[201:208] = 0
+    else:
         feature[102] = 1
-    bq_squares = board.pieces(chess.QUEEN, chess.BLACK)
-    pos = list(bq_squares)[0]
-    row = pos/8
-    col = pos%8
-    feature[103] = float(row)/8.0
-    feature[104] = float(col)/8.0
+        bq_squares = board.pieces(chess.QUEEN, chess.BLACK)
+        pos = list(bq_squares)[0]
+        feature[201] = get_north_mobility(board, pos)
+        feature[202] = get_north_east_mobility(board, pos)
+        feature[203] = get_east_mobility(board, pos)
+        feature[204] = get_south_east_mobility(board, pos)
+        feature[205] = get_south_mobility(board, pos)
+        feature[206] = get_south_west_mobility(board, pos)
+        feature[207] = get_west_mobility(board, pos)
+        feature[208] = get_north_west_mobility(board, pos)
 
-    white_attack = list(board.attackers(chess.WHITE, pos))
-    min_val = 0
-    for lol in range(len(white_attack)):
-        curr_val = board.piece_type_at(white_attack[lol])
-        if curr_val < min_val:
-            min_val = curr_val
-    feature[105] = min_val
+        row = pos/8
+        col = pos%8
+        feature[103] = float(row)/8.0
+        feature[104] = float(col)/8.0
 
-    black_attack = list(board.attackers(chess.BLACK, pos))
-    min_val = 0
-    for lol in range(len(black_attack)):
-        curr_val = board.piece_type_at(black_attack[lol])
-        if curr_val < min_val:
-            min_val = curr_val
-    feature[106] = min_val
+        white_attack = list(board.attackers(chess.WHITE, pos))
+        min_val = 0
+        for lol in range(len(white_attack)):
+            curr_val = board.piece_type_at(white_attack[lol])
+            if curr_val < min_val:
+                min_val = curr_val
+        feature[105] = min_val
+
+        black_attack = list(board.attackers(chess.BLACK, pos))
+        min_val = 0
+        for lol in range(len(black_attack)):
+            curr_val = board.piece_type_at(black_attack[lol])
+            if curr_val < min_val:
+                min_val = curr_val
+        feature[106] = min_val
+
 
     #black rooks
     br_squares = list(board.pieces(chess.ROOK, chess.BLACK))
     br_num = len(br_squares)
     if br_num == 0:
         feature[107:116] = 0
+        feature[209:216] = 0
     elif br_num == 1:
         feature[112:116] = 0
+        feature[213:216] = 0
         feature[107] = 1
         pos = br_squares[0]
+        feature[209] = get_north_mobility(board, pos)
+        feature[210] = get_east_mobility(board, pos)
+        feature[211] = get_south_mobility(board, pos)
+        feature[212] = get_west_mobility(board, pos)
+
         row = pos/8
         col = pos%8
         feature[108] = float(row)/8.0
@@ -552,6 +611,11 @@ def BoardToFeature(board):
     else:
         feature[107] = 1
         pos = br_squares[0]
+        feature[209] = get_north_mobility(board, pos)
+        feature[210] = get_east_mobility(board, pos)
+        feature[211] = get_south_mobility(board, pos)
+        feature[212] = get_west_mobility(board, pos)
+
         row = pos/8
         col = pos%8
         feature[108] = float(row)/8.0
@@ -575,6 +639,11 @@ def BoardToFeature(board):
 
         feature[112] = 1
         pos = br_squares[1]
+        feature[213] = get_north_mobility(board, pos)
+        feature[214] = get_east_mobility(board, pos)
+        feature[215] = get_south_mobility(board, pos)
+        feature[216] = get_west_mobility(board, pos)
+
         row = pos/8
         col = pos%8
         feature[113] = float(row)/8.0
@@ -602,10 +671,17 @@ def BoardToFeature(board):
     bb_num = len(bb_squares)
     if bb_num == 0:
         feature[117:126] = 0
+        feature[217:224] = 0
     elif bb_num == 1:
         feature[122:126] = 0
+        feature[221:224] = 0
         feature[117] = 1
         pos = bb_squares[0]
+        feature[217] = get_north_east_mobility(board, pos)
+        feature[218] = get_south_east_mobility(board, pos)
+        feature[219] = get_south_west_mobility(board, pos)
+        feature[220] = get_north_west_mobility(board, pos)
+
         row = pos/8
         col = pos%8
         feature[118] = float(row)/8.0
@@ -630,6 +706,11 @@ def BoardToFeature(board):
     else:
         feature[117] = 1
         pos = bb_squares[0]
+        feature[217] = get_north_east_mobility(board, pos)
+        feature[218] = get_south_east_mobility(board, pos)
+        feature[219] = get_south_west_mobility(board, pos)
+        feature[220] = get_north_west_mobility(board, pos)
+
         row = pos/8
         col = pos%8
         feature[118] = float(row)/8.0
@@ -653,6 +734,11 @@ def BoardToFeature(board):
 
         feature[122] = 1
         pos = bb_squares[1]
+        feature[221] = get_north_east_mobility(board, pos)
+        feature[222] = get_south_east_mobility(board, pos)
+        feature[223] = get_south_west_mobility(board, pos)
+        feature[224] = get_north_west_mobility(board, pos)
+
         row = pos/8
         col = pos%8
         feature[123] = float(row)/8.0
