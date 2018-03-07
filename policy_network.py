@@ -137,8 +137,8 @@ square_centric = 128
 # attack map = 64
 # defend map = 64
 h1a = 32 #no.of first set of neurons in first hidden layer
-h2a = 512 #no.of second set of neurons in second hidden layer
-h3a = 480 #no.of third set of neurons in third hidden layer
+h1b = 512 #no.of second set of neurons in first hidden layer
+h1c = 480 #no.of third set of neurons in first hidden layer
 
 # x is your 363-dimensional input. and y is our output. We are randomly initializing them here.
 x = Variable(torch.randn(bs, d_in))
