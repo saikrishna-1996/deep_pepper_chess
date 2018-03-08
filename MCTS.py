@@ -36,7 +36,6 @@ class Leaf(board):
     #This class inherit the Board class which control the board representation, find legale move and next board represenation.
     #It has the ability to store and update for each leaf the number of state-action N(s,a), Q(s,a) and P(s,a)
     def __init__(self, board, init_W, init_P, init_N, explore_factor):
-        def board.__init__(self, board, init_W, init_P, init_N, explore_factor):
             
             self.W = [init_W for i in range(len(self.legal_move))]# anyway i need to know the name of this property
             assert init_N.shape = (4096,1)
