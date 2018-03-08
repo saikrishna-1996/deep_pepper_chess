@@ -92,7 +92,7 @@ def legal_mask(board,all_move_probs):
     
 #state type and shape does not matter
 
-def MCTS(state, init_W, init_N, explore_factor,temp,alpha_prob,alpha_eval):#we can add here all our hyper-parameters
+def MCTS(state, init_W, init_N, explore_factor,temp,alpha_prob,alpha_eval,dirichlet_alpha):#we can add here all our hyper-parameters
     # Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
     # argumentes: state: the root state from where the stimulation start .
     #             explore_factor: hyper parameter to tune the exploration range in UCT
@@ -100,6 +100,8 @@ def MCTS(state, init_W, init_N, explore_factor,temp,alpha_prob,alpha_eval):#we c
     #             optional : dirichlet noise
     #             alpha_prob: current policy-network
     #             alpha_eval: current value-network
+    #             dirichlet_alpha: alpha parameter for the dirichlet process
+    
     # return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
 
     #history of leafs for all previous runs
@@ -118,6 +120,10 @@ def MCTS(state, init_W, init_N, explore_factor,temp,alpha_prob,alpha_eval):#we c
                 legal_move_probs = legal_mask(state_copy,all_move_probs)
                 state_action_list.append(Leaf(state_copy, init_W, legal_move_probs, init_N, explore_factor)) #check the initialization strategy
                 leafs.append(state_action_list[-1])
+            #if leafs length is exactly 1 this mean we are in the root state then we should appy the dirichlet noise
+            #(check alphago zero paper page 24)
+            if len(leafs) ==1:
+                leafs[0].P = np.add(np.multiply((1- epsilon),leafs[0].P), np.multiply(epsilon, np.random.dirichlet(dirichlet_alpha, len(leaf[0].P))
             
             if len(state_action_list) > 3 and state_action_list[-1].board == state_action_list[-3].board:
                 repetition +=1
