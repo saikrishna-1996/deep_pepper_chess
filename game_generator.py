@@ -32,7 +32,6 @@ def Generating_games(NUMBER_GAMES,start_state):
                 temperature = 10e-6
             pi = MCSTS(state, init_W= [0 for i in range(64*63)],# what is the shape of this pi ????????
                        init_N = [1 for i in range range(64*63), 
-                       init_P = [ 0 for i in range(64*63)],
                        temp = temperature, explore_factor = 2)
                                                                   
             action_index = np.argmax(pi)
