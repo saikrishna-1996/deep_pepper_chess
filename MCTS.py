@@ -37,13 +37,13 @@ class Leaf(board):
     #It has the ability to store and update for each leaf the number of state-action N(s,a), Q(s,a) and P(s,a)
     def __init__(self, board, init_W, init_N, explore_factor):
             
-            self.W = [init_W for i in range(len(self.legal_move))]# anyway i need to know the name of this property
+            self.W = init_W
             assert init_N.shape = (4096,1)
             assert init_W.shape = (4096,1)
             assert init_P.shape = (4096,1)
             self.board = board
-            self.P = [1.0/len(self.legal_move) for i in range(len(self.legal_move))]
-            self.N = [init_N for i in range(len(self.legal_move))]
+            self.P = init_P
+            self.N = init_N 
             self.explore_factor = explore_factor
 
     @property
