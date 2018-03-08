@@ -8,20 +8,23 @@ from chess import Board
 import old_alpha
 import new_alpha
 
-
-def Match_score(state, repetition):
-    if repetition >=3:
-        return 0
+def Match_score(state):
     # after game_over get the score from white player perspective
     return
 
+def resignation(state):
+    return #True or False, the final score( +1 0 -1 )
 
 def Game_over(state, repetition):
     # check if the list of legal move is empty or the repititions exceeded 3
-    if not Board(state).legal_move or repetition >= 3:
-        return True
-    return False
-
+    if not Board(state).legal_move :
+        return True Match_score(state)
+    if repetition >=3:
+        return True, 0
+    if resignation(state)[0]:
+        return True resignation(state)[1]
+    
+    return False, None
 
 def Generating_challenge(NUMBER_GAMES, start_state):
     state = start_state
@@ -45,7 +48,7 @@ def Generating_challenge(NUMBER_GAMES, start_state):
         repition =0
         state_list = []
 
-        while not Game_over(state,repetition):
+        while not Game_over(state,repetition)[0]:
 
             state_list.append(state)
 
@@ -76,7 +79,7 @@ def Generating_challenge(NUMBER_GAMES, start_state):
             state = Board_render(state, legal_move[action_index])
             # should be able to give the same state even if no room for legal move
 
-        z = Match_score(state, repetition)
+        z = Game_over(state, repetition)[1]
         # from white perspective
 
         if white == alpha1:
