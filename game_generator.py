@@ -13,11 +13,11 @@ def Match_score(state):
 def resignation(state):
     return #True or False, the final score( +1 0 -1 )
 
-def Game_over(state, repitions):
+def Game_over(state, repetition):
     # check if the list of legal move is empty or the repititions exceeded 3
-    if not Board(state).legal_move or repitions >=3 or resignation(state)[0]:
+    if not Board(state).legal_move :
         return True Match_score(state)
-    if repitions >=3:
+    if repetition >=3:
         return True, 0
     if resignation(state)[0]:
         return True resignation(state)[1]
@@ -35,7 +35,8 @@ def Generating_games(NUMBER_GAMES,start_state):
 
         step_game = 0
         temperature = 1
-        while not Game_over(state)[0]:
+        repetition = 0
+        while not Game_over(state, repetition)[0]:
             step_game +=1
             if step_game ==50:
                 temperature = 10e-6
@@ -47,10 +48,15 @@ def Generating_games(NUMBER_GAMES,start_state):
             action_index = np.argmax(pi)
             legal_move = Legal_move(state)
             triplet.append([state,pi])
+            
+            if len(triplet)>=3 and triplet[-1][0]== triplet[-3][0]:
+                repetition +=1
+            else:
+                repetition = 0
 
             state = Board_render( state, legal_move[action_index])#should be able to give the same state even if no room for legal move
 
-        z = Game_over(state)[1]#from white perspective
+        z = Game_over(state, repetition)[1]#from white perspective
 
         for i in range(len(triplet)-step_game, len(triplet)):
             triplet[i].append( z*(-1)**i )
