@@ -70,7 +70,7 @@ def Generating_challenge(NUMBER_GAMES, start_state):
 
             pi = MCSTS(state, init_W=[0 for i in range(64 * 63)],  # what is the shape of this pi ????????
                        init_N=[1 for i in range(64 * 63)],
-            temp = temperature, explore_factor = 2,alpha_prob= player ,alpha_eval= player)
+            temp = temperature, explore_factor = 2,alpha_prob= player ,alpha_eval= player,dirichlet_alpha)
 
 
             action_index = np.argmax(pi)
