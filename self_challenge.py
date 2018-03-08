@@ -9,14 +9,16 @@ import old_alpha
 import new_alpha
 
 
-def Match_score(state):
+def Match_score(state, repetition):
+    if repetition >=3:
+        return 0
     # after game_over get the score from white player perspective
     return
 
 
-def Game_over(state, repitions):
+def Game_over(state, repetition):
     # check if the list of legal move is empty or the repititions exceeded 3
-    if not Board(state).legal_move or repitions >= 3:
+    if not Board(state).legal_move or repetition >= 3:
         return True
     return False
 
@@ -43,15 +45,15 @@ def Generating_challenge(NUMBER_GAMES, start_state):
         repition =0
         state_list = []
 
-        while not Game_over(state,repitiion):
+        while not Game_over(state,repetition):
 
             state_list.append(state)
 
             if len(state_list)>3 and state_list[-1] == state_list[-3]:
-                repitition += 1
+                repetition += 1
             else:
                 #reseting the repition
-                repitition = 0
+                repetition = 0
 
 
             if step_game%2:
@@ -74,7 +76,7 @@ def Generating_challenge(NUMBER_GAMES, start_state):
             state = Board_render(state, legal_move[action_index])
             # should be able to give the same state even if no room for legal move
 
-        z = Match_score(state)
+        z = Match_score(state, repetition)
         # from white perspective
 
         if white == alpha1:
