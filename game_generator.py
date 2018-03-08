@@ -30,7 +30,7 @@ def Generating_games(NUMBER_GAMES,start_state):
             step_game +=1
             if step_game ==50:
                 temperature = 10e-6
-            pi = MCSTS(state, init_W= 0, init_N = 1, temp = temperature)# what is the shape of this pi ????????
+            pi = MCSTS(state, init_W= 0, init_N = 1, temp = temperature, explore_factor = 2)# what is the shape of this pi ????????
             action_index = np.argmax(pi)
             legal_move = Legal_move(state)
             triplet.append([state,pi])
