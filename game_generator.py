@@ -47,4 +47,3 @@ def Generating_games(NUMBER_GAMES,start_state):
         if game_number % 500 ==0:
             np.save('500_triplet', np.array(triplet))
             triplet = []
-    return triplet
