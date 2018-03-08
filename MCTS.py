@@ -10,7 +10,7 @@ from features import BoardToFeature
 from config import ALLMOVESMAP
 
 
-def Termination(board):
+def Termination(board, repetition):
     return board.is_game_over(claim_draw=False)
 
 
@@ -107,7 +107,8 @@ def MCTS(state, init_W, init_N, explore_factor,temp,alpha_prob,alpha_eval):#we c
     leafs=[]
     for simulation in range (800):
         state_action_list=[]#list of leafs in the same run
-        while not Termination(state_copy):
+        repetition = 0
+        while not Termination(state_copy, repetition):
             visited, index = state_visited(leafs,state_copy)
             if visited:
                 state_action_list.append(leafs[index])
@@ -117,14 +118,23 @@ def MCTS(state, init_W, init_N, explore_factor,temp,alpha_prob,alpha_eval):#we c
                 legal_move_probs = legal_mask(state_copy,all_move_probs)
                 state_action_list.append(Leaf(state_copy, init_W, legal_move_probs, init_N, explore_factor)) #check the initialization strategy
                 leafs.append(state_action_list[-1])
-
-            if  Termination(state_copy):
+            
+            if len(state_action_list) > 3 and state_action_list[-1].board == state_action_list[-3].board:
+                repetition +=1
+            else:
+                repetition =0
+            
+            
+            if  Termination(state_copy, repetition):
                 for i in list(reversed(range(len(state_action_list)))):
 
                     action_index = state_action_list[i].best_action
                     state_action_list[i].N_update(action_index)
                     if i == len(state_action_list) -1:
-                        state_action_list[i].W_update(stock_fish_eval(state_action_list[i].next_board), action_index)
+                        if repetition ==3:
+                            state_action_list[i].W_update(0, action_index) # draw ending
+                        else:
+                            state_action_list[i].W_update(stock_fish_eval(state_action_list[i].next_board), action_index)
                         continue
                     giraffe_features = state_action_list[i].next_board
                     state_action_list[i].W_update( alpha_eval.forward(giraffe_features) , action_index)
