@@ -38,9 +38,9 @@ class Leaf(board):
     def __init__(self, board, init_W, init_N,init_P, explore_factor):
             
             self.W = init_W
-            assert init_N.shape = (4096,1)
-            assert init_W.shape = (4096,1)
-            assert init_P.shape = (4096,1)
+            assert init_N.shape = (4096,)
+            assert init_W.shape = (4096,)
+            assert init_P.shape = (4096,)
             self.board = board
             self.P = init_P
             self.N = init_N 
