@@ -61,6 +61,10 @@ class ChessEnv:
     def white_to_move(self):
         return self.board.turn == chess.WHITE
 
+    @property
+    def repetition(self):
+        return self.state_count[self.board._transposition_key]
+
     def step(self, action: str, check_over = True):
         """
         :param action:
