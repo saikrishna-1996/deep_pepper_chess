@@ -2,7 +2,7 @@ import numpy as np
 import MCTS
 import leaf
 from features import BoardToFeature
-from config import ALLMOVESMAP
+import config
 from chess import Board
 
 import old_alpha

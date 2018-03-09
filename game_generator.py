@@ -2,7 +2,7 @@ import numpy as np
 from MCTS import MCTS
 import leaf
 from features import BoardToFeature
-from config import ALLMOVESMAP
+import config
 from chess_env import ChessEnv
 
 
@@ -41,12 +41,11 @@ def Generating_games(NUMBER_GAMES: int,env: ChessEnv):
                        init_N = np.ones((4096,)), 
                        temp = temperature, explore_factor = 2,
                        alpha_prob,alpha_eval,dirichlet_alpha)
-            
-                                          
+                        
             action_index = np.argmax(pi)
             triplet.append([state,pi])
 
-            state = env.step( ALLMOVESMAP[action_index])
+            state = env.step( config.INDEXTOMOVE[action_index])
 
         z = Game_over(state, env.repetition)[1]#from white perspective
 

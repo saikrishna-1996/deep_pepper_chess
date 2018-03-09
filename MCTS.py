@@ -7,12 +7,29 @@ import value_network
 from chess_env import ChessEnv
 import stockfish_eval
 from features import BoardToFeature
-from config import ALLMOVESMAP
+import config
 
 
-def Termination(board, repetition):
-    return board.is_game_over(claim_draw=False)
+def game_over(state):
+    if chess.is_game_over(state):
 
+        score = chess.results(state)
+        if score == 0:
+            return True, -1
+        if score == 0.5:
+            return True, 0
+        if score == 0:
+            return True, -1
+
+    else:
+        return False, None
+
+
+def resignation(state):
+    stockfish_eval = stockfish_eval(state)
+    if abs(stockfish_eval) > 6.5:
+        return True, stockfish_eval / abs(stockfish_eval)
+    return False, None
 
 def state_visited(state_list,state):
     if not state_list:
@@ -55,7 +72,7 @@ class Leaf(board):
     @property
     def next_board(self):
         best_index = self.best_action
-        mymove = ALLMOVESMAP(best_index)
+        mymove = config.INDEXTOMOVE[best_index]
         self.env.step(mymove)
         return self.env.board
         #return self.render_action(self.board, self.best_action)#assuming the function you did
@@ -76,7 +93,7 @@ def legal_mask(board,all_move_probs):
     total_p = 0
     for legal_move in legal_moves:
         legal_move_uci = legal_move.uci()
-        ind = ALLMOVESMAP[legal_move_uci]
+        ind = config.MOVETOINDEX[legal_move_uci]
         mask[ind] = 1
         all_moves_prob += 1e-6
         total_p += all_move_probs[ind]
@@ -107,7 +124,14 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
     for simulation in range (800):
         curr_env = env.copy()
         state_action_list=[] #list of leafs in the same run
-        while not Termination(curr_env.board):
+        moves = 0
+        RESIGN = False
+        while not game_over(curr_env.board)[0] and not RESIGN:
+
+            move += 0.5
+            if move >30 and !(move%10):
+                RESIGN = resignation(curr_env.board)[0]
+            
             visited, index = state_visited(leafs,state_copy)
             if visited:
                 state_action_list.append(leafs[index])
@@ -121,7 +145,7 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
             #(check alphago zero paper page 24)
             if len(leafs) == 1:
                 leafs[0].P = np.add(np.multiply((1 - epsilon),leafs[0].P), np.multiply(epsilon, np.random.dirichlet(dirichlet_alpha, len(leaf[0].P))))
-            best_action = ALLMOVESMAP(leaf[-1].best_action)
+            best_action = config.INDEXTOMOVE[leaf[-1].best_action]
             curr_env = curr_env.step(best_action)
 
 
@@ -129,17 +153,17 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
             action_index = state_action_list[i].best_action #always legal since best_action
             state_action_list[i].N_update(action_index)
             if (i == len(state_action_list)-1):
-                if env.repetition == 3: #should be all termination types
-                    state_action_list[i].W_update(0, action_index) # draw ending
-                else: # if last turn of sim, and game not over use stockfish eval
-                    state_action_list[i].W_update(stock_fish_eval(state_action_list[i].next_board), action_index)
+                game_over_check, end_score = game_over(curr_env.board)
+                resign_check, resign_score = resignation(curr_env.board)
+                if game_over_check:
+                    state_action_list[i].W_update(end_score, action_index)
+                elif (resign_check):
+                    state_action_list[i].W_update(resign_score, action_index)
             else:
                 giraffe_features = BoardToFeature(state_action_list[i+1].board)
                 _, state_value_prediction = network.forward(giraffe_features)
                 state_action_list[i].W_update( state_value_prediction, action_index)
-            
-    
-    
+ 
     N = leafs[0].N
 
     norm_factor = np.sum(np.power(N,temp))
