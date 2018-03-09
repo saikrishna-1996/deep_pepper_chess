@@ -29,11 +29,11 @@ class Leaf(board):
 
     #This class inherit the Board class which control the board representation, find legale move and next board represenation.
     #It has the ability to store and update for each leaf the number of state-action N(s,a), Q(s,a) and P(s,a)
-    def __init__(self, board, init_W, init_N,init_P, explore_factor):
+    def __init__(self, env:ChessEnv, init_W, init_N,init_P, explore_factor):
             assert init_N.shape == (4096,)
             assert init_W.shape == (4096,)
             assert init_P.shape == (4096,)
-            self.board = board
+            self.env = env
             self.P = init_P
             self.N = init_N 
             self.W = init_W
@@ -54,8 +54,10 @@ class Leaf(board):
 
     @property
     def next_board(self):
-        mymove = chess.Move.from_uci(self.best_action)
-        return self.board.push(mymove)
+        best_index = self.best_action
+        mymove = ALLMOVESMAP(best_index)
+        self.env.step(mymove)
+        return self.env.board
         #return self.render_action(self.board, self.best_action)#assuming the function you did
         #Do chess.Move()
 
@@ -103,39 +105,42 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
     state_copy = state.copy()
     leafs=[]
     for simulation in range (800):
-        state_copy = state.copy()
+        curr_env = env.copy()
         state_action_list=[] #list of leafs in the same run
-        while not Termination(state_copy, env.repetition):
+        while not Termination(state_copy):
             visited, index = state_visited(leafs,state_copy)
             if visited:
                 state_action_list.append(leafs[index])
             else: # if state unvisited get legal moves probabilities using policy network
-                giraffe_features = BoardToFeature(state_copy)
+                giraffe_features = BoardToFeature(curr_env.board)
                 all_move_probs, _ = network.forward(giraffe_features)
-                legal_move_probs = legal_mask(state_copy,all_move_probs)
-                state_action_list.append(Leaf(state_copy, init_W, legal_move_probs, init_N, explore_factor))
+                legal_move_probs = legal_mask(curr_env.board,all_move_probs)
+                state_action_list.append(Leaf(curr_env, init_W, legal_move_probs, init_N, explore_factor))
                 leafs.append(state_action_list[-1])
             #if leafs length is exactly 1 this mean we are in the root state then we should appy the dirichlet noise
             #(check alphago zero paper page 24)
             if len(leafs) == 1:
                 leafs[0].P = np.add(np.multiply((1 - epsilon),leafs[0].P), np.multiply(epsilon, np.random.dirichlet(dirichlet_alpha, len(leaf[0].P))
-            
-            
-            if  Termination(state_copy, env.repetition):
-                for i in list(reversed(range(len(state_action_list)))):
 
-                    action_index = state_action_list[i].best_action #always legal since best_action
-                    state_action_list[i].N_update(action_index)
-                    if (i == len(state_action_list)-1):
-                        if env.repetition == 3: #should be all termination types
-                            state_action_list[i].W_update(0, action_index) # draw ending
-                        else: # if last turn of sim, and game not over use stockfish eval
-                            state_action_list[i].W_update(stock_fish_eval(state_action_list[i].next_board), action_index)
-                    else:
-                        giraffe_features = state_action_list[i].next_board
-                        _, state_value_prediction = network.forward(giraffe_features)
-                        state_action_list[i].W_update( state_value_prediction, action_index)
-            state_copy = state_action_list[-1].next_board
+            best_action = ALLMOVESMAP(leaf[-1].best_action)
+            curr_env = curr_env.step(best_action)
+
+
+        for i in list(reversed(range(len(state_action_list)))):
+            action_index = state_action_list[i].best_action #always legal since best_action
+            state_action_list[i].N_update(action_index)
+            if (i == len(state_action_list)-1):
+                if env.repetition == 3: #should be all termination types
+                    state_action_list[i].W_update(0, action_index) # draw ending
+                else: # if last turn of sim, and game not over use stockfish eval
+                    state_action_list[i].W_update(stock_fish_eval(state_action_list[i].next_board), action_index)
+            else:
+                giraffe_features = state_action_list[i+1].board
+                _, state_value_prediction = network.forward(giraffe_features)
+                state_action_list[i].W_update( state_value_prediction, action_index)
+            
+    
+    
     N = leafs[0].N
 
     norm_factor = np.sum(np.power(N,temp))
