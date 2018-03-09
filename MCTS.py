@@ -107,7 +107,7 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
     for simulation in range (800):
         curr_env = env.copy()
         state_action_list=[] #list of leafs in the same run
-        while not Termination(state_copy):
+        while not Termination(curr_env.board):
             visited, index = state_visited(leafs,state_copy)
             if visited:
                 state_action_list.append(leafs[index])
@@ -120,8 +120,7 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
             #if leafs length is exactly 1 this mean we are in the root state then we should appy the dirichlet noise
             #(check alphago zero paper page 24)
             if len(leafs) == 1:
-                leafs[0].P = np.add(np.multiply((1 - epsilon),leafs[0].P), np.multiply(epsilon, np.random.dirichlet(dirichlet_alpha, len(leaf[0].P))
-
+                leafs[0].P = np.add(np.multiply((1 - epsilon),leafs[0].P), np.multiply(epsilon, np.random.dirichlet(dirichlet_alpha, len(leaf[0].P))))
             best_action = ALLMOVESMAP(leaf[-1].best_action)
             curr_env = curr_env.step(best_action)
 
@@ -135,7 +134,7 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
                 else: # if last turn of sim, and game not over use stockfish eval
                     state_action_list[i].W_update(stock_fish_eval(state_action_list[i].next_board), action_index)
             else:
-                giraffe_features = state_action_list[i+1].board
+                giraffe_features = BoardToFeature(state_action_list[i+1].board)
                 _, state_value_prediction = network.forward(giraffe_features)
                 state_action_list[i].W_update( state_value_prediction, action_index)
             
