@@ -119,8 +119,6 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
 
     #history of leafs for all previous runs
     env_copy = env.copy()
-    state = env.board
-    state_copy = state.copy()
     leafs=[]
     for simulation in range (800):
         curr_env = env.copy()
@@ -133,7 +131,7 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
             if moves >30 and not moves%10:
                 RESIGN = resignation(curr_env.board)[0]
             
-            visited, index = state_visited(leafs,state_copy)
+            visited, index = state_visited(leafs,curr_env.board)
             if visited:
                 state_action_list.append(leafs[index])
             else: # if state unvisited get legal moves probabilities using policy network
