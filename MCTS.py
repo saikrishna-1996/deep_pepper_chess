@@ -105,7 +105,7 @@ def legal_mask(board,all_move_probs):
 
 #state type and shape does not matter
 
-def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNetwork_Full,dirichlet_alpha):#we can add here all our hyper-parameters
+def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNetwork_Full,dirichlet_alpha, epsilon):#we can add here all our hyper-parameters
     # Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
     # argumentes: state: the root state from where the stimulation start. A board.
     #             explore_factor: hyper parameter to tune the exploration range in UCT
@@ -114,6 +114,7 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
     #             alpha_prob: current policy-network
     #             alpha_eval: current value-network
     #             dirichlet_alpha: alpha parameter for the dirichlet process
+    #             epsilon : parameter for exploration using dirichlet noise
     
     # return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
 
@@ -146,7 +147,7 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
             #(check alphago zero paper page 24)
             if len(leafs) == 1:
                 leafs[0].P = np.add(np.multiply((1 - epsilon),leafs[0].P), np.multiply(epsilon, np.random.dirichlet(dirichlet_alpha, len(leaf[0].P))))
-            best_action = config.INDEXTOMOVE[leaf[-1].best_action]
+            best_action = config.INDEXTOMOVE[leafs[-1].best_action]
             curr_env = curr_env.step(best_action)
 
 
