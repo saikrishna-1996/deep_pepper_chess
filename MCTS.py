@@ -42,7 +42,7 @@ def state_visited(state_list,state):
 def Q(N,W):
     return W/float(N)
 
-class Leaf(chess.board):
+class Leaf(object):
 
     #This class inherit the Board class which control the board representation, find legale move and next board represenation.
     #It has the ability to store and update for each leaf the number of state-action N(s,a), Q(s,a) and P(s,a)
