@@ -1,35 +1,34 @@
 import numpy as np
-import MCTS
-import leaf
+
+#this is hypothetical functions and classes that should be created by teamates.
+import chess.uci
+from policy_network import PolicyValNetwork_Full, PolicyValNetwork_Full_candidate
+import value_network
+from chess_env import ChessEnv
+import stockfish_eval
 from features import BoardToFeature
 import config
-from chess import Board
+from MCTS import MCTS
 
-import old_alpha
-import new_alpha
+def game_over(state):
+    if chess.is_game_over(state):
 
-def Match_score(state):
-    # after game_over get the score from white player perspective
-    return
+        score = chess.results(state)
+        if score == 0:
+            return True, -1
+        if score == 0.5:
+            return True, 0
+        if score == 1:
+            return True, 1
 
-def resignation(state):
-    return #True or False, the final score( +1 0 -1 )
+    else:
+        return False, None
 
-def Game_over(state, repetition):
-    # check if the list of legal move is empty or the repititions exceeded 3
-    if not Board(state).legal_move :
-        return True Match_score(state)
-    if repetition >=3:
-        return True, 0
-    if resignation(state)[0]:
-        return True resignation(state)[1]
-    
-    return False, None
 
-def Generating_challenge(NUMBER_GAMES, start_state):
-    state = start_state
+def Generating_challenge(NUMBER_GAMES, env: ChessEnv):
+    current_board = env
 
-    new_alpha_score=[]
+    candidate_alpha_score=[]
     old_alpha_score=[]
 
     for game_number in range(NUMBER_GAMES):
@@ -38,28 +37,21 @@ def Generating_challenge(NUMBER_GAMES, start_state):
         temperature = 10e-6
 
         if np.random.binomial(1, 0.5) ==1:
-            white = new_alpha
-            balck = old_alpha
+            white = PolicyValNetwork_Full_candidate
+            black = PolicyValNetwork_Full
         else:
-            white = old_alpha
-            black = new_alpha
+            white = PolicyValNetwork_Full
+            black = PolicyValNetwork_Full_candidate
 
 
         repition =0
         state_list = []
 
-        while not Game_over(state,repetition)[0]:
+        while not game_over(current_board)[0]:
 
-            state_list.append(state)
+            state_list.append(current_board)
 
-            if len(state_list)>3 and state_list[-1] == state_list[-3]:
-                repetition += 1
-            else:
-                #reseting the repition
-                repetition = 0
-
-
-            if step_game%2:
+            if step_game % 2:
 
                 player = black
             else:
@@ -68,36 +60,36 @@ def Generating_challenge(NUMBER_GAMES, start_state):
             step_game += 1
 
 
-            pi = MCSTS(state, init_W=[0 for i in range(64 * 63)],  # what is the shape of this pi ????????
+            pi = MCTS(state, init_W=[0 for i in range(64 * 63)],  # what is the shape of this pi ????????
                        init_N=[1 for i in range(64 * 63)],
-            temp = temperature, explore_factor = 2,alpha_prob= player ,alpha_eval= player,dirichlet_alpha)
+            temp = temperature, explore_factor = 2,network=player, dirichlet_alpha= 0.04, epsilon=0.1)
 
 
             action_index = np.argmax(pi)
-            legal_move = Legal_move(state)
 
-            state = Board_render(state, legal_move[action_index])
+            current_board = env.step( config.INDEXTOMOVE[action_index])
+
             # should be able to give the same state even if no room for legal move
 
-        z = Game_over(state, repetition)[1]
+        z = game_over(current_board)[1]
         # from white perspective
 
-        if white == alpha1:
-            new_alpha_score.append(+z)
+        if white == PolicyValNetwork_Full_candidate:
+            candidate_alpha_score.append(+z)
             old_alpha_score.append(-z)
 
         else:
-            new_alpha_score.append(-z)
+            candidate_alpha_score.append(-z)
             old_alpha_score.append(+z)
 
 
 
-    if sum(new_alpha_score) >sum(old_alpha_score):
-        winner == 'new_alpha'
+    if sum(candidate_alpha_score) >sum(old_alpha_score):
+        winner = 'new_alpha'
 
-    elif sum(new_alpha_score) < sum(old_alpha_score):
-        winner == 'old_alpha'
+    elif sum(candidate_alpha_score) < sum(old_alpha_score):
+        winner = 'old_alpha'
 
     else:
-        winner == None
-    return alpha1_score,alpha2_score,winner
+        winner = None
+    return candidate_alpha_score,old_alpha_score,winner
