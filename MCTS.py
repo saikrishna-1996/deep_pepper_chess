@@ -95,7 +95,7 @@ def legal_mask(board,all_move_probs):
         legal_move_uci = legal_move.uci()
         ind = config.MOVETOINDEX[legal_move_uci]
         mask[ind] = 1
-        all_moves_prob += 1e-6
+        all_move_probs += 1e-6
         total_p += all_move_probs[ind]
     
     legal_moves_prob =  np.multiply(mask,all_move_probs) 
