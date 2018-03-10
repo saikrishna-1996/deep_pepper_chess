@@ -99,8 +99,13 @@ def legal_mask(board,all_move_probs):
         total_p += all_move_probs[ind]
     
     legal_moves_prob =  np.multiply(mask,all_move_probs) 
+<<<<<<< HEAD
     legal_moves_prob = np.divide(legal_moves_probs,total_p)
     return p_legal_moves
+=======
+    legal_moves_prob = np.divide(legal_move_probs,total_p) 
+    return legal_moves_prob
+>>>>>>> 6d06da062aec032f32c167df368d24c229185280
     
 #state type and shape does not matter
 
