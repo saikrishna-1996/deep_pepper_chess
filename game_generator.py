@@ -8,7 +8,7 @@ from chess_env import ChessEnv
 import stockfish_eval
 from features import BoardToFeature
 import config
-
+from MCTS import MCTS
 
 def game_over(state):
     if chess.is_game_over(state):
@@ -43,7 +43,8 @@ def Generating_games(NUMBER_GAMES: int,env: ChessEnv):
                       explore_factor = 2,
                       temp=temperature,
                       network=PolicyValNetwork_Full,
-                      dirichlet_alpha=0.4)
+                      dirichlet_alpha=0.4,
+                      epsilon = 0.1)
 
             action_index = np.argmax(pi)
             triplet.append([state,pi])
