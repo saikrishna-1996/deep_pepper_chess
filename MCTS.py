@@ -18,12 +18,11 @@ def game_over(state):
             return True, -1
         if score == 0.5:
             return True, 0
-        if score == 0:
-            return True, -1
+        if score == 1:
+            return True, 1
 
     else:
         return False, None
-
 
 def resignation(state):
     stockfish_eval = stockfish_eval(state)
