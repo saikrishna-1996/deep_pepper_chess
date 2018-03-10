@@ -42,7 +42,7 @@ def state_visited(state_list,state):
 def Q(N,W):
     return W/float(N)
 
-class Leaf(board):
+class Leaf(chess.board):
 
     #This class inherit the Board class which control the board representation, find legale move and next board represenation.
     #It has the ability to store and update for each leaf the number of state-action N(s,a), Q(s,a) and P(s,a)
@@ -128,8 +128,8 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
         RESIGN = False
         while not game_over(curr_env.board)[0] and not RESIGN:
 
-            move += 0.5
-            if move >30 and !(move%10):
+            moves += 0.5
+            if moves >30 and not moves%10:
                 RESIGN = resignation(curr_env.board)[0]
             
             visited, index = state_visited(leafs,state_copy)
