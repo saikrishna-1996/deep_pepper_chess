@@ -60,7 +60,7 @@ def Generating_challenge(NUMBER_GAMES, env: ChessEnv):
             step_game += 1
 
 
-            pi = MCTS(state, init_W=[0 for i in range(64 * 63)],  # what is the shape of this pi ????????
+            pi = MCTS(current_board, init_W=[0 for i in range(64 * 63)],  # what is the shape of this pi ????????
                        init_N=[1 for i in range(64 * 63)],
             temp = temperature, explore_factor = 2,network=player, dirichlet_alpha= 0.04, epsilon=0.1)
 
