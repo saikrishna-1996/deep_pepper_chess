@@ -1,14 +1,17 @@
 import chess
 
-def make_all_moves_map():
-    ALLMOVESMAP = {}
+def make_move_maps():
+    MOVETOINDEX = {}
+    INDEXTOMOVE = []
     k=0
     for i in range(0,64):
         for j in range(0,64):
-            if (i!=j):
-                ALLMOVESMAP[chess.Move(i,j).uci()] = k
-                k+=1
-    return ALLMOVESMAP
+            move = chess.Move(i,j).uci()
+            MOVETOINDEX[move] = k
+            INDEXTOMOVE.append(move)
+            k+=1
+
+    return MOVETOINDEX, INDEXTOMOVE
 
 def make_square_map():
     ALLSQUARES = {}
@@ -28,4 +31,10 @@ SQUAREMAP = {'a1': 0, 'b1': 1, 'c1': 2, 'd1': 3, 'e1': 4, 'f1': 5, 'g1': 6, 'h1'
              'f6': 45, 'g6': 46, 'h6': 47, 'a7': 48, 'b7': 49, 'c7': 50, 'd7': 51, 'e7': 52, 'f7': 53, 'g7': 54, 'h7': 55,
               'a8': 56, 'b8': 57, 'c8': 58, 'd8': 59, 'e8': 60, 'f8': 61, 'g8': 62, 'h8': 63}
 
-ALLMOVESMAP = make_all_moves_map()
+MOVETOINDEX, INDEXTOMOVE = make_move_maps()
+
+
+#MCTS
+RESIGN_CHECK_MIN = 30
+RESIGN_CHECK_FREQ = 20
+NUM_SIMULATIONS = 800
