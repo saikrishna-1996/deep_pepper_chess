@@ -7,9 +7,9 @@ engine.info_handlers.append(handler)
 
 evaltime = 500 #0.5 seconds
 
-def stockfish_eval(board):
+def stockfish_eval(board, t=evaltime):
     engine.position(board)
-    evaluation = engine.go(movetime = evaltime)
+    evaluation = engine.go(movetime = t)
     eval_val = handler.info["score"][1].cp/100.0
     return eval_val
 
