@@ -10,6 +10,7 @@ class Critic_Giraffe(nn.Module):
     def __init__(self, d_in, gf, pc, sc, h1a, h1b, h1c,  h2, eval_out=1):
         "We instantiate various modules"
         super(Critic_Giraffe, self).__init__()
+        #gf = self.gf
         self.linear1a = nn.Linear(gf, h1a)
         self.linear1b = nn.Linear(pc, h1b)
         self.linear1c = nn.Linear(sc, h1c)
@@ -18,13 +19,13 @@ class Critic_Giraffe(nn.Module):
 
     def forward(self, x):
         "Here, we can use modules defined in the constrcutor (__init__ part defined above) as well as arbitrary operators on Variables"
-        gf = self.gf
-        pc = self.pc
-        sc = self.sc
+        #gf = self.gf
+        #pc = self.pc
+        #sc = self.sc
 
-        x1 = x[:,0:gf-1]
-        x2 = x[:,gf:gf+pc-1]
-        x3 = x[:,gf+pc:gf+pc+sc-1]
+        x1 = x[:,0:self.gf-1]
+        x2 = x[:,self.gf:self.gf+self.pc-1]
+        x3 = x[:,self.gf+self.pc:self.gf+self.pc+self.sc-1]
 
         h1a_relu = F.relu(self.linear1a(x1))
         h1b_relu = F.relu(self.linear1b(x2))
