@@ -1,13 +1,22 @@
 import numpy as np
-
 #this is hypothetical functions and classes that should be created by teamates.
 import chess.uci
 from policy_network import PolicyValNetwork_Full
 import value_network
 from chess_env import ChessEnv
-import stockfish_eval
+from heuristics import stockfish_eval
 from features import BoardToFeature
 import config
+
+def evaluate_p(list_board,network):
+
+
+    list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
+    tensor = np.array(list_board)
+    #pytorch input rank should be 4
+    tensor = tensor[:, :, np.newaxis, np.newaxis]
+    #expect that nueral net ouput is a vector of probability
+    return network.forward(tensor)[0]
 
 
 def game_over(state):
@@ -25,9 +34,9 @@ def game_over(state):
         return False, None
 
 def resignation(state):
-    stockfish_eval = stockfish_eval(state)
-    if abs(stockfish_eval) > 6.5:
-        return True, stockfish_eval / abs(stockfish_eval)
+    stockfishEval = stockfish_eval(state, t=0.5)
+    if abs(stockfishEval) > 6.5:
+        return True, stockfishEval / abs(stockfishEval)
     return False, None
 
 def state_visited(state_list,state):
@@ -43,8 +52,10 @@ def Q(N,W):
 
 class Leaf(object):
 
-    #This class inherit the Board class which control the board representation, find legale move and next board represenation.
-    #It has the ability to store and update for each leaf the number of state-action N(s,a), Q(s,a) and P(s,a)
+    #This class inherit the Board class which control the board representation,
+    #find legale move and next board represenation.
+    #It has the ability to store and update for each leaf the
+    #  number of state-action N(s,a), Q(s,a) and P(s,a)
     def __init__(self, env:ChessEnv, init_W, init_N,init_P, explore_factor):
             assert init_N.shape == (4096,)
             assert init_W.shape == (4096,)
@@ -99,16 +110,17 @@ def legal_mask(board,all_move_probs):
     
     legal_moves_prob =  np.multiply(mask,all_move_probs) 
 
-    legal_moves_prob = np.divide(legal_move_probs,total_p) 
+    legal_moves_prob = np.divide(legal_moves_prob,total_p)
     return legal_moves_prob
 
 #state type and shape does not matter
 
-def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNetwork_Full,dirichlet_alpha, epsilon):#we can add here all our hyper-parameters
+def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: PolicyValNetwork_Full,dirichlet_alpha, epsilon):#we can add here all our hyper-parameters
     # Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
-    # argumentes: state: the root state from where the stimulation start. A board.
+    # arguments: state: the root state from where the stimulation start. A board.
     #             explore_factor: hyper parameter to tune the exploration range in UCT
-    #             temp: temperature constant for the optimum policy to control the level of exploration in the Play policy
+    #             temp: temperature constant for the optimum policy to control the level of exploration/
+    #             in the Play policy
     #             optional : dirichlet noise
     #             alpha_prob: current policy-network
     #             alpha_eval: current value-network
@@ -117,6 +129,9 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
     
     # return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
 
+
+    BATCH_SIZE = 100
+
     #history of leafs for all previous runs
     env_copy = env.copy()
     leafs=[]
@@ -124,21 +139,23 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
         curr_env = env.copy()
         state_action_list=[] #list of leafs in the same run
         moves = 0
-        RESIGN = False
-        while not game_over(curr_env.board)[0] and not RESIGN:
+        resign = False
+
+        ########################
+        ######## Select ########
+        ########################
+
+        while not game_over(curr_env.board)[0] and not resign:
 
             moves += 0.5
-            if moves >30 and not moves%10:
-                RESIGN = resignation(curr_env.board)[0]
+            if moves > 30 and not moves % 10:
+                resign = resignation(curr_env.board)[0]
             
             visited, index = state_visited(leafs,curr_env.board)
             if visited:
                 state_action_list.append(leafs[index])
             else: # if state unvisited get legal moves probabilities using policy network
-                giraffe_features = BoardToFeature(curr_env.board)
-                all_move_probs, _ = network.forward(giraffe_features)
-                legal_move_probs = legal_mask(curr_env.board,all_move_probs)
-                state_action_list.append(Leaf(curr_env, init_W, legal_move_probs, init_N, explore_factor))
+                state_action_list.append(Leaf(curr_env, init_W, init_P, init_N, explore_factor))
                 leafs.append(state_action_list[-1])
             #if leafs length is exactly 1 this mean we are in the root state then we should appy the dirichlet noise
             #(check alphago zero paper page 24)
@@ -147,26 +164,42 @@ def MCTS(env: ChessEnv, init_W, init_N, explore_factor,temp,network: PolicyValNe
             best_action = config.INDEXTOMOVE[leafs[-1].best_action]
             curr_env = curr_env.step(best_action)
 
+        ##########################
+        ### Expand and evaluate###
+        ##########################
+
+        game_over_check, end_score = game_over(curr_env.board)
+        resign_check, resign_score = resignation(curr_env.board)
+
+        if game_over_check:
+            v = end_score
+        elif resign_check:
+            v = resign_score
+
+        number_batches = max(len(state_action_list) // BATCH_SIZE, 1)
+        start = 0
+        end = BATCH_SIZE
+        for batch in range(number_batches):
+            list_p = evaluate_p([state_action_list[i].env.board for i in range(start,end)], network)
+            for i in range(start, end):
+                legal_move_probs = legal_mask(state_action_list[i].env.board, list_p[i-start])
+                state_action_list[i].P_update(legal_move_probs)
+            start = end
+            end += min(BATCH_SIZE, len(state_action_list) - start)
+
+        ###############
+        ### Back-up ###
+        ###############
 
         for i in list(reversed(range(len(state_action_list)))):
             action_index = state_action_list[i].best_action #always legal since best_action
             state_action_list[i].N_update(action_index)
-            if (i == len(state_action_list)-1):
-                game_over_check, end_score = game_over(curr_env.board)
-                resign_check, resign_score = resignation(curr_env.board)
-                if game_over_check:
-                    state_action_list[i].W_update(end_score, action_index)
-                elif (resign_check):
-                    state_action_list[i].W_update(resign_score, action_index)
-            else:
-                giraffe_features = BoardToFeature(state_action_list[i+1].board)
-                _, state_value_prediction = network.forward(giraffe_features)
-                state_action_list[i].W_update( state_value_prediction, action_index)
+            state_action_list[i].W_update(v, action_index)
  
     N = leafs[0].N
 
-    norm_factor = np.sum(np.power(N,temp))
+    norm_factor = np.sum(np.power(N, temp))
     #optimum policy
-    pi = np.divide(np.power(N,temp),norm_factor)
+    pi = np.divide(np.power(N, temp), norm_factor)
 
     return pi
