@@ -48,9 +48,38 @@ EXPLORE_FACTOR = 2
 
 # Game Generator
 TEMP_REDUCE_STEP = 50
+MINGAMES = 500
 
 #PATHS
 ROOTDIR = '~\home'##### DEFINE AS REQ'd
 GAMEPATH = os.path.join(ROOTDIR, 'saved_games')
 NETPATH = os.path.join(ROOTDIR, 'saved_nets')
 BESTNET_NAME = 'BestNetwork.pth.tar' #Example seen here: https://github.com/pytorch/examples/blob/0984955bb8525452d1c0e4d14499756eae76755b/imagenet/main.py#L139-L145
+
+
+# NETWORK INFO
+d_in = 363
+h1 = 1024   #neurons in first hidden layer
+h2 = 2048   #nuerons in second hidden layer
+h2p = 2048  #nuerons in second hidden layer of policy network
+h2e = 512   #neurons in second hidden layer of evaluation network
+d_out = 4096 #without including under promotions. otherwise we have to increase
+
+#splitting the giraffe's feature vector to be input to the network
+global_features = 17
+## the following constitute the global features:
+# side to move = 1
+# castling rights = 4
+# material configuration = 12
+piece_centric = 218
+## the following constitute the piece-centric features:
+# piece lists with their properties = 2*(1+1+2+2+2+8)*5 = 160
+# sldiing pieces mobility = 2*(8+4+4+4+4) = 48
+# And, I just added extra 10 because, otherwise they are not adding up to 363. Someone pls recheck this.
+square_centric = 128
+## the following constitute the square-centric features:
+# attack map = 64
+# defend map = 64
+h1a = 32 #no.of first set of neurons in first hidden layer
+h1b = 512 #no.of second set of neurons in first hidden layer
+h1c = 480 #no.of third set of neurons in first hidden layer

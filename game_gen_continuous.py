@@ -9,16 +9,26 @@ import stockfish_eval
 from features import BoardToFeature
 import config
 from MCTS import MCTS
+import train
 
-def Generating_games(NUMBER_GAMES: int,env: ChessEnv):
+def Generating_games():
     triplet=[]
+    model = PolicyValNetwork_Full(config.d_in, config.h1, config.h2p, config.h2e, config.d_out)
+    old_net_iter = 0
+    game_number = 0
     while (True):
-        
-        if (new_model(config.MODEL_DIR)):
-            model = load(model_dir)
-            game_number = 0
+        net_stats = train.load(True)
+        if (net_stats != None):
+            net_iter = net_stats['iteration']
+            if ((net_iter != old_net_iter) and (game_number > config.MINGAMES)):
+                game_number = 0
+                model = model.load_state_dict(net_stats['state_dict'])
+                old_net_iter = net_iter
+        else:
+            net_iter = 0
         step_game = 0
         temperature = 1
+        env = ChessEnv()
         env.reset()
         while not env.game_over()[0]:
             state = env.board
@@ -43,5 +53,7 @@ def Generating_games(NUMBER_GAMES: int,env: ChessEnv):
 
         for i in range(len(triplet)-step_game, len(triplet)):
             triplet[i].append( z )
-        np.save(config.GAMEPATH + 'p'+ net_number + '_g' + str(game_number), np.array(triplet))
+        np.save(os.path.join(config.GAMEPATH,'p'+ net_iter + '_g' + str(game_number)), np.array(triplet))
         triplet = []
+        game_number += 1
+
