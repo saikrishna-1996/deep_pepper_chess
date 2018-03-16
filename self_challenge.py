@@ -10,21 +10,6 @@ from features import BoardToFeature
 import config
 from MCTS import MCTS
 
-def game_over(state):
-    if chess.is_game_over(state):
-
-        score = chess.results(state)
-        if score == '0-1':
-            return True, -1
-        if score == '1/2-1/2':
-            return True, 0
-        if score == '1-0':
-            return True, 1
-
-    else:
-        return False, None
-
-
 def Generating_challenge(NUMBER_GAMES, env: ChessEnv):
     current_board = env
 
@@ -60,9 +45,9 @@ def Generating_challenge(NUMBER_GAMES, env: ChessEnv):
             step_game += 1
 
 
-            pi = MCTS(current_board, init_W=[[0 for i in range(64 * 63)]],  # what is the shape of this pi ????????
-                       init_N=[1 for i in range(64 * 63)],
-            temp = temperature, explore_factor = 2,network=player, dirichlet_alpha= 0.04, epsilon=0.1)
+            pi = MCTS(current_board, init_W=np.zeros((4096,)),  # what is the shape of this pi ????????
+                        init_N=np.zeros((4096,)),
+                        temp = temperature, explore_factor = 2,network=player, dirichlet_alpha= 0.04, epsilon=0.1)
 
 
             action_index = np.argmax(pi)
