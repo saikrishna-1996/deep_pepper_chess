@@ -5,6 +5,9 @@ import policy_network
 import features
 import mcts
 from policy_network import PolicyValNetwork_Giraffe as pvng
+import config
+import os
+import glob
 
 
 def do_backprop(featuress, model):
@@ -45,3 +48,25 @@ def do_backprop(featuress, model):
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
+
+
+def save(model,fname,network_iter):
+    save_info = {
+        'state_dict': model.state_dict(),
+        'iteration': network_iter
+    }
+    fpath = os.path.join(config.NETPATH,fname)
+    torch.save(save_info,fname)
+
+
+def load(best=False):
+    if (best):
+        best_fname = config.BESTNET_NAME
+        model_state = torch.load(config.NETPATH,best_fname)
+    else:
+        #get newest file
+        list_of_files = glob.glob(config.NETPATH)
+        latest_file = max(list_of_files, key=os.path.getctime)
+        model_state = torch.load(latest_file)
+    return model_state
+    
