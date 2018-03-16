@@ -10,29 +10,14 @@ from features import BoardToFeature
 import config
 from MCTS import MCTS
 
-def game_over(state):
-    if chess.is_game_over(state):
-
-        score = chess.results(state)
-        if score == 0:
-            return True, -1
-        if score == 0.5:
-            return True, 0
-        if score == 1:
-            return True, 1
-
-    else:
-        return False, None
-
-
-
 def Generating_games(NUMBER_GAMES: int,env: ChessEnv):
     triplet=[]
+    model = LoadModel() # best location???
     for game_number in range(NUMBER_GAMES):
-
         step_game = 0
         temperature = 1
-        while not game_over(state)[0]:
+        env.reset()
+        while not env.game_over()[0]:
             state = env.board
             step_game +=1
             if step_game == 50:
@@ -42,16 +27,16 @@ def Generating_games(NUMBER_GAMES: int,env: ChessEnv):
                       init_N=np.ones((4096,)),
                       explore_factor = 2,
                       temp=temperature,
-                      network=PolicyValNetwork_Full,
+                      network=model,
                       dirichlet_alpha=0.4,
                       epsilon = 0.1)
 
             action_index = np.argmax(pi)
             triplet.append([state,pi])
 
-            state = env.step( config.INDEXTOMOVE[action_index])
+            env.step( config.INDEXTOMOVE[action_index])
 
-        z = game_over(state)[1]#from white perspective
+        z = env.game_over()[1] #from white perspective
 
         for i in range(len(triplet)-step_game, len(triplet)):
             triplet[i].append( z )

@@ -9,33 +9,14 @@ from features import BoardToFeature
 import config
 
 def evaluate_p(list_board,network):
-
-
     list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
     tensor = np.array(list_board)
-    #pytorch input rank should be 4
-    tensor = tensor[:, :, np.newaxis, np.newaxis]
-    #expect that nueral net ouput is a vector of probability
+    #expect that neural net ouput is a vector of probability
     return network.forward(tensor)[0]
-
-
-def game_over(state):
-    if chess.is_game_over(state):
-
-        score = chess.results(state)
-        if score == 0:
-            return True, -1
-        if score == 0.5:
-            return True, 0
-        if score == 1:
-            return True, 1
-
-    else:
-        return False, None
 
 def resignation(state):
     stockfishEval = stockfish_eval(state, t=0.5)
-    if abs(stockfishEval) > 6.5:
+    if abs(stockfishEval) > config.SF_EVAL_THRESHOLD:
         return True, stockfishEval / abs(stockfishEval)
     return False, None
 
@@ -122,20 +103,19 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
     #             temp: temperature constant for the optimum policy to control the level of exploration/
     #             in the Play policy
     #             optional : dirichlet noise
-    #             alpha_prob: current policy-network
-    #             alpha_eval: current value-network
+    #             network: policy network for evaluation
     #             dirichlet_alpha: alpha parameter for the dirichlet process
     #             epsilon : parameter for exploration using dirichlet noise
     
     # return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
 
-
-    BATCH_SIZE = 100
+    BATCH_SIZE = config.BATCH_SIZE
+    
 
     #history of leafs for all previous runs
     env_copy = env.copy()
     leafs=[]
-    for simulation in range (800):
+    for simulation in range (config.NUM_SIMULATIONS):
         curr_env = env.copy()
         state_action_list=[] #list of leafs in the same run
         moves = 0
@@ -145,10 +125,10 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
         ######## Select ########
         ########################
 
-        while not game_over(curr_env.board)[0] and not resign:
+        while not curr_env.game_over()[0] and not resign:
 
             moves += 0.5
-            if moves > 30 and not moves % 10:
+            if moves > config.RESIGN_CHECK_MIN and not moves % config.RESIGN_CHECK_FREQ:
                 resign = resignation(curr_env.board)[0]
             
             visited, index = state_visited(leafs,curr_env.board)
@@ -168,7 +148,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
         ### Expand and evaluate###
         ##########################
 
-        game_over_check, end_score = game_over(curr_env.board)
+        game_over_check, end_score = curr_env.game_over()
         resign_check, resign_score = resignation(curr_env.board)
 
         if game_over_check:
@@ -180,7 +160,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
         start = 0
         end = BATCH_SIZE
         for batch in range(number_batches):
-            list_p = evaluate_p([state_action_list[i].env.board for i in range(start,end)], network)
+            list_p = evaluate_p([state_action_list[i].board.env for i in range(start,end)], network)
             for i in range(start, end):
                 legal_move_probs = legal_mask(state_action_list[i].env.board, list_p[i-start])
                 state_action_list[i].P_update(legal_move_probs)
