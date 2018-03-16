@@ -3,7 +3,7 @@ import torch
 from torch.autograd import Variable
 import policy_network
 import features
-import mcts
+import MCTS
 from policy_network import PolicyValNetwork_Giraffe as pvng
 import config
 import os
@@ -69,4 +69,4 @@ def load(best=False):
         latest_file = max(list_of_files, key=os.path.getctime)
         model_state = torch.load(latest_file)
     return model_state
-    
+
