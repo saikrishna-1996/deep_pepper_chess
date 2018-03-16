@@ -78,7 +78,7 @@ class Leaf(object):
     def P_update(self, new_P):
         self.P = new_P
 
-def legal_mask(board,all_move_probs):
+def legal_mask(board, all_move_probs):
     legal_moves = board.legal_moves
     mask = np.zeros_like(all_move_probs)
     total_p = 0
