@@ -13,7 +13,7 @@ def do_backprop(featuress, model):
     #batch_board should be of dimension (batch_size, board)
     #batch_feature = Variable(torch.randn(batch_size, 353))
     criterion1 = torch.nn.MSELoss(size_average = False)
-    criterion2 = torch.nn.BCELoss()
+    criterion2 = torch.nn.NLLLoss()
     optimizer = torch.optim.Adam(policy_model.parameters(), lr=1e-4, momentum=0.9)
 
     ##We can do this cuda part later!?
