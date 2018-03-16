@@ -109,13 +109,13 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
     
     # return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
 
-
-    BATCH_SIZE = 100
+    BATCH_SIZE = config.BATCH_SIZE
+    
 
     #history of leafs for all previous runs
     env_copy = env.copy()
     leafs=[]
-    for simulation in range (800):
+    for simulation in range (config.NUM_SIMULATIONS):
         curr_env = env.copy()
         state_action_list=[] #list of leafs in the same run
         moves = 0
@@ -128,7 +128,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
         while not curr_env.game_over()[0] and not resign:
 
             moves += 0.5
-            if moves > 30 and not moves % 10:
+            if moves > config.RESIGN_CHECK_MIN and not moves % config.RESIGN_CHECK_FREQ:
                 resign = resignation(curr_env.board)[0]
             
             visited, index = state_visited(leafs,curr_env.board)
