@@ -96,6 +96,19 @@ class ChessEnv:
             else:
                 self.winner = Winner.draw
 
+    def game_over(state):
+        if state.is_game_over():
+            score = state.result()
+            if score == '0-1':
+                return True, -1
+            if score == '1/2 - 1/2':
+                return True, 0
+            if score == '1-0':
+                return True, 1
+
+        else:
+            return False, None
+
     def _resign(self):
         self.resigned = True
         if self.white_to_move: # WHITE RESIGNED!
