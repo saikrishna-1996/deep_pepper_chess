@@ -1,4 +1,6 @@
 import chess
+import os
+
 
 def make_move_maps():
     MOVETOINDEX = {}
@@ -40,3 +42,15 @@ RESIGN_CHECK_FREQ = 20
 NUM_SIMULATIONS = 800
 SF_EVAL_THRESHOLD = 6.5
 BATCH_SIZE = 100
+D_ALPHA = 0.4
+EPS = 0.1
+EXPLORE_FACTOR = 2
+
+# Game Generator
+TEMP_REDUCE_STEP = 50
+
+#PATHS
+ROOTDIR = '~\home'##### DEFINE AS REQ'd
+GAMEPATH = os.path.join(ROOTDIR, 'saved_games')
+NETPATH = os.path.join(ROOTDIR, 'saved_nets')
+BESTNET_NAME = 'BestNetwork.pth.tar' #Example seen here: https://github.com/pytorch/examples/blob/0984955bb8525452d1c0e4d14499756eae76755b/imagenet/main.py#L139-L145
