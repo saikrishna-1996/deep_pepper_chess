@@ -1,11 +1,11 @@
 import numpy as np
-
+import os
 #this is hypothetical functions and classes that should be created by teamates.
 import chess.uci
 from policy_network import PolicyValNetwork_Full
 import value_network
 from chess_env import ChessEnv
-import stockfish_eval
+from heuristics import stockfish_eval
 from features import BoardToFeature
 import config
 from MCTS import MCTS
