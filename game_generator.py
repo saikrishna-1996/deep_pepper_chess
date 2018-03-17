@@ -5,7 +5,7 @@ import chess.uci
 from policy_network import PolicyValNetwork_Full
 import value_network
 from chess_env import ChessEnv
-import stockfish_eval
+from heuristics import stockfish_eval
 from features import BoardToFeature
 import config
 from MCTS import MCTS
