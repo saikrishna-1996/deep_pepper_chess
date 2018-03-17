@@ -96,8 +96,8 @@ class ChessEnv:
             else:
                 self.winner = Winner.draw
 
-    def game_over(state):
-        if state.is_game_over():
+    def game_over(self):
+        if self.board.is_game_over():
             score = state.result()
             if score == '0-1':
                 return True, -1
