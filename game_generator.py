@@ -1,5 +1,5 @@
 import numpy as np
-
+import config
 #this is hypothetical functions and classes that should be created by teamates.
 import chess.uci
 from policy_network import PolicyValNetwork_Full
@@ -7,7 +7,6 @@ import value_network
 from chess_env import ChessEnv
 from heuristics import stockfish_eval
 from features import BoardToFeature
-import config
 from MCTS import MCTS
 
 def Generating_games(NUMBER_GAMES: int,env: ChessEnv):

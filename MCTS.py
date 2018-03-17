@@ -12,7 +12,7 @@ def evaluate_p(list_board,network):
     list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
     tensor = np.array(list_board)
     #expect that neural net ouput is a vector of probability
-    return network.forward(tensor)[0]
+    return network(tensor)[0]
 
 def resignation(state):
     stockfishEval = stockfish_eval(state, t=0.5)
@@ -188,3 +188,4 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
     pi = np.divide(np.power(N, temp), norm_factor)
 
     return pi
+
