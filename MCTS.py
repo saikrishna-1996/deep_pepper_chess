@@ -8,6 +8,9 @@ from heuristics import stockfish_eval
 from features import BoardToFeature
 import config
 
+def PolicyValNetwork_Full(input):
+    return [np.random.rand(4096,), 0]
+
 def evaluate_p(list_board,network):
     list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
     tensor = np.array(list_board)

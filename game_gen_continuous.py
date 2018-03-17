@@ -38,7 +38,7 @@ def Generating_games():
             pi = MCTS(env,
                       init_W=np.zeros((4096,)),
                       init_N=np.zeros((4096,)),
-                      init_P=np.zeros((4069,)),
+                      init_P=np.zeros((4096,)),
                       explore_factor = config.EXPLORE_FACTOR,
                       temp=temperature,
                       network=model,
