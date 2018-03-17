@@ -25,6 +25,7 @@ def Generating_games(NUMBER_GAMES: int,env: ChessEnv):
             pi = MCTS(state,
                       init_W=np.zeros((4096,)),
                       init_N=np.zeros((4096,)),
+                      init_P=np.zeros((4069,)),
                       explore_factor = 2,
                       temp=temperature,
                       network=model,
