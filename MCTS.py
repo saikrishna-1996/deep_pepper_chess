@@ -54,9 +54,14 @@ class Leaf(object):
     @property
     def U(self):
         return np.multiply( np.multiply( self.explore_factor , self.P) , np.divide( np.sqrt(np.sum(self.N)),(np.add(1., self.N))))
-
+    @property
     def best_action(self):
-        index = np.argmax(np.add(self.U, self.Q)) #U and Q are lists of dimensionality no.of legal moves
+
+        Q = self.Q
+        if not self.env.board.turn:
+            Q = -Q
+
+        index = np.argmax(np.add(self.U, Q)) #U and Q are lists of dimensionality no.of legal moves
         # it is nice to decorate the legal move method with property
         return index
 
