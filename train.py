@@ -8,7 +8,7 @@ from policy_network import PolicyValNetwork_Giraffe as pvng
 import config
 import os
 import glob
-import np
+import numpy as np
 
 #There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 #load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.

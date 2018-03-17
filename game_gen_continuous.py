@@ -53,7 +53,7 @@ def Generating_games():
         z = env.game_over()[1] #from white perspective
 
         for i in range(len(triplet)-step_game, len(triplet)):
-            triplet[i].append( z )
+            triplet[i].append(z)
         np.save(os.path.join(config.GAMEPATH,'p'+ net_iter + '_g' + str(game_number)), np.array(triplet))
         triplet = []
         game_number += 1
