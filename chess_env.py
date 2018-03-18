@@ -98,7 +98,7 @@ class ChessEnv:
 
     def game_over(self):
         if self.board.is_game_over():
-            score = state.result()
+            score = self.state.result()
             if score == '0-1':
                 return True, -1
             if score == '1/2 - 1/2':
