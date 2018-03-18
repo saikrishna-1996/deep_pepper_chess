@@ -8,11 +8,14 @@ from heuristics import stockfish_eval
 from features import BoardToFeature
 import config
 
+def PolicyValNetwork_Full(input):
+    return [np.random.rand(4096,), 0]
+
 def evaluate_p(list_board,network):
     list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
     tensor = np.array(list_board)
     #expect that neural net ouput is a vector of probability
-    return network.forward(tensor)[0]
+    return network(tensor)[0]
 
 def resignation(state):
     stockfishEval = stockfish_eval(state, t=0.5)
@@ -54,9 +57,14 @@ class Leaf(object):
     @property
     def U(self):
         return np.multiply( np.multiply( self.explore_factor , self.P) , np.divide( np.sqrt(np.sum(self.N)),(np.add(1., self.N))))
-
+    @property
     def best_action(self):
-        index = np.argmax(np.add(self.U, self.Q)) #U and Q are lists of dimensionality no.of legal moves
+
+        Q = self.Q
+        if not self.env.board.turn:
+            Q = -Q
+
+        index = np.argmax(np.add(self.U, Q)) #U and Q are lists of dimensionality no.of legal moves
         # it is nice to decorate the legal move method with property
         return index
 
@@ -183,3 +191,4 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
     pi = np.divide(np.power(N, temp), norm_factor)
 
     return pi
+
