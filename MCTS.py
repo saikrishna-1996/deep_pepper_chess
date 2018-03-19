@@ -57,7 +57,7 @@ class Leaf(object):
 
     def best_action(self):
         if not self.env.white_to_move:
-            return p.argmax(np.add(self.U, -self.Q))
+            return np.argmax(np.add(self.U, -self.Q))
 
         return np.argmax(np.add(self.U, self.Q))
 
@@ -185,7 +185,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
 
         number_batches = max(len(state_action_list) // BATCH_SIZE, 1)
         start = 0
-        end = BATCH_SIZE
+        end = min(BATCH_SIZE, len(state_action_list))
         for batch in range(number_batches):
             list_p = evaluate_p([state_action_list[i].env.board for i in range(start,end)], network)
             for i in range(start, end):
@@ -210,3 +210,9 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
     pi = np.divide(np.power(N, temp), norm_factor)
 
     return pi
+
+m = ChessEnv()
+m.reset()
+MCTS(m, init_W=np.zeros((config.d_out,)),init_P = np.zeros((config.d_out,)) ,init_N=np.ones((config.d_out,)),
+     explore_factor = 2,
+     temp=1,network=None, dirichlet_alpha=0.4, epsilon = 0.1)
