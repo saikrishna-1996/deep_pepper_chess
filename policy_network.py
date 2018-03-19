@@ -89,7 +89,7 @@ class PolicyValNetwork_Giraffe(nn.Module):
 
 
 class PolicyValNetwork_Full(nn.Module):
-    def __init_(self, d_in, h1, h2p, h2e, d_out, eval_out=1):
+    def __init__(self, d_in, h1, h2p, h2e, d_out, eval_out=1):
         #h2a are the no.of hidden neurons in the second layer to be used for policy network
         #h2b are the no.of hidden neurons in the second layer to be used for evaluation network. evaluation network outputs the value function which is a scalar.
         super(PolicyValNetwork_Full, self).__init__()

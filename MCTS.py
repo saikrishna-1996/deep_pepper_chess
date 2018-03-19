@@ -8,14 +8,11 @@ from heuristics import stockfish_eval
 from features import BoardToFeature
 import config
 
-def PolicyValNetwork_Full(input):
-    return [np.random.rand(4096,), 0]
-
 def evaluate_p(list_board,network):
     list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
     tensor = np.array(list_board)
     #expect that neural net ouput is a vector of probability
-    return network(tensor)[0]
+    return network.forward(tensor)[0]
 
 def resignation(state):
     stockfishEval = stockfish_eval(state, t=0.5)
@@ -27,7 +24,7 @@ def state_visited(state_list,state):
     if not state_list:
         return False, None
     for i in range(len(state_list)):
-        if  np.array_equal(state_list[i].board, state):
+        if  np.array_equal(state_list[i].env.board, state):
             return True, i
     return False, None
 
@@ -57,14 +54,9 @@ class Leaf(object):
     @property
     def U(self):
         return np.multiply( np.multiply( self.explore_factor , self.P) , np.divide( np.sqrt(np.sum(self.N)),(np.add(1., self.N))))
-    @property
+
     def best_action(self):
-
-        Q = self.Q
-        if not self.env.board.turn:
-            Q = -Q
-
-        index = np.argmax(np.add(self.U, Q)) #U and Q are lists of dimensionality no.of legal moves
+        index = np.argmax(np.add(self.U, self.Q)) #U and Q are lists of dimensionality no.of legal moves
         # it is nice to decorate the legal move method with property
         return index
 
@@ -86,21 +78,34 @@ class Leaf(object):
     def P_update(self, new_P):
         self.P = new_P
 
-def legal_mask(board, all_move_probs):
+def legal_mask(board, all_move_probs,dirichlet = False,epsilon=None):
     legal_moves = board.legal_moves
     mask = np.zeros_like(all_move_probs)
     total_p = 0
+    inds=[]
     for legal_move in legal_moves:
         legal_move_uci = legal_move.uci()
         ind = config.MOVETOINDEX[legal_move_uci]
         mask[ind] = 1
+        inds.append(ind)
         all_move_probs += 1e-6
         total_p += all_move_probs[ind]
-    
+
     legal_moves_prob =  np.multiply(mask,all_move_probs) 
 
     legal_moves_prob = np.divide(legal_moves_prob,total_p)
+
+    if dirichlet:
+        num_legal_moves = sum(mask)
+        z=config.D_ALPHA*np.ones((legal_moves_prob[inds].shape))
+        d_noise = np.random.dirichlet(config.D_ALPHA*np.ones((legal_moves_prob[inds].shape)))
+        legal_moves_prob[inds] = np.add(np.multiply((1-epsilon),legal_moves_prob[inds]),np.multiply(epsilon,np.add(legal_moves_prob[inds],d_noise)))
+        p_tot = np.sum(legal_moves_prob)
+        legal_moves_prob[inds] = np.divide(legal_moves_prob[inds],p_tot)
     return legal_moves_prob
+
+def add_dirichlet(env,leaf):
+    pass
 
 #state type and shape does not matter
 
@@ -124,6 +129,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
     env_copy = env.copy()
     leafs=[]
     for simulation in range (config.NUM_SIMULATIONS):
+        
         curr_env = env.copy()
         state_action_list=[] #list of leafs in the same run
         moves = 0
@@ -134,7 +140,6 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
         ########################
 
         while not curr_env.game_over()[0] and not resign:
-
             moves += 0.5
             if moves > config.RESIGN_CHECK_MIN and not moves % config.RESIGN_CHECK_FREQ:
                 resign = resignation(curr_env.board)[0]
@@ -143,14 +148,30 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
             if visited:
                 state_action_list.append(leafs[index])
             else: # if state unvisited get legal moves probabilities using policy network
-                state_action_list.append(Leaf(curr_env, init_W, init_P, init_N, explore_factor))
+                if len(leafs) == 0:
+                    root = Leaf(curr_env.copy(), init_W, init_P, init_N, explore_factor)
+                    all_move_probs = init_P
+                    legal_move_probs = legal_mask(curr_env.board,all_move_probs,dirichlet=True,epsilon=epsilon)
+                    root.P = legal_move_probs
+                    state_action_list.append(root)
+                else:
+                    all_move_probs = init_P
+                    legal_move_probs = legal_mask(curr_env.board,all_move_probs)
+                    state_action_list.append(Leaf(curr_env.copy(), init_W, legal_move_probs, init_N, explore_factor))
                 leafs.append(state_action_list[-1])
+<<<<<<< HEAD
             #if leafs length is exactly 1 this mean we are in the root state then we should appy the dirichlet noise
             #(check alphago zero paper page 24)
             if len(leafs) == 1:
                 leafs[0].P = np.add(np.multiply((1 - epsilon),leafs[0].P), np.multiply(epsilon, np.random.dirichlet(dirichlet_alpha, len(leafs[0].P))))
             best_action = config.it [leafs[-1].best_action]
             curr_env = curr_env.step(best_action)
+=======
+
+            best_move_index = leafs[-1].best_action()
+            best_action = config.INDEXTOMOVE[best_move_index]
+            curr_env.step(best_action)
+>>>>>>> 5803905e43647966cfabdb0b71b6f88dc49da144
 
         ##########################
         ### Expand and evaluate###
@@ -190,6 +211,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
     #optimum policy
     pi = np.divide(np.power(N, temp), norm_factor)
 
+<<<<<<< HEAD
     return pi
 env = ChessEnv()
 env.reset()
@@ -202,3 +224,6 @@ MCTS(env,
                       network=None,
                       dirichlet_alpha=0.4,
                       epsilon = 0.1)
+=======
+    return pi
+>>>>>>> 5803905e43647966cfabdb0b71b6f88dc49da144
