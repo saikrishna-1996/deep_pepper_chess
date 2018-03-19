@@ -84,6 +84,8 @@ class ChessEnv:
         self.num_halfmoves += 1
 
         if check_over and self.board.result(claim_draw=True) != "*":
+            print('Board resultd')
+            print(self.board.result(claim_draw=True))
             self._game_over()
 
     def _game_over(self):
@@ -97,11 +99,13 @@ class ChessEnv:
                 self.winner = Winner.draw
 
     def game_over(self):
+        print('is_game_over?')
+        print(self.board.is_game_over())
         if self.board.is_game_over():
-            score = self.state.result()
+            score = self.board.result()
             if score == '0-1':
                 return True, -1
-            if score == '1/2 - 1/2':
+            if score == '1/2-1/2':
                 return True, 0
             if score == '1-0':
                 return True, 1
