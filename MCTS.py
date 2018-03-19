@@ -78,7 +78,7 @@ class Leaf(object):
     def P_update(self, new_P):
         self.P = new_P
 
-def legal_mask(board, all_move_probs,dirichlet = False):
+def legal_mask(board, all_move_probs,dirichlet = False,epsilon=None):
     legal_moves = board.legal_moves
     mask = np.zeros_like(all_move_probs)
     total_p = 0
@@ -99,7 +99,7 @@ def legal_mask(board, all_move_probs,dirichlet = False):
         num_legal_moves = sum(mask)
         z=config.D_ALPHA*np.ones((legal_moves_prob[inds].shape))
         d_noise = np.random.dirichlet(config.D_ALPHA*np.ones((legal_moves_prob[inds].shape)))
-        legal_moves_prob[inds] = np.add(legal_moves_prob[inds],d_noise)
+        legal_moves_prob[inds] = np.add(np.multiply((1-epsilon),legal_moves_prob[inds]),np.multiply(epsilon,np.add(legal_moves_prob[inds],d_noise)))
         p_tot = np.sum(legal_moves_prob)
         legal_moves_prob[inds] = np.divide(legal_moves_prob[inds],p_tot)
     return legal_moves_prob
@@ -131,7 +131,6 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
     for simulation in range (config.NUM_SIMULATIONS):
         
         curr_env = env.copy()
-        print(curr_env.game_over())
         state_action_list=[] #list of leafs in the same run
         moves = 0
         resign = False
@@ -141,7 +140,6 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
         ########################
 
         while not curr_env.game_over()[0] and not resign:
-            print('Moves: ' + repr(moves))
             moves += 0.5
             if moves > config.RESIGN_CHECK_MIN and not moves % config.RESIGN_CHECK_FREQ:
                 resign = resignation(curr_env.board)[0]
@@ -151,30 +149,21 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
                 state_action_list.append(leafs[index])
             else: # if state unvisited get legal moves probabilities using policy network
                 if len(leafs) == 0:
-                    print('Root node entered')
                     root = Leaf(curr_env.copy(), init_W, init_P, init_N, explore_factor)
                     all_move_probs = init_P
-                    legal_move_probs = legal_mask(curr_env.board,all_move_probs,dirichlet=True)
+                    legal_move_probs = legal_mask(curr_env.board,all_move_probs,dirichlet=True,epsilon=epsilon)
                     root.P = legal_move_probs
                     state_action_list.append(root)
                 else:
                     all_move_probs = init_P
                     legal_move_probs = legal_mask(curr_env.board,all_move_probs)
-                    print(legal_move_probs)
                     state_action_list.append(Leaf(curr_env.copy(), init_W, legal_move_probs, init_N, explore_factor))
                 leafs.append(state_action_list[-1])
 
             best_move_index = leafs[-1].best_action()
             best_action = config.INDEXTOMOVE[best_move_index]
-            #best_action = chess.Move.from_uci(best_action)
-            print('ACTION: ')
-            print(best_action)
-            #print(curr_env.board.legal_moves)
-            print('Step!')
-            print(curr_env.board)
             curr_env.step(best_action)
-            
-            print(curr_env.game_over())
+
         ##########################
         ### Expand and evaluate###
         ##########################
