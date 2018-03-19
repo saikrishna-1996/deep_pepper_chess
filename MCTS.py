@@ -104,9 +104,6 @@ def legal_mask(board, all_move_probs,dirichlet = False,epsilon=None):
         legal_moves_prob[inds] = np.divide(legal_moves_prob[inds],p_tot)
     return legal_moves_prob
 
-def add_dirichlet(env,leaf):
-    pass
-
 #state type and shape does not matter
 
 def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: PolicyValNetwork_Full,dirichlet_alpha, epsilon):#we can add here all our hyper-parameters
@@ -149,7 +146,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
                 state_action_list.append(leafs[index])
             else: # if state unvisited get legal moves probabilities using policy network
                 if len(leafs) == 0:
-                    root = Leaf(curr_env.copy(), init_W, init_P, init_N, explore_factor)
+                    root = Leaf(curr_env.copy(), init_W,init_N, init_P, explore_factor)
                     all_move_probs = init_P
                     legal_move_probs = legal_mask(curr_env.board,all_move_probs,dirichlet=True,epsilon=epsilon)
                     root.P = legal_move_probs
@@ -157,11 +154,15 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
                 else:
                     all_move_probs = init_P
                     legal_move_probs = legal_mask(curr_env.board,all_move_probs)
-                    state_action_list.append(Leaf(curr_env.copy(), init_W, legal_move_probs, init_N, explore_factor))
+                    print('best legal')
+                    print(np.argmax(legal_move_probs))
+                    state_action_list.append(Leaf(curr_env.copy(), init_W,  init_N,legal_move_probs, explore_factor))
                 leafs.append(state_action_list[-1])
 
             best_move_index = leafs[-1].best_action()
             best_action = config.INDEXTOMOVE[best_move_index]
+            print("Best Action: " + repr(best_action))
+            print(np.argmax(leafs[-1].P))
             curr_env.step(best_action)
 
         ##########################
