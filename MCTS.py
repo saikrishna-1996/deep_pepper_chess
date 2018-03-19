@@ -159,19 +159,16 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
                     legal_move_probs = legal_mask(curr_env.board,all_move_probs)
                     state_action_list.append(Leaf(curr_env.copy(), init_W, legal_move_probs, init_N, explore_factor))
                 leafs.append(state_action_list[-1])
-<<<<<<< HEAD
             #if leafs length is exactly 1 this mean we are in the root state then we should appy the dirichlet noise
             #(check alphago zero paper page 24)
             if len(leafs) == 1:
                 leafs[0].P = np.add(np.multiply((1 - epsilon),leafs[0].P), np.multiply(epsilon, np.random.dirichlet(dirichlet_alpha, len(leafs[0].P))))
             best_action = config.it [leafs[-1].best_action]
             curr_env = curr_env.step(best_action)
-=======
 
             best_move_index = leafs[-1].best_action()
             best_action = config.INDEXTOMOVE[best_move_index]
             curr_env.step(best_action)
->>>>>>> 5803905e43647966cfabdb0b71b6f88dc49da144
 
         ##########################
         ### Expand and evaluate###
@@ -211,19 +208,4 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
     #optimum policy
     pi = np.divide(np.power(N, temp), norm_factor)
 
-<<<<<<< HEAD
     return pi
-env = ChessEnv()
-env.reset()
-MCTS(env,
-                      init_W=np.zeros((4096,)),
-                      init_N=np.zeros((4096,)),
-                      init_P=np.zeros((4096,)),
-                      explore_factor = 2,
-                      temp=1,
-                      network=None,
-                      dirichlet_alpha=0.4,
-                      epsilon = 0.1)
-=======
-    return pi
->>>>>>> 5803905e43647966cfabdb0b71b6f88dc49da144
