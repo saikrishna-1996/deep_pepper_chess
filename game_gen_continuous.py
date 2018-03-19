@@ -36,9 +36,9 @@ def Generating_games():
             if step_game == config.TEMP_REDUCE_STEP:
                 temperature = 10e-6
             pi = MCTS(env,
-                      init_W=np.zeros((4096,)),
-                      init_N=np.zeros((4096,)),
-                      init_P=np.zeros((4096,)),
+                      init_W=np.zeros((config.d_out,)),
+                      init_N=np.zeros((config.d_out,)),
+                      init_P=np.zeros((config.d_out,)),
                       explore_factor = config.EXPLORE_FACTOR,
                       temp=temperature,
                       network=model,

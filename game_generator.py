@@ -22,9 +22,9 @@ def Generating_games(NUMBER_GAMES: int,env: ChessEnv):
             if step_game == 50:
                 temperature = 10e-6
             pi = MCTS(state,
-                      init_W=np.zeros((4096,)),
-                      init_N=np.zeros((4096,)),
-                      init_P=np.zeros((4096,)),
+                      init_W=np.zeros((config.d_out,)),
+                      init_N=np.zeros((config.d_out,)),
+                      init_P=np.zeros((config.d_out,)),
                       explore_factor = 2,
                       temp=temperature,
                       network=model,

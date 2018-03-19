@@ -38,9 +38,9 @@ class Leaf(object):
     #It has the ability to store and update for each leaf the
     #  number of state-action N(s,a), Q(s,a) and P(s,a)
     def __init__(self, env:ChessEnv, init_W, init_N,init_P, explore_factor):
-            assert init_N.shape == (4096,)
-            assert init_W.shape == (4096,)
-            assert init_P.shape == (4096,)
+            assert init_N.shape == (config.d_out,)
+            assert init_W.shape == (config.d_out,)
+            assert init_P.shape == (config.d_out,)
             self.env = env
             self.P = init_P
             self.N = init_N 
@@ -154,7 +154,12 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
                     state_action_list.append(root)
                 else:
                     all_move_probs = init_P
+<<<<<<< HEAD
                     legal_move_probs = curr_env.legal_mask(all_move_probs)
+=======
+                    movesh = curr_env.board.legal_moves
+                    legal_move_probs = legal_mask(curr_env.board,all_move_probs)
+>>>>>>> 191913a3db5bd93fe6685c44fb45ea1dfebb8cb1
                     print('best legal')
                     print(np.argmax(legal_move_probs))
                     state_action_list.append(Leaf(curr_env.copy(), init_W,  init_N,legal_move_probs, explore_factor))
@@ -170,6 +175,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
             best_action = config.INDEXTOMOVE[best_move_index]
             print("Best Action: " + repr(best_action))
             print(np.argmax(leafs[-1].P))
+            print(curr_env.board)
             curr_env.step(best_action)
 
         ##########################

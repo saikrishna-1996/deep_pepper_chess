@@ -45,8 +45,8 @@ def Generating_challenge(NUMBER_GAMES, env: ChessEnv):
             step_game += 1
 
 
-            pi = MCTS(current_board, init_W=np.zeros((4096,)),  # what is the shape of this pi ????????
-                        init_N=np.zeros((4096,)),
+            pi = MCTS(current_board, init_W=np.zeros((config.d_out,)),  # what is the shape of this pi ????????
+                        init_N=np.zeros((config.d_out,)),
                         temp = temperature, explore_factor = 2,network=player, dirichlet_alpha= 0.04, epsilon=0.1)
 
 
