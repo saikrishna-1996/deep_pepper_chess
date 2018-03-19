@@ -9,9 +9,23 @@ def make_move_maps():
     for i in range(0,64):
         for j in range(0,64):
             move = chess.Move(i,j).uci()
+        
+            if move[3]=='8' and move[1]=='7':
+                for letter in 'QRBN':
+                    new_move = move+letter
+                    MOVETOINDEX[new_move] = k
+                    INDEXTOMOVE.append(new_move)
+                    k+=1
+            elif move[3]=='1' and move[1]=='2':
+                for letter in 'qrbn':
+                    new_move = move+letter
+                    MOVETOINDEX[new_move] = k
+                    INDEXTOMOVE.append(new_move)
+                    k+=1       
             MOVETOINDEX[move] = k
             INDEXTOMOVE.append(move)
             k+=1
+    INDEXTOMOVE[0] = 'a1a1'
 
     return MOVETOINDEX, INDEXTOMOVE
 
@@ -66,7 +80,7 @@ h1 = 1024   #neurons in first hidden layer
 h2 = 2048   #nuerons in second hidden layer
 h2p = 2048  #nuerons in second hidden layer of policy network
 h2e = 512   #neurons in second hidden layer of evaluation network
-d_out = 4096 #without including under promotions. otherwise we have to increase
+d_out = 4608 #without including under promotions. otherwise we have to increase
 
 #splitting the giraffe's feature vector to be input to the network
 global_features = 17
