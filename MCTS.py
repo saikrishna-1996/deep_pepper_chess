@@ -166,13 +166,15 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
             print(np.argmax(leafs[-1].P))
             print(curr_env.board)
             curr_env.step(best_action)
+            print(curr_env.board.fen())
 
         ##########################
         ### Expand and evaluate###
         ##########################
 
         game_over_check, end_score = curr_env.game_over()
-        resign_check, resign_score = resignation(curr_env.board)
+        if not game_over_check:
+            resign_check, resign_score = resignation(curr_env.board)
 
         if game_over_check:
             v = end_score
@@ -183,7 +185,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
         start = 0
         end = BATCH_SIZE
         for batch in range(number_batches):
-            list_p = evaluate_p([state_action_list[i].board.env for i in range(start,end)], network)
+            list_p = evaluate_p([state_action_list[i].env.board for i in range(start,end)], network)
             for i in range(start, end):
                 legal_move_probs = legal_mask(state_action_list[i].env.board, list_p[i-start])
                 state_action_list[i].P_update(legal_move_probs)
