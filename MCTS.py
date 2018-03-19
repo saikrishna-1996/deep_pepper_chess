@@ -143,7 +143,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
             if moves > config.RESIGN_CHECK_MIN and not moves % config.RESIGN_CHECK_FREQ:
                 resign = resignation(curr_env.board)[0]
             
-            visited, index = state_visited(leafs,curr_env.board)
+            visited, index = state_visited(leafs, curr_env.board)
             if visited:
                 state_action_list.append(leafs[index])
             else: # if state unvisited get legal moves probabilities using policy network

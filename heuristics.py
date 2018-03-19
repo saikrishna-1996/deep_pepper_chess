@@ -16,9 +16,7 @@ def stockfish_eval(board, t=500):
 
 def stockfish_result(board):
     eval_val = stockfish_eval(board)
-    if eval_val > 6.5:
-        return 1
-    elif eval_val < -6.5:
-        return -1
+    if abs(eval_val) > 6.5:
+        return eval_val/abs(eval_val)
     else:
-        return 0
+        return None
