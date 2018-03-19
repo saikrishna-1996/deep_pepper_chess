@@ -78,31 +78,31 @@ class Leaf(object):
     def P_update(self, new_P):
         self.P = new_P
 
-def legal_mask(board, all_move_probs,dirichlet = False,epsilon=None):
-    legal_moves = board.legal_moves
-    mask = np.zeros_like(all_move_probs)
-    total_p = 0
-    inds=[]
-    for legal_move in legal_moves:
-        legal_move_uci = legal_move.uci()
-        ind = config.MOVETOINDEX[legal_move_uci]
-        mask[ind] = 1
-        inds.append(ind)
-        all_move_probs += 1e-6
-        total_p += all_move_probs[ind]
+    def legal_mask(self, all_move_probs,dirichlet = False,epsilon=None):
+        legal_moves = self.env.legal_moves
+        mask = np.zeros_like(all_move_probs)
+        total_p = 0
+        inds=[]
+        for legal_move in legal_moves:
+            legal_move_uci = legal_move.uci()
+            ind = config.MOVETOINDEX[legal_move_uci]
+            mask[ind] = 1
+            inds.append(ind)
+            all_move_probs += 1e-6
+            total_p += all_move_probs[ind]
 
-    legal_moves_prob =  np.multiply(mask,all_move_probs) 
+        legal_moves_prob =  np.multiply(mask,all_move_probs)
 
-    legal_moves_prob = np.divide(legal_moves_prob,total_p)
+        legal_moves_prob = np.divide(legal_moves_prob,total_p)
 
-    if dirichlet:
-        num_legal_moves = sum(mask)
-        z=config.D_ALPHA*np.ones((legal_moves_prob[inds].shape))
-        d_noise = np.random.dirichlet(config.D_ALPHA*np.ones((legal_moves_prob[inds].shape)))
-        legal_moves_prob[inds] = np.add(np.multiply((1-epsilon),legal_moves_prob[inds]),np.multiply(epsilon,np.add(legal_moves_prob[inds],d_noise)))
-        p_tot = np.sum(legal_moves_prob)
-        legal_moves_prob[inds] = np.divide(legal_moves_prob[inds],p_tot)
-    return legal_moves_prob
+        if dirichlet:
+            num_legal_moves = sum(mask)
+            z=config.D_ALPHA*np.ones((legal_moves_prob[inds].shape))
+            d_noise = np.random.dirichlet(config.D_ALPHA*np.ones((legal_moves_prob[inds].shape)))
+            legal_moves_prob[inds] = np.add(np.multiply((1-epsilon),legal_moves_prob[inds]),np.multiply(epsilon,np.add(legal_moves_prob[inds],d_noise)))
+            p_tot = np.sum(legal_moves_prob)
+            legal_moves_prob[inds] = np.divide(legal_moves_prob[inds],p_tot)
+        return legal_moves_prob
 
 #state type and shape does not matter
 
@@ -148,12 +148,13 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
                 if len(leafs) == 0:
                     root = Leaf(curr_env.copy(), init_W,init_N, init_P, explore_factor)
                     all_move_probs = init_P
-                    legal_move_probs = legal_mask(curr_env.board,all_move_probs,dirichlet=True,epsilon=epsilon)
+                    curr_env.legal_moves(all_move_probs,dirichlet=True, epsilon=epsilon)
+                    legal_move_probs = curr_env.legal_moves(all_move_probs, dirichlet=True, epsilon=epsilon)
                     root.P = legal_move_probs
                     state_action_list.append(root)
                 else:
                     all_move_probs = init_P
-                    legal_move_probs = legal_mask(curr_env.board,all_move_probs)
+                    legal_move_probs = curr_env.legal_mask(all_move_probs)
                     print('best legal')
                     print(np.argmax(legal_move_probs))
                     state_action_list.append(Leaf(curr_env.copy(), init_W,  init_N,legal_move_probs, explore_factor))
@@ -189,7 +190,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
         for batch in range(number_batches):
             list_p = evaluate_p([state_action_list[i].board.env for i in range(start,end)], network)
             for i in range(start, end):
-                legal_move_probs = legal_mask(state_action_list[i].env.board, list_p[i-start])
+                legal_move_probs = state_action_list[i].legal_mask(list_p[i-start])
                 state_action_list[i].P_update(legal_move_probs)
             start = end
             end += min(BATCH_SIZE, len(state_action_list) - start)
