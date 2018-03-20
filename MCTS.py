@@ -57,7 +57,7 @@ class Leaf(object):
 
     def best_action(self):
         if not self.env.white_to_move:
-            return p.argmax(np.add(self.U, -self.Q))
+            return np.argmax(np.add(self.U, -self.Q))
 
         return np.argmax(np.add(self.U, self.Q))
 
