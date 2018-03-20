@@ -167,6 +167,7 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
             print("Best Action: " + repr(best_action))
             print(np.argmax(leafs[-1].P))
             print(curr_env.board)
+            print("White to move: " + repr(curr_env.white_to_move))
             curr_env.step(best_action)
             print(curr_env.board.fen())
 
@@ -211,8 +212,3 @@ def MCTS(env: ChessEnv, init_W, init_P,  init_N, explore_factor,temp,network: Po
 
     return pi
 
-m = ChessEnv()
-m.reset()
-MCTS(m, init_W=np.zeros((config.d_out,)),init_P = np.zeros((config.d_out,)) ,init_N=np.ones((config.d_out,)),
-     explore_factor = 2,
-     temp=1,network=None, dirichlet_alpha=0.4, epsilon = 0.1)
