@@ -6,6 +6,9 @@ import torch.nn.functional as F
 # fully connected (including the first layer to hidden layer neurons. so, this is different from giraffe network) network with 2 hidden layers.
 # The input is 363-dimensional feature vector as used in the evaluation network for giraffe. The output is 4096-layer. 64x64 = 4096. So, this entire vector indicates the probability of moving from one square to the other square. We know that a piece can't move up from a square and land in the same square. So, technically, it should only be of dimension (4096-64)x1, but, for sanitation purposes let's keep it the way it is.
 # ToDo: compute a value function as well using this network
+from config import ConfigVars
+
+
 class PolicyNetwork_Full(nn.Module):
     def __init__(self, d_in, h1, h2, d_out):
         "We instantiate the linear m odules and assign them as member variables"
@@ -52,7 +55,17 @@ class PolicyNetwork_Giraffe(nn.Module):
 
 
 class PolicyValNetwork_Giraffe(nn.Module):
-    def __init__(self, d_in, gf, pc, sc, h1a, h1b, h1c, h2p, h2e, d_out, eval_out=1):
+    def __init__(self, d_in = ConfigVars.d_in,
+                 gf = ConfigVars.global_features,
+                 pc = ConfigVars.piece_centric,
+                 sc = ConfigVars.square_centric,
+                 h1a = ConfigVars.h1a,
+                 h1b = ConfigVars.h1b,
+                 h1c = ConfigVars.h1c,
+                 h2p = ConfigVars.h2p,
+                 h2e = ConfigVars.h2e,
+                 d_out = ConfigVars.d_out,
+                 eval_out=1):
         "We instantiate various modules"
         super(PolicyNetwork_Giraffe, self).__init__()
         self.linear1a = nn.Linear(gf, h1a)

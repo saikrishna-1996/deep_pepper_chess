@@ -17,7 +17,7 @@ def Generating_games():
     game_number = 0
     while True:
         net_stats = train.load(True)
-        if net_stats != None:
+        if net_stats is not None:
             net_iter = net_stats['iteration']
             if (net_iter != old_net_iter) and (game_number > config.MINGAMES):
                 game_number = 0

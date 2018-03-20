@@ -48,7 +48,7 @@ for i in range(5):
     board = kasgame.board()
     for move in kasgame.main_line():
 
-        if move == None:
+        if move is None:
             kasgame = chess.pgn.read_game(pgn)
             board = kasgame.board()
         cunt = cunt + 1
