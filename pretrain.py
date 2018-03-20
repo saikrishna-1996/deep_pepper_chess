@@ -1,12 +1,11 @@
-import chess
 import chess.pgn
 import chess.uci
-import features
-
-#import random
+# import random
 import torch
 from torch.autograd import Variable
-#import value_networks
+
+import features
+# import value_networks
 from value_network import Critic_Giraffe
 
 pgn = open("/u/gottipav/kasparov.pgn")

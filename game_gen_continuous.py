@@ -1,15 +1,13 @@
-import numpy as np
 import os
-# this is hypothetical functions and classes that should be created by teamates.
-import chess.uci
-from policy_network import PolicyValNetwork_Full
-import value_network
-from chess_env import ChessEnv
-from heuristics import stockfish_eval
-from features import BoardToFeature
+
+import numpy as np
+
 import config
-from MCTS import MCTS
 import train
+from MCTS import MCTS
+from chess_env import ChessEnv
+# this is hypothetical functions and classes that should be created by teamates.
+from policy_network import PolicyValNetwork_Full
 
 
 def Generating_games():

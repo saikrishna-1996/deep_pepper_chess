@@ -1,14 +1,10 @@
-import chess
-import torch
-from torch.autograd import Variable
-import policy_network
-import features
-import MCTS
-from policy_network import PolicyValNetwork_Giraffe as pvng
-import config
-import os
 import glob
+import os
+
 import numpy as np
+import torch
+
+import config
 
 
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network

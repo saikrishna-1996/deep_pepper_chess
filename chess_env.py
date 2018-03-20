@@ -1,10 +1,9 @@
+import copy
 import enum
+from logging import getLogger
+
 import chess.pgn
 import numpy as np
-import copy
-from config import SQUAREMAP
-
-from logging import getLogger
 
 logger = getLogger(__name__)
 

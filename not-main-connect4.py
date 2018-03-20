@@ -1,15 +1,6 @@
-import argparse
-from itertools import count
-from collections import namedtuple
-import numpy as np
 import random
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.autograd import Variable
-from torch.distributions import Categorical
+import numpy as np
 
 # parser = argparse.ArgumentParser(description='solving the connect4')
 # parser.add_argument('--gamma', type=float, default=0.99, metavar = 'G',

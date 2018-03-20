@@ -1,14 +1,10 @@
 import numpy as np
 
-# this is hypothetical functions and classes that should be created by teamates.
-import chess.uci
-from policy_network import PolicyValNetwork_Full, PolicyValNetwork_Full_candidate
-import value_network
-from chess_env import ChessEnv
-import stockfish_eval
-from features import BoardToFeature
 import config
 from MCTS import MCTS
+from chess_env import ChessEnv
+# this is hypothetical functions and classes that should be created by teamates.
+from policy_network import PolicyValNetwork_Full, PolicyValNetwork_Full_candidate
 
 
 def Generating_challenge(NUMBER_GAMES, env: ChessEnv):

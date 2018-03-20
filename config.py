@@ -1,5 +1,6 @@
-import chess
 import os
+
+import chess
 
 
 def make_move_maps():

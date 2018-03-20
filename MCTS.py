@@ -1,12 +1,11 @@
 import numpy as np
-# this is hypothetical functions and classes that should be created by teamates.
-import chess.uci
-from policy_network import PolicyValNetwork_Full
-import value_network
-from chess_env import ChessEnv
-from heuristics import stockfish_eval
-from features import BoardToFeature
+
 import config
+from chess_env import ChessEnv
+from features import BoardToFeature
+from heuristics import stockfish_eval
+# this is hypothetical functions and classes that should be created by teamates.
+from policy_network import PolicyValNetwork_Full
 
 
 def evaluate_p(list_board, network):
