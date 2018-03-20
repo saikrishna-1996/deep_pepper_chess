@@ -172,15 +172,15 @@ class ChessEnv:
     def testeval(self, absolute=False) -> float:
         return testeval(self.board.fen(), absolute)
 
-    def get_planes(self):
-        move_count_plane = np.full((8,8), self.num_halfmoves, dtype=np.float32)
-        player_colour_plane = np.full((8,8),(self.num_halfmoves%2)+1,dtype = np.float32) # 1 when white, 0 when black
-        
-        piece_planes, aux_planes = canonical_input_planes()
-        rep_planes = repetition_planes(self)
-        curr_planes = np.vstack((piece_planes,rep_planes,player_colour_plane,move_count_plane,aux_planes))
-        assert curr_planes.shape == (21,8,8)
-        return curr_planes
+    # def get_planes(self):
+    #     move_count_plane = np.full((8,8), self.num_halfmoves, dtype=np.float32)
+    #     player_colour_plane = np.full((8,8),(self.num_halfmoves%2)+1,dtype = np.float32) # 1 when white, 0 when black
+    #
+    #     piece_planes, aux_planes = canonical_input_planes()
+    #     rep_planes = repetition_planes(self)
+    #     curr_planes = np.vstack((piece_planes,rep_planes,player_colour_plane,move_count_plane,aux_planes))
+    #     assert curr_planes.shape == (21,8,8)
+    #     return curr_planes
 
     #returns 2 planes, one for each repetition of state
     def repetition_planes(self):

@@ -1,4 +1,5 @@
 import chess
+from chess.uci import InfoHandler, popen_engine
 
 pgnfilename = str(arguments[1])
 
@@ -14,8 +15,8 @@ board = game.board()  # in our case, we should directly have this
 print("FEN of the last position of the game:", board.fen())
 
 # load your engine now
-handler = chess.uci.InfoHandler()
-engine = chess.uci.popen_engine('...\stockfish_8x_64')  # give the correct path here
+handler = InfoHandler()
+engine = popen_engine('...\stockfish_8x_64')  # give the correct path here
 engine.info_handlers.append(handler)
 
 # send your position to the engine

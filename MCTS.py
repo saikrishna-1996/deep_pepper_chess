@@ -1,7 +1,7 @@
 import numpy as np
 
-import config
 from chess_env import ChessEnv
+from config import Config
 from features import BoardToFeature
 from heuristics import stockfish_eval
 # this is hypothetical functions and classes that should be created by teamates.
@@ -17,7 +17,7 @@ def evaluate_p(list_board, network):
 
 def resignation(state):
     stockfishEval = stockfish_eval(state, t=0.5)
-    if abs(stockfishEval) > config.SF_EVAL_THRESHOLD:
+    if abs(stockfishEval) > Config.SF_EVAL_THRESHOLD:
         return True, stockfishEval / abs(stockfishEval)
     return False, None
 
@@ -36,15 +36,14 @@ def Q(N, W):
 
 
 class Leaf(object):
-
     # This class inherit the Board class which control the board representation,
     # find legale move and next board represenation.
     # It has the ability to store and update for each leaf the
     #  number of state-action N(s,a), Q(s,a) and P(s,a)
     def __init__(self, env: ChessEnv, init_W, init_N, init_P, explore_factor):
-        assert init_N.shape == (config.d_out,)
-        assert init_W.shape == (config.d_out,)
-        assert init_P.shape == (config.d_out,)
+        assert init_N.shape == (Config.d_out,)
+        assert init_W.shape == (Config.d_out,)
+        assert init_P.shape == (Config.d_out,)
         self.env = env
         self.P = init_P
         self.N = init_N
@@ -69,7 +68,7 @@ class Leaf(object):
     @property
     def next_board(self):
         best_index = self.best_action
-        mymove = config.INDEXTOMOVE[best_index]
+        mymove = Config.INDEXTOMOVE[best_index]
         self.env.step(mymove)
         return self.env.board
         # return self.render_action(self.board, self.best_action)#assuming the function you did
@@ -92,7 +91,7 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None):
     inds = []
     for legal_move in legal_moves:
         legal_move_uci = legal_move.uci()
-        ind = config.MOVETOINDEX[legal_move_uci]
+        ind = Config.MOVETOINDEX[legal_move_uci]
         mask[ind] = 1
         inds.append(ind)
         all_move_probs += 1e-6
@@ -104,8 +103,8 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None):
 
     if dirichlet:
         num_legal_moves = sum(mask)
-        z = config.D_ALPHA * np.ones(legal_moves_prob[inds].shape)
-        d_noise = np.random.dirichlet(config.D_ALPHA * np.ones(legal_moves_prob[inds].shape))
+        z = Config.D_ALPHA * np.ones(legal_moves_prob[inds].shape)
+        d_noise = np.random.dirichlet(Config.D_ALPHA * np.ones(legal_moves_prob[inds].shape))
         legal_moves_prob[inds] = np.add(np.multiply((1 - epsilon), legal_moves_prob[inds]),
                                         np.multiply(epsilon, np.add(legal_moves_prob[inds], d_noise)))
         p_tot = np.sum(legal_moves_prob)
@@ -129,13 +128,12 @@ def MCTS(env: ChessEnv, init_W, init_P, init_N, explore_factor, temp, network: P
 
     # return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
 
-    BATCH_SIZE = config.BATCH_SIZE
+    BATCH_SIZE = Config.BATCH_SIZE
 
     # history of leafs for all previous runs
     env_copy = env.copy()
     leafs = []
-    for simulation in range(config.NUM_SIMULATIONS):
-
+    for simulation in range(Config.NUM_SIMULATIONS):
         curr_env = env.copy()
         state_action_list = []  # list of leafs in the same run
         moves = 0
@@ -147,7 +145,7 @@ def MCTS(env: ChessEnv, init_W, init_P, init_N, explore_factor, temp, network: P
 
         while not curr_env.game_over()[0] and not resign:
             moves += 0.5
-            if moves > config.RESIGN_CHECK_MIN and not moves % config.RESIGN_CHECK_FREQ:
+            if moves > Config.RESIGN_CHECK_MIN and not moves % Config.RESIGN_CHECK_FREQ:
                 resign = resignation(curr_env.board)[0]
 
             visited, index = state_visited(leafs, curr_env.board)
@@ -170,7 +168,7 @@ def MCTS(env: ChessEnv, init_W, init_P, init_N, explore_factor, temp, network: P
                 leafs.append(state_action_list[-1])
 
             best_move_index = leafs[-1].best_action()
-            best_action = config.INDEXTOMOVE[best_move_index]
+            best_action = Config.INDEXTOMOVE[best_move_index]
             print("Best Action: " + repr(best_action))
             print(np.argmax(leafs[-1].P))
             print(curr_env.board)

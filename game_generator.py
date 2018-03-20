@@ -1,12 +1,12 @@
 import numpy as np
 
-import config
 from MCTS import MCTS
 # this is hypothetical functions and classes that should be created by teamates.
 from chess_env import ChessEnv
+from config import Config
 
 
-def Generating_games(NUMBER_GAMES: int, env: ChessEnv):
+def generate_games(NUMBER_GAMES: int, env: ChessEnv):
     triplet = []
     model = LoadModel()  # best location???
     for game_number in range(NUMBER_GAMES):
@@ -19,9 +19,9 @@ def Generating_games(NUMBER_GAMES: int, env: ChessEnv):
             if step_game == 50:
                 temperature = 10e-6
             pi = MCTS(state,
-                      init_W=np.zeros((config.d_out,)),
-                      init_N=np.zeros((config.d_out,)),
-                      init_P=np.zeros((config.d_out,)),
+                      init_W=np.zeros((Config.d_out,)),
+                      init_N=np.zeros((Config.d_out,)),
+                      init_P=np.zeros((Config.d_out,)),
                       explore_factor=2,
                       temp=temperature,
                       network=model,
@@ -31,7 +31,7 @@ def Generating_games(NUMBER_GAMES: int, env: ChessEnv):
             action_index = np.argmax(pi)
             triplet.append([state, pi])
 
-            env.step(config.INDEXTOMOVE[action_index])
+            env.step(Config.INDEXTOMOVE[action_index])
 
         z = env.game_over()[1]  # from white perspective
 

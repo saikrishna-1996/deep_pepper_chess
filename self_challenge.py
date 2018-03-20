@@ -1,9 +1,9 @@
 import numpy as np
 
-import config
 from MCTS import MCTS
 from chess_env import ChessEnv
 # this is hypothetical functions and classes that should be created by teamates.
+from config import Config
 from policy_network import PolicyValNetwork_Giraffe
 
 
@@ -40,13 +40,13 @@ def Generating_challenge(NUMBER_GAMES, env: ChessEnv):
                 player = white
             step_game += 1
 
-            pi = MCTS(current_board, init_W=np.zeros((config.d_out,)),  # what is the shape of this pi ????????
-                      init_N=np.zeros((config.d_out,)),
+            pi = MCTS(current_board, init_W=np.zeros((Config.d_out,)),  # what is the shape of this pi ????????
+                      init_N=np.zeros((Config.d_out,)),
                       temp=temperature, explore_factor=2, network=player, dirichlet_alpha=0.04, epsilon=0.1)
 
             action_index = np.argmax(pi)
 
-            current_board = env.step(config.INDEXTOMOVE[action_index])
+            current_board = env.step(Config.INDEXTOMOVE[action_index])
 
             # should be able to give the same state even if no room for legal move
 

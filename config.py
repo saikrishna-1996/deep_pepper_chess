@@ -3,7 +3,7 @@ import os
 import chess
 
 
-class ConfigVars:
+class Config:
     @staticmethod
     def make_move_maps():
         MOVETOINDEX = {}

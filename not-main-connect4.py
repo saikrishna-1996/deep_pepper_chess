@@ -13,8 +13,7 @@ gamma = 0.9  # discount factor
 
 
 def initialize():
-    board = np.zeros((6, 7))  # note that (0,0) corresponds on top left and (5,6) corresponds to bottom right
-    return board
+    return np.zeros((6, 7))  # note that (0,0) corresponds on top left and (5,6) corresponds to bottom rightboard
 
 
 def is_it_draw(board):

@@ -4,15 +4,15 @@ import os
 import numpy as np
 import torch
 
-import config
 
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
+from config import Config
 from policy_network import PolicyValNetwork_Giraffe
 
 
 def load_gamefile(net_number):  # I'm not married to this, I think it could be done better.
-    list_of_files = glob.glob(config.GAMEPATH)
+    list_of_files = glob.glob(Config.GAMEPATH)
     net_files = []
     for file_name in list_of_files:
         if 'p' + repr(net_number) in file_name:
@@ -77,22 +77,22 @@ def save(model, fname, network_iter):
         'state_dict': model.state_dict(),
         'iteration': network_iter
     }
-    fpath = os.path.join(config.NETPATH, fname)
+    fpath = os.path.join(Config.NETPATH, fname)
     torch.save(save_info, fname)
 
 
 def load(best=False):
     if best:
 
-        best_fname = config.BESTNET_NAME
+        best_fname = Config.BESTNET_NAME
         try:
-            model_state = torch.load(config.NETPATH, best_fname)
+            model_state = torch.load(Config.NETPATH, best_fname)
         except:
             print("Could not load model")
             return None
     else:
         # get newest file
-        list_of_files = glob.glob(config.NETPATH)
+        list_of_files = glob.glob(Config.NETPATH)
         latest_file = max(list_of_files, key=os.path.getctime)
         try:
             model_state = torch.load(latest_file)

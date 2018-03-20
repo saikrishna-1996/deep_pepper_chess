@@ -8,6 +8,8 @@ import features
 # import value_networks
 from value_network import Critic_Giraffe
 
+# Not used
+
 pgn = open("/u/gottipav/kasparov.pgn")
 engine = chess.uci.popen_engine("/u/gottipav/stockfish-9-linux/src/stockfish")
 think_time = 1000 #1 seconds
