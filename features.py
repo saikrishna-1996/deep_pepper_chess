@@ -6,8 +6,8 @@ def get_north_mobility(board, pos):
     cpos = int(pos)
     bean = 0
     cpos = cpos + 8
-    while(cpos <= 63):
-        if(board.piece_type_at(cpos) == 0):
+    while cpos <= 63:
+        if board.piece_type_at(cpos) == 0:
             bean = bean + 1
         else:
             break
@@ -18,8 +18,8 @@ def get_south_mobility(board, pos):
     cpos = int(pos)
     bean = 0
     cpos = cpos - 8
-    while(cpos >= 0):
-        if(board.piece_type_at(cpos) == 0):
+    while cpos >= 0:
+        if board.piece_type_at(cpos) == 0:
             bean = bean + 1
         else:
             break
@@ -32,9 +32,9 @@ def get_east_mobility(board, pos):
     col = cpos%8
     bean = 0
     col = col + 1
-    while(col < 8):
+    while col < 8:
         cpos = row*8 + col
-        if(board.piece_type_at(cpos) == 0):
+        if board.piece_type_at(cpos) == 0:
             bean = bean + 1
         else:
             break
@@ -47,9 +47,9 @@ def get_west_mobility(board, pos):
     col = cpos%8
     bean = 0
     col = col - 1
-    while(col >= 0):
+    while col >= 0:
         cpos = row*8 + col
-        if(board.piece_type_at(cpos) == 0):
+        if board.piece_type_at(cpos) == 0:
             bean = bean + 1
         else:
             break
@@ -63,9 +63,9 @@ def get_north_east_mobility(board, pos):
     bean = 0
     row = row + 1
     col = col + 1
-    while(col < 8 and row < 8):
+    while col < 8 and row < 8:
         cpos = row*8 + col
-        if(board.piece_type_at(cpos) == 0):
+        if board.piece_type_at(cpos) == 0:
             bean = bean + 1
         else:
             break
@@ -80,9 +80,9 @@ def get_south_east_mobility(board, pos):
     bean = 0
     row = row - 1
     col = col + 1
-    while(col < 8 and row >= 0):
+    while col < 8 and row >= 0:
         cpos = row*8 + col
-        if(board.piece_type_at(cpos) == 0):
+        if board.piece_type_at(cpos) == 0:
             bean = bean + 1
         else:
             break
@@ -97,9 +97,9 @@ def get_south_west_mobility(board, pos):
     bean = 0
     row = row - 1
     col = col - 1
-    while(col >= 0 and row >= 0):
+    while col >= 0 and row >= 0:
         cpos = row*8 + col
-        if(board.piece_type_at(cpos) == 0):
+        if board.piece_type_at(cpos) == 0:
             bean = bean + 1
         else:
             break
@@ -114,9 +114,9 @@ def get_north_west_mobility(board, pos):
     bean = 0
     row = row + 1
     col = col - 1
-    while(col >= 0 and row < 8):
+    while col >= 0 and row < 8:
         cpos = row*8 + col
-        if(board.piece_type_at(cpos) == 0):
+        if board.piece_type_at(cpos) == 0:
             bean = bean + 1
         else:
             break

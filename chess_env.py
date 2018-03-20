@@ -186,11 +186,11 @@ class ChessEnv:
     #returns 2 planes, one for each repetition of state
     def repetition_planes(self):
         state = self.board._transposition_key()
-        if (self.state_count[state] == 1):
+        if self.state_count[state] == 1:
             rep1 = np.full([8,8],1,dtype=np.float32)
             rep2 = np.full([8,8],0,dtype = np.float32)
 
-        elif (self.state_count[state] == 2):
+        elif self.state_count[state] == 2:
             rep1 = np.full([8,8],1,dtype=np.float32)
             rep2 = np.full([8,8],1,dtype = np.float32)
         

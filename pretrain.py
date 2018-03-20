@@ -49,11 +49,11 @@ for i in range(5):
     board = kasgame.board()
     for move in kasgame.main_line():
 
-        if(move == None):
+        if move == None:
             kasgame = chess.pgn.read_game(pgn)
             board = kasgame.board()
         cunt = cunt + 1
-        if(cunt == batch_size):
+        if cunt == batch_size:
             do_your_shit(savepos, eval_val)
             cunt = 0
             #eval_val = []
