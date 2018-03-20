@@ -4,7 +4,7 @@ import config
 from MCTS import MCTS
 from chess_env import ChessEnv
 # this is hypothetical functions and classes that should be created by teamates.
-from policy_network import PolicyValNetwork_Full, PolicyValNetwork_Full_candidate
+from policy_network import PolicyValNetwork_Giraffe
 
 
 def Generating_challenge(NUMBER_GAMES, env: ChessEnv):
@@ -19,11 +19,11 @@ def Generating_challenge(NUMBER_GAMES, env: ChessEnv):
         temperature = 10e-6
 
         if np.random.binomial(1, 0.5) == 1:
-            white = PolicyValNetwork_Full_candidate
-            black = PolicyValNetwork_Full
+            white = PolicyValNetwork_Giraffe_candidate
+            black = PolicyValNetwork_Giraffe
         else:
-            white = PolicyValNetwork_Full
-            black = PolicyValNetwork_Full_candidate
+            white = PolicyValNetwork_Giraffe
+            black = PolicyValNetwork_Giraffe_candidate
 
         repition = 0
         state_list = []
