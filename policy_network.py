@@ -99,7 +99,7 @@ class PolicyValNetwork_Giraffe(nn.Module):
         h1_relu = torch.cat((h1a_relu, h1b_relu, h1c_relu), dim=1)
 
         h2p_relu = F.relu(self.linear2p(h1_relu))
-        p_out = F.softmax(self.linear3p(h2p_relu), dim=0)
+        p_out = F.log_softmax(self.linear3p(h2p_relu), dim=0)
 
         h2e_relu = F.relu(self.linear2e(h1_relu))
         val_out = F.tanh(self.linear3e(h2e_relu))
