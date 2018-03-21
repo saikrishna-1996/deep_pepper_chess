@@ -61,8 +61,8 @@ for i in range(5):
             #savepos = []
         else:
             board.push(move)
-            featuree = features.BoardToFeature(board)
-            savepos[cunt,:] = torch.FloatTensor(featuree)
+            features = features.BoardToFeature(board)
+            savepos[cunt,:] = torch.FloatTensor(features)
             print(move)
             engine.position(board)
             evaluation = engine.go(movetime = think_time)

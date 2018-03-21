@@ -77,7 +77,7 @@ class PolicyValNetwork_Giraffe(nn.Module):
         self.linear3e = nn.Linear(h2e, eval_out)
 
     def forward(self, x):
-        "Here, we can use modules defined in the constrcutor (__init__ part defined above) as well as arbitrary operators on Variables"
+        "Here, we can use modules defined in the constructor (__init__ part defined above) as well as arbitrary operators on Variables"
         gf = self.gf
         pc = self.pc
         sc = self.sc

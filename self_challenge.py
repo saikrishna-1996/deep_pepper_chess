@@ -7,7 +7,7 @@ from config import Config
 from policy_network import PolicyValNetwork_Giraffe
 
 
-def Generating_challenge(NUMBER_GAMES, env: ChessEnv):
+def Generating_challenge(env: ChessEnv, old_policy, new_policy, NUMBER_GAMES=100):
     current_board = env
 
     candidate_alpha_score = []
@@ -63,10 +63,16 @@ def Generating_challenge(NUMBER_GAMES, env: ChessEnv):
 
     if sum(candidate_alpha_score) > sum(old_alpha_score):
         winner = 'new_alpha'
-
     elif sum(candidate_alpha_score) < sum(old_alpha_score):
         winner = 'old_alpha'
-
     else:
         winner = None
+
     return candidate_alpha_score, old_alpha_score, winner
+
+def game_over(board):
+    """ Returns whether a game is over from the board position?
+    :param board
+    :return: ???
+    """
+    return False

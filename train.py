@@ -4,7 +4,6 @@ import os
 import numpy as np
 import torch
 
-
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
 from config import Config
@@ -20,16 +19,18 @@ def load_gamefile(net_number):  # I'm not married to this, I think it could be d
 
     index = np.random.randint(0, len(net_files))
     try:
-        triplet = np.load(net_files[index])
-    except:
+        return np.load(net_files[index])
+    except IOError:
         print('Could not load gamefile!')
-    return triplet
 
 
-def train_model(model=PolicyValNetwork_Giraffe(), net_number=0, min_num_games=400):
-    games_trained = 0
-    while games_trained < min_num_games:
+def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_num_games=400):
+    if games is None:
         game_data = load_gamefile(net_number)
+    else:
+        game_data = games
+
+    for games_trained in range(min_num_games):
         if game_data is not None:
             for state, policy, val in game_data:
                 do_backprop(state, val, policy, model)
@@ -58,11 +59,11 @@ def do_backprop(features, policy, act_val, model):
     loss2 = criterion2(policy, nn_policy_out)
 
     l2_reg = None
-    for wei in model.parameters():
+    for weight in model.parameters():
         if l2_reg is None:
-            l2_reg = wei.norm(2)
+            l2_reg = weight.norm(2)
         else:
-            l2_reg = l2_reg + wei.norm(2)
+            l2_reg = l2_reg + weight.norm(2)
     loss3 = 0.1 * l2_reg
 
     loss = loss1 + loss2 + loss3
@@ -83,7 +84,6 @@ def save(model, fname, network_iter):
 
 def load(best=False):
     if best:
-
         best_fname = Config.BESTNET_NAME
         try:
             model_state = torch.load(Config.NETPATH, best_fname)

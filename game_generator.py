@@ -6,9 +6,8 @@ from chess_env import ChessEnv
 from config import Config
 
 
-def generate_games(NUMBER_GAMES: int, env: ChessEnv):
+def generate_games(model, NUMBER_GAMES: int, env: ChessEnv):
     triplet = []
-    model = LoadModel()  # best location???
     for game_number in range(NUMBER_GAMES):
         step_game = 0
         temperature = 1
