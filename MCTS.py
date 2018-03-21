@@ -218,7 +218,7 @@ def MCTS(env: ChessEnv,
         ###############
 
         for i in list(reversed(range(len(state_action_list)))):
-            action_index = state_action_list[i].best_action  # always legal since best_action
+            action_index = state_action_list[i].best_action()  # always legal since best_action
             state_action_list[i].N_update(action_index)
             state_action_list[i].W_update(v, action_index)
 
