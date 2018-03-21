@@ -34,15 +34,7 @@ def generate_games():
             step_game += 1
             if step_game == Config.TEMP_REDUCE_STEP:
                 temperature = 10e-6
-            pi = MCTS(env,
-                      init_W=np.zeros((Config.d_out,)),
-                      init_N=np.zeros((Config.d_out,)),
-                      init_P=np.zeros((Config.d_out,)),
-                      explore_factor=Config.EXPLORE_FACTOR,
-                      temp=temperature,
-                      network=model,
-                      dirichlet_alpha=Config.D_ALPHA,
-                      epsilon=Config.EPS)
+            pi = MCTS(env, temp=temperature, network=model)
 
             action_index = np.argmax(pi)
             triplet.append([state, pi])

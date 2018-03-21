@@ -7,7 +7,7 @@ from config import Config
 from policy_network import PolicyValNetwork_Giraffe
 
 
-def Generating_challenge(env: ChessEnv, old_policy, new_policy, NUMBER_GAMES=100):
+def self_play(env: ChessEnv, old_policy, new_policy, NUMBER_GAMES=100):
     current_board = env
 
     candidate_alpha_score = []
@@ -28,29 +28,23 @@ def Generating_challenge(env: ChessEnv, old_policy, new_policy, NUMBER_GAMES=100
         repition = 0
         state_list = []
 
-        while not game_over(current_board)[0]:
+        while not env.game_over()[0]:
 
             state_list.append(current_board)
 
             if step_game % 2:
-
                 player = black
             else:
-
                 player = white
+
             step_game += 1
-
-            pi = MCTS(current_board, init_W=np.zeros((Config.d_out,)),  # what is the shape of this pi ????????
-                      init_N=np.zeros((Config.d_out,)),
-                      temp=temperature, explore_factor=2, network=player, dirichlet_alpha=0.04, epsilon=0.1)
-
+            pi = MCTS(current_board, temp=temperature, network=player)
             action_index = np.argmax(pi)
-
             current_board = env.step(Config.INDEXTOMOVE[action_index])
 
             # should be able to give the same state even if no room for legal move
 
-        z = game_over(current_board)[1]
+        z = env.game_over()[1]
         # from white perspective
 
         if white == PolicyValNetwork_Full_candidate:
@@ -69,10 +63,3 @@ def Generating_challenge(env: ChessEnv, old_policy, new_policy, NUMBER_GAMES=100
         winner = None
 
     return candidate_alpha_score, old_alpha_score, winner
-
-def game_over(board):
-    """ Returns whether a game is over from the board position?
-    :param board
-    :return: ???
-    """
-    return False

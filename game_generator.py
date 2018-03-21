@@ -17,15 +17,7 @@ def generate_games(model, NUMBER_GAMES: int, env: ChessEnv):
             step_game += 1
             if step_game == 50:
                 temperature = 10e-6
-            pi = MCTS(state,
-                      init_W=np.zeros((Config.d_out,)),
-                      init_N=np.zeros((Config.d_out,)),
-                      init_P=np.zeros((Config.d_out,)),
-                      explore_factor=2,
-                      temp=temperature,
-                      network=model,
-                      dirichlet_alpha=0.4,
-                      epsilon=0.1)
+            pi = MCTS(state, temp=temperature, network=model)
 
             action_index = np.argmax(pi)
             triplet.append([state, pi])

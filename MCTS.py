@@ -114,21 +114,32 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None):
 
 # state type and shape does not matter
 
-def MCTS(env: ChessEnv, init_W, init_P, init_N, explore_factor, temp, network: PolicyValNetwork_Full, dirichlet_alpha,
-         epsilon):  # we can add here all our hyper-parameters
-    # Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
-    # arguments: state: the root state from where the stimulation start. A board.
-    #             explore_factor: hyper parameter to tune the exploration range in UCT
-    #             temp: temperature constant for the optimum policy to control the level of exploration/
-    #             in the Play policy
-    #             optional : dirichlet noise
-    #             network: policy network for evaluation
-    #             dirichlet_alpha: alpha parameter for the dirichlet process
-    #             epsilon : parameter for exploration using dirichlet noise
+def MCTS(env: ChessEnv,
+         temp,
+         network: PolicyValNetwork_Full,
+         explore_factor=Config.EXPLORE_FACTOR,
+         dirichlet_alpha=Config.D_ALPHA,
+         epsilon=Config.EPS,
+         batch_size = Config.BATCH_SIZE,
+         init_W=np.zeros((Config.d_out,)),
+         init_N=np.zeros((Config.d_out,)),
+         init_P=np.zeros((Config.d_out,))):  # we can add here all our hyper-parameters
+    '''
+    Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
+    arguments: state: the root state from where the stimulation start. A board.
 
-    # return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
-
-    BATCH_SIZE = Config.BATCH_SIZE
+    :param env:
+    :param temp: temperature constant for the optimum policy to control the level of exploration/
+    :param network: policy network for evaluation
+    :param explore_factor: hyper parameter to tune the exploration range in UCT
+    :param dirichlet_alpha: alpha parameter for the dirichlet process
+    :param epsilon: parameter for exploration using dirichlet noise
+    :param batch_size:
+    :param init_W:
+    :param init_N:
+    :param init_P:
+    :return: return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
+    '''
 
     # history of leafs for all previous runs
     env_copy = env.copy()
@@ -188,16 +199,16 @@ def MCTS(env: ChessEnv, init_W, init_P, init_N, explore_factor, temp, network: P
         elif resign_check:
             v = resign_score
 
-        number_batches = max(len(state_action_list) // BATCH_SIZE, 1)
+        number_batches = max(len(state_action_list) // batch_size, 1)
         start = 0
-        end = BATCH_SIZE
+        end = batch_size
         for batch in range(number_batches):
             list_p = evaluate_p([state_action_list[i].env.board for i in range(start, end)], network)
             for i in range(start, end):
                 legal_move_probs = legal_mask(state_action_list[i].env.board, list_p[i - start])
                 state_action_list[i].P_update(legal_move_probs)
             start = end
-            end += min(BATCH_SIZE, len(state_action_list) - start)
+            end += min(batch_size, len(state_action_list) - start)
 
         ###############
         ### Back-up ###

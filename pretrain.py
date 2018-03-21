@@ -12,7 +12,7 @@ from value_network import Critic_Giraffe
 
 pgn = open("/u/gottipav/kasparov.pgn")
 engine = chess.uci.popen_engine("/u/gottipav/stockfish-9-linux/src/stockfish")
-think_time = 1000 #1 seconds
+think_time = 1000  # 1 seconds
 batch_size = 32
 d_in = 353
 h1 = 1024
@@ -32,7 +32,8 @@ eval_val = Variable(torch.randn(batch_size, 1), requires_grad=False)
 critic_model = Critic_Giraffe(d_in, gf, pc, sc, h1a, h1b, h1c, h2, 1)
 
 criterion = torch.nn.MSELoss(size_average=False)
-optimizer = torch.optim.SGD(critic_model.parameters(), lr=1e-4, momentum=0.9) #change it Adam or Adagrad may be
+optimizer = torch.optim.SGD(critic_model.parameters(), lr=1e-4, momentum=0.9)  # change it Adam or Adagrad may be
+
 
 def do_your_shit(board, stock_eval):
     optimizer.zero_grad()
@@ -42,9 +43,10 @@ def do_your_shit(board, stock_eval):
     loss.backward()
     optimizer.step()
 
+
 cunt = 0
-#eval_val = []
-#savepos = []
+# eval_val = []
+# savepos = []
 for i in range(5):
     kasgame = chess.pgn.read_game(pgn)
     board = kasgame.board()
@@ -57,20 +59,20 @@ for i in range(5):
         if cunt == batch_size:
             do_your_shit(savepos, eval_val)
             cunt = 0
-            #eval_val = []
-            #savepos = []
+            # eval_val = []
+            # savepos = []
         else:
             board.push(move)
             features = features.BoardToFeature(board)
-            savepos[cunt,:] = torch.FloatTensor(features)
+            savepos[cunt, :] = torch.FloatTensor(features)
             print(move)
             engine.position(board)
-            evaluation = engine.go(movetime = think_time)
-            #eval_val[cunt,0] =
-            shit = handler.info["score"][1].cp/100.0
+            evaluation = engine.go(movetime=think_time)
+            # eval_val[cunt,0] =
+            shit = handler.info["score"][1].cp / 100.0
             print(shit)
             print(type(shit))
             print(torch.Tensor(shit))
-            #print(type(handler.info["score"][1].cp/100.0))
-            #print(torch.FloatTensor(float(handler.info["score"][1].cp/100.0)))
+            # print(type(handler.info["score"][1].cp/100.0))
+            # print(torch.FloatTensor(float(handler.info["score"][1].cp/100.0)))
             print(eval_val)

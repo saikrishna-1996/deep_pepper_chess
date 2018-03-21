@@ -101,7 +101,7 @@ def mcts_thinker(board):
                 if mess_with_me[0, j] == 0:
                     for i in range(6):
                         if mess_with_me[5 - i, j] == 0:
-                            mess_with_me[5 - i, j] == -1
+                            mess_with_me[5 - i, j] = -1
                             turn = 1
                             break
 

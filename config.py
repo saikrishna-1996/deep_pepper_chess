@@ -4,7 +4,7 @@ import chess
 
 class Config:
     @staticmethod
-    def make_move_maps():
+    def __make_move_maps():
         MOVETOINDEX = {}
         INDEXTOMOVE = []
         k = 0
@@ -55,7 +55,7 @@ class Config:
                  'h7': 55,
                  'a8': 56, 'b8': 57, 'c8': 58, 'd8': 59, 'e8': 60, 'f8': 61, 'g8': 62, 'h8': 63}
 
-    MOVETOINDEX, INDEXTOMOVE = make_move_maps()
+    MOVETOINDEX, INDEXTOMOVE = __make_move_maps()
 
     # MCTS
 

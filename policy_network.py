@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 # fully connected (including the first layer to hidden layer neurons. so, this is different from giraffe network) network with 2 hidden layers.
 # The input is 363-dimensional feature vector as used in the evaluation network for giraffe. The output is 4096-layer. 64x64 = 4096. So, this entire vector indicates the probability of moving from one square to the other square. We know that a piece can't move up from a square and land in the same square. So, technically, it should only be of dimension (4096-64)x1, but, for sanitation purposes let's keep it the way it is.
 # ToDo: compute a value function as well using this network
@@ -55,19 +54,20 @@ class PolicyNetwork_Giraffe(nn.Module):
 
 
 class PolicyValNetwork_Giraffe(nn.Module):
-    def __init__(self, d_in = Config.d_in,
-                 gf = Config.global_features,
-                 pc = Config.piece_centric,
-                 sc = Config.square_centric,
-                 h1a = Config.h1a,
-                 h1b = Config.h1b,
-                 h1c = Config.h1c,
-                 h2p = Config.h2p,
-                 h2e = Config.h2e,
-                 d_out = Config.d_out,
+    def __init__(self,
+                 d_in=Config.d_in,
+                 gf=Config.global_features,
+                 pc=Config.piece_centric,
+                 sc=Config.square_centric,
+                 h1a=Config.h1a,
+                 h1b=Config.h1b,
+                 h1c=Config.h1c,
+                 h2p=Config.h2p,
+                 h2e=Config.h2e,
+                 d_out=Config.d_out,
                  eval_out=1):
         "We instantiate various modules"
-        super(PolicyNetwork_Giraffe, self).__init__()
+        super(PolicyValNetwork_Giraffe, self).__init__()
         self.linear1a = nn.Linear(gf, h1a)
         self.linear1b = nn.Linear(pc, h1b)
         self.linear1c = nn.Linear(sc, h1c)
@@ -92,10 +92,10 @@ class PolicyValNetwork_Giraffe(nn.Module):
         h1_relu = torch.cat(h1a_relu, h1b_relu, h1c_relu, dim=1)
 
         h2p_relu = F.relu(self.linear2p(h1_relu))
-        p_out = F.LogSoftmax(self.linear3p(h2p_relu))
+        p_out = F.log_softmax(self.linear3p(h2p_relu))
 
         h2e_relu = F.relu(self.linear2e(h1_relu))
-        val_out = F.Tanh(self.linear3e(h2e_relu))
+        val_out = F.tanh(self.linear3e(h2e_relu))
 
         return p_out, val_out
 
@@ -119,6 +119,6 @@ class PolicyValNetwork_Full(nn.Module):
         p_out = F.sigmoid(self.linear3p(h2p_relu))
 
         h2e_relu = F.relu(self.linear2e(h1_relu))
-        v_out = F.Tanh(self.linear3p(h2e_relu))
+        v_out = F.tanh(self.linear3p(h2e_relu))
 
         return p_out, v_out

@@ -1,4 +1,4 @@
-import chess
+import chess.pgn
 from chess.uci import InfoHandler, popen_engine
 
 pgnfilename = str(arguments[1])
