@@ -1,4 +1,7 @@
+#!/usr/bin/env python
+
 import argparse
+import copy
 import multiprocessing
 
 import torch
@@ -70,6 +73,6 @@ if __name__ == '__main__':
     while True:
         if i % 100:
             torch.save(policy, "./{}.mdl".format(i))
-        games = generator(policy)
+        games = generator(copy.copy(policy))
         policy = improver(games)
         i += 1

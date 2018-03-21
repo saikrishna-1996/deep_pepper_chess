@@ -95,7 +95,6 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array
         ind = Config.MOVETOINDEX[legal_move_uci]
         mask[ind] = 1
         inds.append(ind)
-        all_move_probs += 1e-6
         total_p += all_move_probs[ind]
 
     legal_moves_prob = np.multiply(mask, all_move_probs)
@@ -120,11 +119,12 @@ def MCTS(env: ChessEnv,
          network: PolicyValNetwork_Giraffe,
          explore_factor=Config.EXPLORE_FACTOR,
          dirichlet_alpha=Config.D_ALPHA,
-         epsilon: float =Config.EPS,
-         batch_size: int =Config.BATCH_SIZE,
+         epsilon: float = Config.EPS,
+         batch_size: int = Config.BATCH_SIZE,
          init_W=np.zeros((Config.d_out,)),
-         init_N=np.ones((Config.d_out,))*0.001,
-         init_P=np.zeros((Config.d_out,))) -> np.ndarray:  # we can add here all our hyper-parameters
+         init_N=np.ones((Config.d_out,)) * 0.001,
+         init_P=np.ones((Config.d_out,)) * (1 / len(Config.d_out))) -> np.ndarray:
+    # we can add here all our hyper-parameters
     """
     Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
     arguments: state: the root state from where the stimulation start. A board.
