@@ -201,7 +201,7 @@ def MCTS(env: ChessEnv,
 
         number_batches = max(len(state_action_list) // batch_size, 1)
         start = 0
-        end = batch_size
+        end = min(batch_size, len(state_action_list))
         for batch in range(number_batches):
             list_p = evaluate_p([state_action_list[i].env.board for i in range(start, end)], network)
             for i in range(start, end):
