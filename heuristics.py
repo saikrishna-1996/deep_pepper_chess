@@ -9,7 +9,13 @@ def stockfish_eval(board, t=500):
     engine.info_handlers.append(handler)
     engine.position(board)
     evaluation = engine.go(movetime=t)
-    eval_val = handler.info["score"][1].cp / 100.0
+    if(handler.info["score"][1].mate == None):
+        eval_val = handler.info["score"][1].cp / 100.0
+    else:
+        if(handler.info["score"][1].mate < 0):
+            eval_val = -100.0
+        else:
+            eval_val = 100.0
     return eval_val
 
 
