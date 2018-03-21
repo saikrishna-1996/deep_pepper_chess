@@ -31,9 +31,9 @@ class Champion(object):
                     player = black
 
                 step_game += 1
-                pi = MCTS(current_board, temp=temperature, network=player)
+                pi = MCTS(env, temp=temperature, network=player)
                 action_index = np.argmax(pi)
-                current_board = env.step(Config.INDEXTOMOVE[action_index])
+                env.step(Config.INDEXTOMOVE[action_index])
                 # should be able to give the same state even if no room for legal move
 
             z = env.game_over()[1]
