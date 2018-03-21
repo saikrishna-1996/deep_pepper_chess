@@ -12,7 +12,6 @@ class Champion(object):
 
     def self_play(self, candidate, NUMBER_GAMES=Config.NUM_GAMES):
         env = ChessEnv()
-        current_board = env
 
         candidate_alpha_score = []
         old_alpha_score = []
@@ -23,7 +22,7 @@ class Champion(object):
 
             p = np.random.binomial(1, 0.5) == 1
             white, black = (self.current_policy, candidate) if p else (candidate, self.current_policy)
-
+            env.reset()
             while not env.game_over()[0]:
                 if current_board.white_to_move:
                     player = white
