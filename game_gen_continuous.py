@@ -7,12 +7,12 @@ from MCTS import MCTS
 from chess_env import ChessEnv
 # this is hypothetical functions and classes that should be created by teamates.
 from config import Config
-from policy_network import PolicyValNetwork_Full
+from policy_network import PolicyValNetwork_Giraffe
 
 
 def generate_games():
     triplet = []
-    model = PolicyValNetwork_Full(Config.d_in, Config.h1, Config.h2p, Config.h2e, Config.d_out)
+    model = PolicyValNetwork_Giraffe(Config.d_in, Config.h1, Config.h2p, Config.h2e, Config.d_out)
     old_net_iter = 0
     game_number = 0
     while True:

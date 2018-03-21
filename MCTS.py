@@ -5,7 +5,7 @@ from config import Config
 from features import BoardToFeature
 from heuristics import stockfish_eval
 # this is hypothetical functions and classes that should be created by teamates.
-from policy_network import PolicyValNetwork_Full
+from policy_network import PolicyValNetwork_Giraffe
 
 
 def evaluate_p(list_board, network):
@@ -84,7 +84,7 @@ class Leaf(object):
         self.P = new_P
 
 
-def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None):
+def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array:
     legal_moves = board.legal_moves
     mask = np.zeros_like(all_move_probs)
     total_p = 0
@@ -115,15 +115,15 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None):
 # state type and shape does not matter
 
 def MCTS(env: ChessEnv,
-         temp,
-         network: PolicyValNetwork_Full,
+         temp: float,
+         network: PolicyValNetwork_Giraffe,
          explore_factor=Config.EXPLORE_FACTOR,
          dirichlet_alpha=Config.D_ALPHA,
-         epsilon=Config.EPS,
-         batch_size=Config.BATCH_SIZE,
+         epsilon: float =Config.EPS,
+         batch_size: int =Config.BATCH_SIZE,
          init_W=np.zeros((Config.d_out,)),
          init_N=np.zeros((Config.d_out,)),
-         init_P=np.zeros((Config.d_out,))):  # we can add here all our hyper-parameters
+         init_P=np.zeros((Config.d_out,))) -> np.ndarray:  # we can add here all our hyper-parameters
     '''
     Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
     arguments: state: the root state from where the stimulation start. A board.
