@@ -4,8 +4,8 @@ import torch
 from chess_env import ChessEnv
 from config import Config
 from features import BoardToFeature
-from heuristics import stockfish_eval
 # this is hypothetical functions and classes that should be created by teamates.
+from heuristics import Stockfish
 from policy_network import PolicyValNetwork_Giraffe
 
 
@@ -16,10 +16,10 @@ def evaluate_p(list_board, network):
     return network.forward(tensor)[0]
 
 
-def resignation(state):
-    eval = stockfish_eval(state, t=0.5)
-    if abs(eval) > Config.SF_EVAL_THRESHOLD:
-        return True, eval / abs(eval)
+def resignation(stockfish, state):
+    evaluation = stockfish.stockfish_eval(state, t=0.5)
+    if abs(evaluation) > Config.SF_EVAL_THRESHOLD:
+        return True, evaluation / abs(evaluation)
     return False, None
 
 
@@ -141,7 +141,7 @@ def MCTS(env: ChessEnv,
     :param init_P:
     :return: return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
     """
-
+    stockfish = Stockfish()
     # history of leafs for all previous runs
     env_copy = env.copy()
     leafs = []
@@ -158,7 +158,7 @@ def MCTS(env: ChessEnv,
         while not curr_env.game_over()[0] and not resign:
             moves += 0.5
             if moves > Config.RESIGN_CHECK_MIN and not moves % Config.RESIGN_CHECK_FREQ:
-                resign = resignation(curr_env.board)[0]
+                resign = resignation(stockfish, curr_env.board)[0]
 
             visited, index = state_visited(leafs, curr_env.board)
             if visited:
@@ -193,7 +193,7 @@ def MCTS(env: ChessEnv,
 
         game_over_check, end_score = curr_env.game_over()
         if not game_over_check:
-            resign_check, resign_score = resignation(curr_env.board)
+            resign_check, resign_score = resignation(stockfish, curr_env.board)
 
         if game_over_check:
             v = end_score
@@ -204,6 +204,8 @@ def MCTS(env: ChessEnv,
         start = 0
         end = min(batch_size, len(state_action_list))
         for batch in range(number_batches):
+            if batch % 10:
+                print("batch number: {}".format(batch))
             list_p = evaluate_p([state_action_list[i].env.board for i in range(start, end)], network)
             for i in range(start, end):
                 legal_move_probs = legal_mask(state_action_list[i].env.board, list_p[i - start])
