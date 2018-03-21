@@ -206,7 +206,7 @@ def MCTS(env: ChessEnv,
         for batch in range(number_batches):
             if batch % 10:
                 print("batch number: {}".format(batch))
-            list_p = evaluate_p([state_action_list[i].env.board for i in range(start, end)], network)
+            list_p = evaluate_p([state_action_list[i].env.board for i in range(start, end)], network).data
             for i in range(start, end):
                 legal_move_probs = legal_mask(state_action_list[i].env.board, list_p[i - start])
                 state_action_list[i].P_update(legal_move_probs)
