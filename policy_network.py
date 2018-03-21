@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
+
 
 # fully connected (including the first layer to hidden layer neurons. so, this is different from giraffe network) network with 2 hidden layers.
 # The input is 363-dimensional feature vector as used in the evaluation network for giraffe. The output is 4096-layer. 64x64 = 4096. So, this entire vector indicates the probability of moving from one square to the other square. We know that a piece can't move up from a square and land in the same square. So, technically, it should only be of dimension (4096-64)x1, but, for sanitation purposes let's keep it the way it is.
@@ -35,6 +37,7 @@ class PolicyNetwork_Giraffe(nn.Module):
         self.linear3 = nn.Linear(h2, d_out)
 
     def forward(self, x):
+        x = Variable(x)
         "Here, we can use modules defined in the constrcutor (__init__ part defined above) as well as arbitrary operators on Variables"
         gf = self.gf
         pc = self.pc
@@ -68,6 +71,9 @@ class PolicyValNetwork_Giraffe(nn.Module):
                  eval_out=1):
         "We instantiate various modules"
         super(PolicyValNetwork_Giraffe, self).__init__()
+        self.gf = gf
+        self.pc = pc
+        self.sc = sc
         self.linear1a = nn.Linear(gf, h1a)
         self.linear1b = nn.Linear(pc, h1b)
         self.linear1c = nn.Linear(sc, h1c)
@@ -77,22 +83,23 @@ class PolicyValNetwork_Giraffe(nn.Module):
         self.linear3e = nn.Linear(h2e, eval_out)
 
     def forward(self, x):
+        x = Variable(x.float())
         "Here, we can use modules defined in the constructor (__init__ part defined above) as well as arbitrary operators on Variables"
         gf = self.gf
         pc = self.pc
         sc = self.sc
 
-        x1 = x[:, 0:gf - 1]
-        x2 = x[:, gf:gf + pc - 1]
-        x3 = x[:, gf + pc:gf + pc + sc - 1]
+        x1 = x[:, 0:gf]
+        x2 = x[:, gf:gf + pc]
+        x3 = x[:, gf + pc:gf + pc + sc]
 
         h1a_relu = F.relu(self.linear1a(x1))
         h1b_relu = F.relu(self.linear1b(x2))
         h1c_relu = F.relu(self.linear1c(x3))
-        h1_relu = torch.cat(h1a_relu, h1b_relu, h1c_relu, dim=1)
+        h1_relu = torch.cat((h1a_relu, h1b_relu, h1c_relu), dim=1)
 
         h2p_relu = F.relu(self.linear2p(h1_relu))
-        p_out = F.log_softmax(self.linear3p(h2p_relu))
+        p_out = F.log_softmax(self.linear3p(h2p_relu), dim=0)
 
         h2e_relu = F.relu(self.linear2e(h1_relu))
         val_out = F.tanh(self.linear3e(h2e_relu))

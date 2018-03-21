@@ -3,47 +3,47 @@ import os
 import chess
 
 
-class Config:
-    @staticmethod
-    def __make_move_maps():
-        MOVETOINDEX = {}
-        INDEXTOMOVE = []
-        k = 0
-        for i in range(0, 64):
-            for j in range(0, 64):
-                move = chess.Move(i, j).uci()
+def make_move_maps():
+    MOVETOINDEX = {}
+    INDEXTOMOVE = []
+    k = 0
+    for i in range(0, 64):
+        for j in range(0, 64):
+            move = chess.Move(i, j).uci()
 
-                if move[3] == '8' and move[1] == '7':
-                    for letter in 'QRBN':
-                        new_move = move + letter
-                        MOVETOINDEX[new_move] = k
-                        INDEXTOMOVE.append(new_move)
-                        k += 1
-                elif move[3] == '1' and move[1] == '2':
-                    for letter in 'qrbn':
-                        new_move = move + letter
-                        MOVETOINDEX[new_move] = k
-                        INDEXTOMOVE.append(new_move)
-                        k += 1
-                MOVETOINDEX[move] = k
-                INDEXTOMOVE.append(move)
-                k += 1
-        INDEXTOMOVE[0] = 'a1a1'
+            if move[3] == '8' and move[1] == '7':
+                for letter in 'QRBN':
+                    new_move = move + letter
+                    MOVETOINDEX[new_move] = k
+                    INDEXTOMOVE.append(new_move)
+                    k += 1
+            elif move[3] == '1' and move[1] == '2':
+                for letter in 'qrbn':
+                    new_move = move + letter
+                    MOVETOINDEX[new_move] = k
+                    INDEXTOMOVE.append(new_move)
+                    k += 1
+            MOVETOINDEX[move] = k
+            INDEXTOMOVE.append(move)
+            k += 1
+    INDEXTOMOVE[0] = 'a1a1'
 
-        return MOVETOINDEX, INDEXTOMOVE
+    return MOVETOINDEX, INDEXTOMOVE
 
-    @staticmethod
-    def make_square_map():
-        ALLSQUARES = {}
-        files = 'abcdefgh'
-        k = 0
-        for j in range(1, 9):
-            for i in range(8):
-                square_string = str(files[i] + repr(j))
-                ALLSQUARES[square_string] = k
-                k += 1
-        return ALLSQUARES
 
+def make_square_map():
+    ALLSQUARES = {}
+    files = 'abcdefgh'
+    k = 0
+    for j in range(1, 9):
+        for i in range(8):
+            square_string = str(files[i] + repr(j))
+            ALLSQUARES[square_string] = k
+            k += 1
+    return ALLSQUARES
+
+
+class Config(object):
     SQUAREMAP = {'a1': 0, 'b1': 1, 'c1': 2, 'd1': 3, 'e1': 4, 'f1': 5, 'g1': 6, 'h1': 7, 'a2': 8, 'b2': 9, 'c2': 10,
                  'd2': 11,
                  'e2': 12, 'f2': 13, 'g2': 14, 'h2': 15, 'a3': 16, 'b3': 17, 'c3': 18, 'd3': 19, 'e3': 20, 'f3': 21,
@@ -56,7 +56,7 @@ class Config:
                  'h7': 55,
                  'a8': 56, 'b8': 57, 'c8': 58, 'd8': 59, 'e8': 60, 'f8': 61, 'g8': 62, 'h8': 63}
 
-    MOVETOINDEX, INDEXTOMOVE = __make_move_maps()
+    MOVETOINDEX, INDEXTOMOVE = make_move_maps()
 
     # MCTS
 

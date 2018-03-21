@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 from chess_env import ChessEnv
 from config import Config
@@ -10,7 +11,7 @@ from policy_network import PolicyValNetwork_Giraffe
 
 def evaluate_p(list_board, network):
     list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
-    tensor = np.array(list_board)
+    tensor = torch.from_numpy(np.array(list_board))
     # expect that neural net ouput is a vector of probability
     return network.forward(tensor)[0]
 
@@ -122,9 +123,9 @@ def MCTS(env: ChessEnv,
          epsilon: float =Config.EPS,
          batch_size: int =Config.BATCH_SIZE,
          init_W=np.zeros((Config.d_out,)),
-         init_N=np.zeros((Config.d_out,)),
+         init_N=np.ones((Config.d_out,))*0.001,
          init_P=np.zeros((Config.d_out,))) -> np.ndarray:  # we can add here all our hyper-parameters
-    '''
+    """
     Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
     arguments: state: the root state from where the stimulation start. A board.
 
@@ -139,7 +140,7 @@ def MCTS(env: ChessEnv,
     :param init_N:
     :param init_P:
     :return: return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
-    '''
+    """
 
     # history of leafs for all previous runs
     env_copy = env.copy()

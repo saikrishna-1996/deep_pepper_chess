@@ -1,11 +1,8 @@
 import argparse
-import glob
 import multiprocessing
 
 import torch
-from torch.nn import Module
 
-from chess_env import ChessEnv
 from game_generator import generate_game
 from policy_network import PolicyValNetwork_Giraffe
 from self_challenge import Champion
@@ -63,15 +60,16 @@ class PolicyImprover(object):
 
 
 if __name__ == '__main__':
-    pool = multiprocessing.Pool(args.num_workers)
+    print("hello")
+    pool = multiprocessing.Pool(args.workers)
     policy = PolicyValNetwork_Giraffe()
     generator = GameGenerator(policy, pool, args.batch_size)
     improver = PolicyImprover(policy, pool)
 
     i = 0
     while True:
-        i += 1
         if i % 100:
             torch.save(policy, "./{}.mdl".format(i))
         games = generator(policy)
         policy = improver(games)
+        i += 1
