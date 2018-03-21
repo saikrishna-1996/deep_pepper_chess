@@ -18,6 +18,7 @@ class Champion(object):
         old_alpha_score = []
 
         for game_number in range(NUMBER_GAMES):
+            self.num_challenges += 1
             step_game = 0
             temperature = 10e-6
 
@@ -45,14 +46,15 @@ class Champion(object):
             else:
                 candidate_alpha_score.append(-z)
                 old_alpha_score.append(+z)
+            
 
         if sum(candidate_alpha_score) > sum(old_alpha_score):
-            winner = 'new_alpha'
+            winner = candidate
         elif sum(candidate_alpha_score) < sum(old_alpha_score):
-            winner = 'old_alpha'
+            winner = self.current_policy
         else:
             winner = None
 
         self.current_policy = winner
 
-        # return candidate_alpha_score, old_alpha_score, winner
+         return candidate_alpha_score, old_alpha_score, winner

@@ -46,12 +46,33 @@ class PolicyImprover(object):
         self.old_policy = old_policy
         self.pool = multiprocessing.Pool(args.num_workers)
         self.champion = Champion(old_policy)
+        #Logging attributes
+        PI_log_dir = os.path.join(Config.LOGDIR,'PI')
+        self.logger = Logger(PI_log_dir)
+        self.num_challenges = 0
+        self.av_consec_wins = 0
+        self.consec_wins = 0        
+
 
     def train_model(self, new_games):
         return train_model(model=self.old_policy, games=new_games, min_num_games=args.championship_rounds)
 
     def run_challenge(self, new_policy):
-        return self.champion.self_play(new_policy)
+        self.num_challenges += 1
+        cand_score, champ_score, winner =  self.champion.self_play(new_policy)
+        
+        if (winner == self.champion.current_policy):
+            self.consec_wins += 1
+        else:
+            self.consec_wins = 1
+        self.champion.current_policy = winner
+        self.av_consec_wins = self.av_consec_wins + (self.consec_wins-self.av_consec_wins)/self.num_challenges
+        self.logger.scalar_summary('Average Number of wins Per Policy',self.av_consec_wins,self.num_challenges)
+            
+        self.logger.scalar_summary('Candidate Score Average',np.mean(cand_score),self.num_challenges)
+        self.logger.scalar_summary('Candidate Score Variance', np.var(cand_score),self.num_challenges)
+        self.logger.scalar_summary('Candidate Score Average',np.mean(champ_score),self.num_challenges)
+        self.logger.scalar_summary('Candidate Score Variance', np.var(champ_score),self.num_challenges)
 
     def __call__(self, games):
         new_policy = self.train_model(games)

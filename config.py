@@ -1,5 +1,4 @@
 import os
-
 import chess
 
 
@@ -56,7 +55,7 @@ class Config:
                  'h7': 55,
                  'a8': 56, 'b8': 57, 'c8': 58, 'd8': 59, 'e8': 60, 'f8': 61, 'g8': 62, 'h8': 63}
 
-    MOVETOINDEX, INDEXTOMOVE = __make_move_maps()
+    #MOVETOINDEX, INDEXTOMOVE = __make_move_maps()
 
     # MCTS
 
@@ -72,7 +71,6 @@ class Config:
     # Game Generator
     TEMP_REDUCE_STEP = 50
     MINGAMES = 500
-    NUM_GAMES = 100
 
     # PATHS
     ROOTDIR = '~\home'  ##### DEFINE AS REQ'd
@@ -80,7 +78,8 @@ class Config:
     NETPATH = os.path.join(ROOTDIR, 'saved_nets')
     BESTNET_NAME = 'BestNetwork.pth.tar'  # Example seen here: https://github.com/pytorch/examples/blob/0984955bb8525452d1c0e4d14499756eae76755b/imagenet/main.py#L139-L145
 
-    batch_size = 100
+    #LOGGING
+    LOGDIR = os.path.join(ROOTDIR,'logs')
 
     # NETWORK INFO
     d_in = 363
