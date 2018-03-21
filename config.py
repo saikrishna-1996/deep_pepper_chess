@@ -1,4 +1,5 @@
 import os
+
 import chess
 
 
@@ -71,12 +72,15 @@ class Config:
     # Game Generator
     TEMP_REDUCE_STEP = 50
     MINGAMES = 500
+    NUM_GAMES = 100
 
     # PATHS
     ROOTDIR = '~\home'  ##### DEFINE AS REQ'd
     GAMEPATH = os.path.join(ROOTDIR, 'saved_games')
     NETPATH = os.path.join(ROOTDIR, 'saved_nets')
     BESTNET_NAME = 'BestNetwork.pth.tar'  # Example seen here: https://github.com/pytorch/examples/blob/0984955bb8525452d1c0e4d14499756eae76755b/imagenet/main.py#L139-L145
+
+    batch_size = 100
 
     # NETWORK INFO
     d_in = 363

@@ -16,9 +16,9 @@ def evaluate_p(list_board, network):
 
 
 def resignation(state):
-    stockfishEval = stockfish_eval(state, t=0.5)
-    if abs(stockfishEval) > Config.SF_EVAL_THRESHOLD:
-        return True, stockfishEval / abs(stockfishEval)
+    eval = stockfish_eval(state, t=0.5)
+    if abs(eval) > Config.SF_EVAL_THRESHOLD:
+        return True, eval / abs(eval)
     return False, None
 
 
@@ -120,7 +120,7 @@ def MCTS(env: ChessEnv,
          explore_factor=Config.EXPLORE_FACTOR,
          dirichlet_alpha=Config.D_ALPHA,
          epsilon=Config.EPS,
-         batch_size = Config.BATCH_SIZE,
+         batch_size=Config.BATCH_SIZE,
          init_W=np.zeros((Config.d_out,)),
          init_N=np.zeros((Config.d_out,)),
          init_P=np.zeros((Config.d_out,))):  # we can add here all our hyper-parameters

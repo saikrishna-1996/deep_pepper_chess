@@ -1,11 +1,13 @@
 import argparse
 import glob
 import multiprocessing
-import torch
 
-import self_challenge
+import torch
+from torch.nn import Module
+
 from chess_env import ChessEnv
 from game_generator import generate_games
+from self_challenge import Champion
 from train import train_model
 
 parser = argparse.ArgumentParser(description='Launcher for distributed Chess trainer')
@@ -40,21 +42,20 @@ class GameGenerator(object):
 
 
 class PolicyImprover(object):
-    def __init__(self, old_policy, new_games):
-        self.env = ChessEnv()
+    def __init__(self, old_policy):
         self.old_policy = old_policy
-        self.new_games = new_games
         self.pool = multiprocessing.Pool(args.num_workers)
+        self.champion = Champion(old_policy)
 
-    def train_model(self):
-        return train_model(model=self.old_policy, games=self.new_games, min_num_games=args.championship_rounds)
+    def train_model(self, new_games):
+        return train_model(model=self.old_policy, games=new_games, min_num_games=args.championship_rounds)
 
-    def challenge(self, new_policy):
-        return self_challenge.self_play(self.env, old_policy=self.old_policy, new_policy=new_policy)[2]
+    def run_challenge(self, new_policy):
+        return self.champion.self_play(new_policy)
 
-    def __call__(self):
-        new_policy = self.train_model()
-        self.pool.map(self.challenge(new_policy))
+    def __call__(self, games):
+        new_policy = self.train_model(games)
+        self.champion.self_play(new_policy)
 
 
 def intial_policy():
@@ -63,9 +64,14 @@ def intial_policy():
 
 if __name__ == '__main__':
     input_files = glob.glob('*.game')
-    policy = intial_policy()
+    policy: Module = intial_policy()
 
     generator = GameGenerator(policy)
+    improver = PolicyImprover(policy)
+    i = 0
     while True:
-        games = generator(policy)
-        policy = PolicyImprover(games)
+        i += 1
+        if i % 100:
+            torch.save(policy, "./{}.mdl".format(i))
+        games = generator()
+        policy = improver(games)

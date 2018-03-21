@@ -84,9 +84,7 @@ def mcts_thinker(board):
         print("Are you kidding me\n")
 
     if legal_move_exists == 1:
-
         for j in range(7):  # I have 7 possible moves
-
             total_reward = 0
 
             turn = -1  # 1 for white and -1 for black
