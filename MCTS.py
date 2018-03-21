@@ -123,7 +123,7 @@ def MCTS(env: ChessEnv,
          batch_size: int = Config.BATCH_SIZE,
          init_W=np.zeros((Config.d_out,)),
          init_N=np.ones((Config.d_out,)) * 0.001,
-         init_P=np.ones((Config.d_out,)) * (1 / len(Config.d_out))) -> np.ndarray:
+         init_P=np.ones((Config.d_out,)) * (1 / Config.d_out)) -> np.ndarray:
     # we can add here all our hyper-parameters
     """
     Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
