@@ -492,7 +492,7 @@ def BoardToFeature(board):
     num_wp = len(wp_squares)
     fc = 57
     for lol in range(8):
-        if lol >= num_wp-1:
+        if lol > num_wp-1:
             feature[fc:fc + 5] = 0
         else:
             feature[fc] = 1
@@ -853,7 +853,7 @@ def BoardToFeature(board):
     num_bp = len(bp_squares)
     fc = 137
     for lol in range(8):
-        if lol >= num_bp-1:
+        if lol > num_bp-1:
             feature[fc:fc + 5] = 0
         else:
             feature[fc] = 1
