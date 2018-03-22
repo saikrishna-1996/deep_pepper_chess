@@ -186,6 +186,7 @@ def MCTS(env: ChessEnv,
             print(curr_env.board)
             curr_env.step(best_action)
             print(curr_env.board.fen())
+            print("White turn ? " + str(curr_env.white_to_move))
 
         ##########################
         ### Expand and evaluate###
