@@ -776,7 +776,7 @@ def BoardToFeature(board):
     bn_num = len(bn_squares)
     if bn_num == 0:
         feature[127:136] = 0
-    elif wn_num == 1:
+    elif bn_num == 1:
         feature[132:136] = 0
         feature[127] = 1
         pos = bn_squares[0]
