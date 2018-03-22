@@ -12,13 +12,13 @@ def make_move_maps():
             move = chess.Move(i, j).uci()
 
             if move[3] == '8' and move[1] == '7':
-                for letter in 'QRBN':
+                for letter in 'qrbn':
                     new_move = move + letter
                     MOVETOINDEX[new_move] = k
                     INDEXTOMOVE.append(new_move)
                     k += 1
             elif move[3] == '1' and move[1] == '2':
-                for letter in 'qrbn':
+                for letter in 'QRBN':
                     new_move = move + letter
                     MOVETOINDEX[new_move] = k
                     INDEXTOMOVE.append(new_move)
