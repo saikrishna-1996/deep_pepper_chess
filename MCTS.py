@@ -51,6 +51,15 @@ class Leaf(object):
         self.N = init_N
         self.W = init_W
         self.explore_factor = explore_factor
+        self.legal_move_inds = []
+        self.legal_moves = []
+        self.taken_action = None
+        legal_moves = env.board.legal_moves
+        for move in legal_moves:
+            legal_move_uci = move.uci()
+            ind = Config.MOVETOINDEX[legal_move_uci]
+            self.legal_moves.append(legal_move_uci)
+            self.legal_move_inds.append(ind)
 
     @property
     def Q(self):
@@ -61,11 +70,16 @@ class Leaf(object):
         return np.multiply(np.multiply(self.explore_factor, self.P),
                            np.divide(np.sqrt(np.sum(self.N)), (np.add(1., self.N))))
 
-    def best_action(self):
+    def best_action(self,act=False):
         if not self.env.white_to_move:
-            return np.argmax(np.add(self.U, -self.Q))
-
-        return np.argmax(np.add(self.U, self.Q))
+            all_moves = (np.add(self.U, -self.Q))
+        else:
+            all_moves = (np.add(self.U, self.Q))
+        print('MOVE IND:  '+ repr(np.argmax(all_moves[self.legal_move_inds])))
+        move = self.legal_moves[np.argmax(all_moves[self.legal_move_inds])]
+        if act:
+            self.taken_action = move
+        return move
 
     @property
     def next_board(self):
@@ -93,6 +107,8 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array
     inds = []
     for legal_move in legal_moves:
         legal_move_uci = legal_move.uci()
+        if len(legal_move_uci)>4:
+            print(legal_move_uci)
         ind = Config.MOVETOINDEX[legal_move_uci]
         mask[ind] = 1
         inds.append(ind)
@@ -144,7 +160,7 @@ def MCTS(env: ChessEnv,
     """
     stockfish = Stockfish()
     # history of leafs for all previous runs
-    env_copy = env.copy()
+    #env_copy = env.copy()
     leafs = []
     for simulation in range(Config.NUM_SIMULATIONS):
         curr_env = env.copy()
@@ -158,8 +174,6 @@ def MCTS(env: ChessEnv,
 
         while not curr_env.game_over()[0] and not resign:
             moves += 0.5
-            if moves > Config.RESIGN_CHECK_MIN and not moves % Config.RESIGN_CHECK_FREQ:
-                resign = resignation(stockfish, curr_env.board)[0]
 
             visited, index = state_visited(leafs, curr_env.board)
             if visited:
@@ -175,19 +189,20 @@ def MCTS(env: ChessEnv,
                     all_move_probs = init_P
                     movesh = curr_env.board.legal_moves
                     legal_move_probs = legal_mask(curr_env.board, all_move_probs)
-                    print('best legal')
-                    print(np.argmax(legal_move_probs))
                     state_action_list.append(Leaf(curr_env.copy(), init_W, init_N, legal_move_probs, explore_factor))
                 leafs.append(state_action_list[-1])
 
-            best_move_index = leafs[-1].best_action()
-            best_action = Config.INDEXTOMOVE[best_move_index]
+            best_action = state_action_list[-1].best_action(True)
+            best_action_index = Config.MOVETOINDEX[best_action]
             print("Best Action: " + repr(best_action))
-            print(np.argmax(leafs[-1].P))
             print(curr_env.board)
+            print(simulation)
             curr_env.step(best_action)
-            print(curr_env.board.fen())
+            print('VALID?')
+            print(curr_env.board.is_valid())
             print("White turn ? " + str(curr_env.white_to_move))
+            if moves > Config.RESIGN_CHECK_MIN and not moves % Config.RESIGN_CHECK_FREQ:
+                resign = resignation(stockfish, curr_env.board)[0]
 
         ##########################
         ### Expand and evaluate###
@@ -206,6 +221,7 @@ def MCTS(env: ChessEnv,
         start = 0
         end = min(batch_size, len(state_action_list))
         for batch in range(number_batches):
+            print(batch)
             if batch % 10:
                 print("batch number: {}".format(batch))
             list_p = evaluate_p([state_action_list[i].env.board for i in range(start, end)], network).data
@@ -221,7 +237,8 @@ def MCTS(env: ChessEnv,
         ###############
 
         for i in list(reversed(range(len(state_action_list)))):
-            action_index = state_action_list[i].best_action()  # always legal since best_action
+            action = state_action_list[i].taken_action  # always legal since best_action
+            action_index = Config.MOVETOINDEX[action]
             state_action_list[i].N_update(action_index)
             state_action_list[i].W_update(v, action_index)
 
