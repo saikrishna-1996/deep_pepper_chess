@@ -195,7 +195,7 @@ def MCTS(env: ChessEnv,
         game_over_check, end_score = curr_env.game_over()
         if not game_over_check:
             resign_check, resign_score = resignation(stockfish, curr_env.board)
-
+            print ("Resignation?" + str(resign_check))
         if game_over_check:
             v = end_score
         elif resign_check:
@@ -231,3 +231,4 @@ def MCTS(env: ChessEnv,
     pi = np.divide(np.power(N, temp), norm_factor)
 
     return pi
+lNetwork_Giraffe, dirichlet_alpha=0.4, epsilon=0.1)
