@@ -13,7 +13,8 @@ def evaluate_p(list_board, network):
     list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
     tensor = torch.from_numpy(np.array(list_board))
     # expect that neural net ouput is a vector of probability
-    return network.forward(tensor)[0]
+    probability = network.forward(tensor)[0]
+    return probability.data.numpy()
 
 
 def resignation(stockfish, state):
