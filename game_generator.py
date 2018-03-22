@@ -22,7 +22,8 @@ def generate_game(model: PolicyValNetwork_Giraffe):
 
         action_index = np.argmax(pi)
         triplet.append([state, pi])
-
+        print('')
+        print(env.board)
         env.step(Config.INDEXTOMOVE[action_index])
 
     z = env.game_over()[1]  # from white perspective

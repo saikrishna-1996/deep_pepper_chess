@@ -95,11 +95,11 @@ class ChessEnv:
                 self.winner = Winner.draw
 
     def game_over(self):
-        print('is_game_over?')
-        print(self.board.is_game_over())
+        #print('is_game_over?')
+        #print(self.board.is_game_over())
         if self.board.is_game_over():
             score = self.board.result()
-            print(score)
+            #print(score)
             if score == '0-1':
                 return True, -1
             if score == '1/2-1/2':
