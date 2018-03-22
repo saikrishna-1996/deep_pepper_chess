@@ -231,4 +231,3 @@ def MCTS(env: ChessEnv,
     pi = np.divide(np.power(N, temp), norm_factor)
 
     return pi
-lNetwork_Giraffe, dirichlet_alpha=0.4, epsilon=0.1)
