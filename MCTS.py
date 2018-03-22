@@ -225,6 +225,8 @@ def MCTS(env: ChessEnv,
             state_action_list[i].N_update(action_index)
             state_action_list[i].W_update(v, action_index)
 
+        print("Simulation episode: "+str(simulation))
+
     N = leafs[0].N
 
     norm_factor = np.sum(np.power(N, temp))
