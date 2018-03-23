@@ -40,7 +40,7 @@ class GameGenerator(object):
 
     def __call__(self, policy):
         self.policy = policy
-        ongoing_games = [self.pool.apply_async(self.play_game()) for i in range(self.batch_size)]
+        ongoing_games = [self.pool.apply_async(self.play_game) for i in range(self.batch_size)]
         return [g.get() for g in ongoing_games]
 
 
