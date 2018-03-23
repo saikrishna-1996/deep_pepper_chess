@@ -45,10 +45,9 @@ class GameGenerator(object):
 
 
 class PolicyImprover(object):
-    def __init__(self, old_policy, pool):
+    def __init__(self, old_policy):
         self.old_policy = old_policy
         self.champion = Champion(old_policy)
-        self.pool = pool
 
     def train_model(self, new_games):
         return train_model(model=self.old_policy, games=new_games, min_num_games=args.championship_rounds)
@@ -67,7 +66,7 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(args.workers)
     policy = PolicyValNetwork_Giraffe()
     generator = GameGenerator(policy, pool, args.batch_size)
-    improver = PolicyImprover(policy, pool)
+    improver = PolicyImprover(policy)
 
     i = 0
     while True:
