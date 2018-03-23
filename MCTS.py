@@ -75,8 +75,11 @@ class Leaf(object):
             all_moves = (np.add(self.U, -self.Q))
         else:
             all_moves = (np.add(self.U, self.Q))
-        print('MOVE IND:  '+ repr(np.argmax(all_moves[self.legal_move_inds])))
-        move = self.legal_moves[np.argmax(all_moves[self.legal_move_inds])]
+        # print('MOVE IND:  '+ repr(np.argmax(all_moves[self.legal_move_inds])))
+
+        max_list = np.argwhere(all_moves[self.legal_move_inds] == np.amax(all_moves[self.legal_move_inds]))
+
+        move = self.legal_moves[np.random.choice(max_list.flatten(), 1)[0]]
         if act:
             self.taken_action = move
         return move
