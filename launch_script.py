@@ -35,13 +35,12 @@ class GameGenerator(object):
         self.pool = pool
         self.batch_size = batch_size
 
-    def play_game(self):
+    def play_game(self, _):
         return generate_game(self.policy)
 
     def __call__(self, policy):
         self.policy = policy
-        ongoing_games = [self.pool.apply_async(self.play_game) for i in range(self.batch_size)]
-        return [g.get() for g in ongoing_games]
+        return self.pool.apply_async(self.play_game, range(self.batch_size/args.workers))
 
 
 class PolicyImprover(object):
