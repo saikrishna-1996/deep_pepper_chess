@@ -42,6 +42,11 @@ class GameGenerator(object):
         self.policy = policy
         return self.pool.map(self.play_game, range(int(self.batch_size/args.workers + 1)))
 
+    def __getstate__(self):
+        self_dict = self.__dict__.copy()
+        del self_dict['pool']
+        return self_dict
+
 
 class PolicyImprover(object):
     def __init__(self, old_policy):
