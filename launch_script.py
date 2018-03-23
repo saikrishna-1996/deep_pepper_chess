@@ -40,7 +40,7 @@ class GameGenerator(object):
 
     def __call__(self, policy):
         self.policy = policy
-        return self.pool.apply_async(self.play_game, range(int(self.batch_size/args.workers + 1))
+        return self.pool.apply_async(self.play_game, range(int(self.batch_size/args.workers + 1)))
 
 
 class PolicyImprover(object):
