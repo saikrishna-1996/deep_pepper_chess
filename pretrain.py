@@ -1,28 +1,19 @@
 import chess.pgn
 import chess.uci
+from chess_env import ChessEnv
 # import random
 import torch
 from torch.autograd import Variable
 
 import features
-# import value_networks
-from value_network import Critic_Giraffe
+from policy_network import PolicyValNetwork_Giraffe
 
 # Not used
 
-pgn = open("/u/gottipav/kasparov.pgn")
-engine = chess.uci.popen_engine("/u/gottipav/stockfish-9-linux/src/stockfish")
+
+engine = chess.uci.popen_engine("./stockfish")
 think_time = 1000  # 1 seconds
 batch_size = 32
-d_in = 353
-h1 = 1024
-h1a = 32
-h1b = 512
-h1c = 480
-h2 = 512
-gf = 17
-pc = 208
-sc = 128
 
 handler = chess.uci.InfoHandler()
 engine.info_handlers.append(handler)
@@ -33,6 +24,25 @@ critic_model = Critic_Giraffe(d_in, gf, pc, sc, h1a, h1b, h1c, h2, 1)
 
 criterion = torch.nn.MSELoss(size_average=False)
 optimizer = torch.optim.SGD(critic_model.parameters(), lr=1e-4, momentum=0.9)  # change it Adam or Adagrad may be
+
+
+def pretrain_model(model=PolicyValNetwork_Giraffe(), games=None):
+    if games is None:
+        game_data = load_kaspagames
+    else:
+        game_data = games
+
+    #for games_trained in range(
+
+
+def play_pgn(model: PolicyValNetwork_Giraffe):
+    pgn = open("/u/gottipav/kasparov.pgn")
+    singlet = []
+    for i in range(num_games):
+        kasgame = chess.pgn.read_game(pgn)
+        board = kasgame.board()
+        board.push(move)
+        singlet.append(board)
 
 
 def do_your_shit(board, stock_eval):
