@@ -215,9 +215,11 @@ def MCTS(env: ChessEnv,
         if not game_over_check:
             resign_check, resign_score = resignation(stockfish, curr_env.board)
             print ("Resignation?" + str(resign_check))
+        #v = 0
         if game_over_check:
             v = end_score
-        elif resign_check:
+        #elif resign_check:
+        else:
             v = resign_score
 
         number_batches = max(len(state_action_list) // batch_size, 1)

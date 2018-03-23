@@ -37,24 +37,28 @@ def pretrain_model(model=PolicyValNetwork_Giraffe(), games=None):
 
 def play_pgn():
     pgn = open("/u/gottipav/kasparov.pgn")
-    singlet = []
+    board_positions = []
     for i in range(num_games):
         kasgame = chess.pgn.read_game(pgn)
         board = kasgame.board()
         board.push(move)
-        singlet.append(board)
-        return singlet
+        board_positions.append(board)
+        return board_positions
 
-def get_triplet_and_backprop(singlet):
+def get_triplet_and_backprop(board_positions):
     triplet=[]
-    for lol in range(singlet):
-        if lol % batch_size  != 0:
-            val = stockfish_eval(singlet[lol], 1000)
-            moves_with_probab = stockfish_pol()
-            triplet.append([singlet[lol], val, moves_with_probab])
+    for index in range(board_positions):
+        if index % batch_size  != 0:
+            val = stockfish_eval(board_positions[index], 1000)
+            moves_with_probab = board_positions[index]
+            triplet.append([board_positions[index], val, moves_with_probab])
         else:
             do_backprop(triplet)
             triplet = []
+
+def stockfish_pol(board_position):
+
+
 
 def do_backprop(features, policy, val, model):
     criterion1 = torch.nn.MSELoss(size_average=False)
