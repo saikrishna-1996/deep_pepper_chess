@@ -1,6 +1,17 @@
 from chess.uci import InfoHandler, popen_engine
+import chess
+import chess.polyglot
 
 evaltime = 500  # 0.5 seconds
+
+def play_opening(n):
+    #n is the number of half moves
+    board = chess.Board()
+    with chess.polyglot.open_reader("./komodo_bin/strong/komodo.bin") as reader:
+        for i in range(n):
+            my_move = reader.choice(board).move
+            board.push(my_move)
+        return board
 
 
 class Stockfish(object):
