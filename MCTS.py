@@ -174,8 +174,8 @@ def MCTS(env: ChessEnv,
         ########################
         ######## Select ########
         ########################
-
-        while not curr_env.game_over()[0] and not resign:
+        game_over,v = curr_env.game_over()
+        while not game_over and not resign:
             moves += 0.5
 
             visited, index = state_visited(leafs, curr_env.board)
@@ -204,24 +204,27 @@ def MCTS(env: ChessEnv,
             print('VALID?')
             print(curr_env.board.is_valid())
             print("White turn ? " + str(curr_env.white_to_move))
-            if moves > Config.RESIGN_CHECK_MIN and not moves % Config.RESIGN_CHECK_FREQ:
-                resign = resignation(stockfish, curr_env.board)[0]
+            
+            game_over, v = curr_env.game_over()
+            
+            if (moves > Config.RESIGN_CHECK_MIN) and (not moves % Config.RESIGN_CHECK_FREQ) and (not game_over):
+                resign,v = resignation(stockfish, curr_env.board)
 
         ##########################
         ### Expand and evaluate###
         ##########################
 
-        game_over_check, end_score = curr_env.game_over()
-        if not game_over_check:
-            resign_check, resign_score = resignation(stockfish, curr_env.board)
-            print ("Resignation?" + str(resign_check))
+        #game_over_check, end_score = curr_env.game_over()
+        #if not game_over_check:
+        #    resign_check, resign_score = resignation(stockfish, curr_env.board)
+        #    print ("Resignation?" + str(resign_check))
         #v = 0
-        if game_over_check:
-            v = end_score
-        elif resign_check:
-            v = resign_score
-        else:
-            raise Exception("This should never happen!")
+        #if game_over_check:
+        #    v = end_score
+        #elif resign_check:
+        #    v = resign_score
+        #else:
+        #    raise Exception("This should never happen!")
 
         number_batches = max(len(state_action_list) // batch_size, 1)
         start = 0
