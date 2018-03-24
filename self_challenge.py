@@ -24,7 +24,7 @@ class Champion(object):
             white, black = (self.current_policy, candidate) if p else (candidate, self.current_policy)
             env.reset()
             while not env.game_over()[0]:
-                if current_board.white_to_move:
+                if env.white_to_move:
                     player = white
                 else:
                     player = black
