@@ -218,9 +218,10 @@ def MCTS(env: ChessEnv,
         #v = 0
         if game_over_check:
             v = end_score
-        #elif resign_check:
-        else:
+        elif resign_check:
             v = resign_score
+        else:
+            raise Exception("This should never happen!")
 
         number_batches = max(len(state_action_list) // batch_size, 1)
         start = 0
