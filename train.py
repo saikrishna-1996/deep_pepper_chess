@@ -59,7 +59,7 @@ def do_backprop(features, policy, act_val, model):
     #policy = torch.autograd.Variable(policy)
     nn_policy_out, nn_val_out = model(features)
     act_val = torch.autograd.Variable(torch.Tensor([act_val]))
-    policy = torch.autograd.Variable(torch.from_numpy(policy.astype(long)))
+    policy = torch.autograd.Variable((torch.from_numpy(policy)).long())
     loss1 = criterion1(nn_val_out,act_val)
     loss2 = criterion2(nn_policy_out,policy)
 
