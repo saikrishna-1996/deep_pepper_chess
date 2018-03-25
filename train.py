@@ -79,7 +79,7 @@ def save(model, fname, network_iter):
         'iteration': network_iter
     }
     fpath = os.path.join(Config.NETPATH, fname)
-    torch.save(save_info, fname)
+    torch.save(save_info, fpath)
 
 
 def load(best=False):
