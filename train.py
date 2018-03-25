@@ -32,8 +32,8 @@ def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_
 
     for games_trained in range(min_num_games):
         if game_data is not None:
-            for state, policy, val in game_data:
-                do_backprop(state, policy, val, model)
+            for data in game_data:
+                do_backprop(data[0], data[1], data[2], model)
 
 
 def do_backprop(features, policy, act_val, model):
