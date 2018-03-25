@@ -42,7 +42,7 @@ def do_backprop(features, policy, act_val, model):
     # batch_feature = Variable(torch.randn(batch_size, 353))
     criterion1 = torch.nn.MSELoss(size_average=False)
     criterion2 = torch.nn.NLLLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, momentum=0.9)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
     ##We can do this cuda part later!?
     # if torch.cuda_is_available():
