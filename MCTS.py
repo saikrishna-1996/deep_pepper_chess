@@ -110,8 +110,6 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array
     inds = []
     for legal_move in legal_moves:
         legal_move_uci = legal_move.uci()
-        if len(legal_move_uci)>4:
-            print(legal_move_uci)
         ind = Config.MOVETOINDEX[legal_move_uci]
         mask[ind] = 1
         inds.append(ind)
@@ -199,10 +197,7 @@ def MCTS(env: ChessEnv,
             best_action_index = Config.MOVETOINDEX[best_action]
             print("Best Action: " + repr(best_action))
             print(curr_env.board)
-            print(simulation)
             curr_env.step(best_action)
-            print('VALID?')
-            print(curr_env.board.is_valid())
             print("White turn ? " + str(curr_env.white_to_move))
             
             game_over, v = curr_env.game_over()
@@ -230,7 +225,6 @@ def MCTS(env: ChessEnv,
         start = 0
         end = min(batch_size, len(state_action_list))
         for batch in range(number_batches):
-            print(batch)
             if batch % 10:
                 print("batch number: {}".format(batch))
             list_p = evaluate_p([state_action_list[i].env.board for i in range(start, end)], network).data
