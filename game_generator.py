@@ -5,7 +5,7 @@ from MCTS import MCTS
 from chess_env import ChessEnv
 from config import Config
 from policy_network import PolicyValNetwork_Giraffe
-
+from features import BoardToFeature
 
 def generate_game(model: PolicyValNetwork_Giraffe):
     triplet = []
@@ -21,7 +21,8 @@ def generate_game(model: PolicyValNetwork_Giraffe):
         pi = MCTS(env, temp=temperature, network=model)
 
         action_index = np.argmax(pi)
-        triplet.append([env.board, pi])
+        feature = BoardToFeature(env.board)
+        triplet.append([feature, pi])
         print('')
         print(env.board)
         env.step(Config.INDEXTOMOVE[action_index])
