@@ -905,8 +905,3 @@ def BoardToFeature(board):
 
     return feature
     # We should make sure that bishops are not messed up.
-
-
-board = chess.Board()
-featuress = BoardToFeature(board)
-print(featuress)
