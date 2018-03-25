@@ -195,10 +195,10 @@ def MCTS(env: ChessEnv,
 
             best_action = state_action_list[-1].best_action(True)
             best_action_index = Config.MOVETOINDEX[best_action]
-            print("Best Action: " + repr(best_action))
-            print(curr_env.board)
+            #print("Best Action: " + repr(best_action))
+            #print(curr_env.board)
             curr_env.step(best_action)
-            print("White turn ? " + str(curr_env.white_to_move))
+            #print("White turn ? " + str(curr_env.white_to_move))
             
             game_over, v = curr_env.game_over()
             
