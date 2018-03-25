@@ -55,6 +55,8 @@ def do_backprop(features, policy, act_val, model):
 
     # pvng_model = pvng(d_in, gf, pc, sc, h1a, h1b, h1c, h2p, h2e, d_out, eval_out=1)
     features = features.view(1,-1)
+    act_val = torch.autograd.Variable(act_val)
+    policy = torch.autograd.Variable(policy)
     nn_policy_out, nn_val_out = model(features)
 
     loss1 = criterion1(act_val, nn_val_out)
