@@ -13,8 +13,8 @@ def generate_game(model: PolicyValNetwork_Giraffe):
     temperature = 1
     env = ChessEnv()
     env.reset()
-    while not env.game_over()[0]:
-        state = env.board
+    game_over = False
+    while not game_over:
         step_game += 1
         if step_game == 50:
             temperature = 10e-6
@@ -25,8 +25,7 @@ def generate_game(model: PolicyValNetwork_Giraffe):
         print('')
         print(env.board)
         env.step(Config.INDEXTOMOVE[action_index])
-
-    z = env.game_over()[1]  # from white perspective
+        game_over, z = env.game_over()
 
     for i in range(len(triplet) - step_game, len(triplet)):
         triplet[i].append(z)
