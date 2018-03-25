@@ -21,7 +21,7 @@ def generate_game(model: PolicyValNetwork_Giraffe):
         pi = MCTS(env, temp=temperature, network=model)
 
         action_index = np.argmax(pi)
-        triplet.append([state, pi])
+        triplet.append([env.board, pi])
         print('')
         print(env.board)
         env.step(Config.INDEXTOMOVE[action_index])
