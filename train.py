@@ -71,7 +71,7 @@ def do_backprop(features, policy, act_val, model):
             l2_reg = l2_reg + weight.norm(2)
     loss3 = 0.1 * l2_reg
 
-    loss = loss1 + loss2 + loss3
+    loss = loss1 - loss2 + loss3
 
     optimizer.zero_grad()
     loss.backward()
