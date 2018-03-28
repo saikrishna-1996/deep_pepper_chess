@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 import torch
+import torch.nn as nn
 
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
@@ -36,13 +37,17 @@ def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_
                 features = torch.from_numpy(np.array(data[0]))
                 do_backprop(features, data[1], data[2], model)
 
+def cross_entropy(pred, soft_targets):
+    logsoftmax = nn.LogSoftmax()
+    return torch.mean(torch.sum(- soft_targets.double() * logsoftmax(pred).double(), 1))
+
 
 def do_backprop(features, policy, act_val, model):
     # first convert this batch_board to batch_features
     # batch_board should be of dimension (batch_size, board)
     # batch_feature = Variable(torch.randn(batch_size, 353))
     criterion1 = torch.nn.MSELoss(size_average=False)
-    criterion2 = torch.nn.NLLLoss()
+    #criterion2 = torch.nn.NLLLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
     ##We can do this cuda part later!?
@@ -61,7 +66,8 @@ def do_backprop(features, policy, act_val, model):
     act_val = torch.autograd.Variable(torch.Tensor([act_val]))
     policy = torch.autograd.Variable((torch.from_numpy(policy)).long())
     loss1 = criterion1(nn_val_out,act_val)
-    loss2 = criterion2(nn_policy_out,policy)
+    #loss2 = criterion2(nn_policy_out,policy)
+    loss2 = cross_entropy(nn_policy_out, policy)
 
     l2_reg = None
     for weight in model.parameters():
@@ -71,7 +77,7 @@ def do_backprop(features, policy, act_val, model):
             l2_reg = l2_reg + weight.norm(2)
     loss3 = 0.1 * l2_reg
 
-    loss = loss1 - loss2 + loss3
+    loss = loss1.float() - loss2.float() + loss3.float()
 
     optimizer.zero_grad()
     loss.backward()
