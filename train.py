@@ -39,6 +39,7 @@ def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_
 
     return model
 
+
 def cross_entropy(pred, soft_targets):
     logsoftmax = nn.LogSoftmax()
     return torch.mean(torch.sum(- soft_targets.double() * logsoftmax(pred).double(), 1))
@@ -49,7 +50,7 @@ def do_backprop(features, policy, act_val, model):
     # batch_board should be of dimension (batch_size, board)
     # batch_feature = Variable(torch.randn(batch_size, 353))
     criterion1 = torch.nn.MSELoss(size_average=False)
-    #criterion2 = torch.nn.NLLLoss()
+    # criterion2 = torch.nn.NLLLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
     ##We can do this cuda part later!?
@@ -61,14 +62,14 @@ def do_backprop(features, policy, act_val, model):
     #    batch_feature[i,:] = features.BoardToFeature(batch_board[i,board])
 
     # pvng_model = pvng(d_in, gf, pc, sc, h1a, h1b, h1c, h2p, h2e, d_out, eval_out=1)
-    features = features.view(1,-1)
-    #act_val = torch.autograd.Variable(act_val)
-    #policy = torch.autograd.Variable(policy)
+    features = features.view(1, -1)
+    # act_val = torch.autograd.Variable(act_val)
+    # policy = torch.autograd.Variable(policy)
     nn_policy_out, nn_val_out = model(features)
     act_val = torch.autograd.Variable(torch.Tensor([act_val]))
     policy = torch.autograd.Variable((torch.from_numpy(policy)).long())
-    loss1 = criterion1(nn_val_out,act_val)
-    #loss2 = criterion2(nn_policy_out,policy)
+    loss1 = criterion1(nn_val_out, act_val)
+    # loss2 = criterion2(nn_policy_out,policy)
     loss2 = cross_entropy(nn_policy_out, policy)
 
     l2_reg = None

@@ -165,7 +165,7 @@ def MCTS(env: ChessEnv,
         ########################
         ######## Select ########
         ########################
-        game_over = False
+        game_over, v = curr_env.is_game_over(moves)
         while not game_over and not resign:
             visited, index = state_visited(leafs, curr_env.board)
             if visited:

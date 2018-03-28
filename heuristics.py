@@ -2,7 +2,7 @@ from chess.uci import InfoHandler, popen_engine
 import chess
 import chess.polyglot
 
-from config import Config
+
 
 evaltime = 500  # 0.5 seconds
 
@@ -37,6 +37,6 @@ class Stockfish(object):
 
     def check_resignation(self, state):
         evaluation = self.stockfish_eval(state, t=0.5)
-        if abs(evaluation) > Config.SF_EVAL_THRESHOLD:
+        if abs(evaluation) > 6.5:
             return True, evaluation / abs(evaluation)
         return False, None

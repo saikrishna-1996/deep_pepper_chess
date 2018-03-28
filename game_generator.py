@@ -7,6 +7,7 @@ from config import Config
 from policy_network import PolicyValNetwork_Giraffe
 from features import BoardToFeature
 
+
 def generate_game(model: PolicyValNetwork_Giraffe):
     triplet = []
     step_game = 0
