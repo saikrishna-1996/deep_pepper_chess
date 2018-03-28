@@ -107,7 +107,7 @@ class ChessEnv:
             if score == '1-0':
                 return True, 1
         elif (moves > Config.RESIGN_CHECK_MIN) and (not moves % Config.RESIGN_CHECK_FREQ):
-            return Config.stockfish.check_resignation(Config.stockfish, self.board)
+            return Config.stockfish.check_resignation(self.board)
 
         return False, None
 
