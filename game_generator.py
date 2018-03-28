@@ -16,6 +16,7 @@ def generate_game(model: PolicyValNetwork_Giraffe):
     env.reset()
     game_over = False
     moves = 0
+    game_over, z = env.is_game_over(moves)
     while not game_over:
         moves += 1
         step_game += 1

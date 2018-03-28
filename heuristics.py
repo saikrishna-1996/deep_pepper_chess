@@ -1,7 +1,7 @@
 from chess.uci import InfoHandler, popen_engine
 import chess
 import chess.polyglot
-
+import platform
 
 
 evaltime = 500  # 0.5 seconds
@@ -19,7 +19,12 @@ def play_opening(n):
 
 class Stockfish(object):
     def __init__(self):
-        self.engine = popen_engine("./stockfish")
+        if platform.system() == 'Darwin':
+            self.engine = popen_engine("./stockfish-osx")
+        elif platform.system() == 'Linux':
+            self.engine = popen_engine("./stockfish-linux")
+        elif platform.system() == 'Windows':
+            self.engine = popen_engine("./stockfish-windows")
 
     def stockfish_eval(self, board, t=500):
         handler = InfoHandler()
