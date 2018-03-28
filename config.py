@@ -2,6 +2,8 @@ import os
 
 import chess
 
+from heuristics import Stockfish
+
 
 def make_move_maps():
     MOVETOINDEX = {}
@@ -60,7 +62,7 @@ class Config(object):
 
     # MCTS
 
-    RESIGN_CHECK_MIN = 30
+    RESIGN_CHECK_MIN = 60
     RESIGN_CHECK_FREQ = 10
     NUM_SIMULATIONS = 2
     SF_EVAL_THRESHOLD = 6.5
@@ -108,3 +110,5 @@ class Config(object):
     h1a = 32  # no.of first set of neurons in first hidden layer
     h1b = 512  # no.of second set of neurons in first hidden layer
     h1c = 480  # no.of third set of neurons in first hidden layer
+
+    stockfish = Stockfish()

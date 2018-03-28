@@ -5,6 +5,8 @@ from logging import getLogger
 import chess.pgn
 import numpy as np
 
+from config import Config
+
 logger = getLogger(__name__)
 
 # noinspection PyArgumentList
@@ -94,21 +96,20 @@ class ChessEnv:
             else:
                 self.winner = Winner.draw
 
-    def game_over(self):
-        #print('is_game_over?')
-        #print(self.board.is_game_over())
+    def is_game_over(self, moves=0):
         if self.board.is_game_over():
             score = self.board.result()
-            #print(score)
+            # print(score)
             if score == '0-1':
                 return True, -1
             if score == '1/2-1/2':
                 return True, 0
             if score == '1-0':
                 return True, 1
+        elif (moves > Config.RESIGN_CHECK_MIN) and (not moves % Config.RESIGN_CHECK_FREQ):
+            return Config.stockfish.check_resignation(Config.stockfish, self.board)
 
-        else:
-            return False, None
+        return False, None
 
     def _resign(self):
         self.resigned = True

@@ -2,10 +2,13 @@ from chess.uci import InfoHandler, popen_engine
 import chess
 import chess.polyglot
 
+from config import Config
+
 evaltime = 500  # 0.5 seconds
 
+
 def play_opening(n):
-    #n is the number of half moves
+    # n is the number of half moves
     board = chess.Board()
     with chess.polyglot.open_reader("./komodo_bin/strong/komodo.bin") as reader:
         for i in range(n):
@@ -32,11 +35,8 @@ class Stockfish(object):
                 eval_val = 100.0
         return eval_val
 
-    def stockfish_result(self, board):
-        eval_val = self.stockfish_eval(board)
-        if eval_val > 6.5:
-            return 1
-        elif eval_val < -6.5:
-            return -1
-        else:
-            return 0
+    def check_resignation(self, state):
+        evaluation = self.stockfish_eval(state, t=0.5)
+        if abs(evaluation) > Config.SF_EVAL_THRESHOLD:
+            return True, evaluation / abs(evaluation)
+        return False, None

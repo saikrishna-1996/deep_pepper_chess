@@ -29,7 +29,9 @@ def generate_games():
         temperature = 1
         env = ChessEnv()
         env.reset()
-        while not env.game_over()[0]:
+        moves = 0
+        game_over, z = env.is_game_over(moves)
+        while not game_over:
             state = env.board
             step_game += 1
             if step_game == Config.TEMP_REDUCE_STEP:
@@ -40,8 +42,8 @@ def generate_games():
             triplet.append([state, pi])
 
             env.step(Config.INDEXTOMOVE[action_index])
-
-        z = env.game_over()[1]  # from white perspective
+            moves += 1
+            game_over, z = env.is_game_over(moves)
 
         for i in range(len(triplet) - step_game, len(triplet)):
             triplet[i].append(z)

@@ -17,25 +17,26 @@ class Champion(object):
         old_alpha_score = []
 
         for game_number in range(NUMBER_GAMES):
-            step_game = 0
+            moves = 0
             temperature = 10e-6
 
             p = np.random.binomial(1, 0.5) == 1
             white, black = (self.current_policy, candidate) if p else (candidate, self.current_policy)
             env.reset()
-            while not env.game_over()[0]:
+            game_over, z = env.is_game_over(moves)
+            while not game_over:
                 if env.white_to_move:
                     player = white
                 else:
                     player = black
 
-                step_game += 1
                 pi = MCTS(env, temp=temperature, network=player)
                 action_index = np.argmax(pi)
                 env.step(Config.INDEXTOMOVE[action_index])
+                moves += 1
+                game_over, z = env.is_game_over(moves)
                 # should be able to give the same state even if no room for legal move
 
-            z = env.game_over()[1]
             # from white perspective
 
             if white == candidate:
@@ -53,5 +54,3 @@ class Champion(object):
             winner = None
 
         self.current_policy = winner
-
-        # return candidate_alpha_score, old_alpha_score, winner

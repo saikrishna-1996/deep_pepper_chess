@@ -17,13 +17,6 @@ def evaluate_p(list_board, network):
     return probability.data.numpy()
 
 
-def resignation(stockfish, state):
-    evaluation = stockfish.stockfish_eval(state, t=0.5)
-    if abs(evaluation) > Config.SF_EVAL_THRESHOLD:
-        return True, evaluation / abs(evaluation)
-    return False, None
-
-
 def state_visited(state_list, state):
     if not state_list:
         return False, None
@@ -159,7 +152,7 @@ def MCTS(env: ChessEnv,
     :param init_P:
     :return: return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
     """
-    stockfish = Stockfish()
+
     # history of leafs for all previous runs
     # env_copy = env.copy()
     leafs = []
@@ -172,10 +165,8 @@ def MCTS(env: ChessEnv,
         ########################
         ######## Select ########
         ########################
-        game_over, v = curr_env.game_over()
+        game_over = False
         while not game_over and not resign:
-            moves += 0.5
-
             visited, index = state_visited(leafs, curr_env.board)
             if visited:
                 state_action_list.append(leafs[index])
@@ -188,7 +179,6 @@ def MCTS(env: ChessEnv,
                     state_action_list.append(root)
                 else:
                     all_move_probs = init_P
-                    movesh = curr_env.board.legal_moves
                     legal_move_probs = legal_mask(curr_env.board, all_move_probs)
                     state_action_list.append(
                         Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(), explore_factor))
@@ -199,13 +189,8 @@ def MCTS(env: ChessEnv,
             # print("Best Action: " + repr(best_action))
             # print(curr_env.board)
             curr_env.step(best_action)
-            # print("White turn ? " + str(curr_env.white_to_move))
-
-            game_over, v = curr_env.game_over()
-
-            if (moves > Config.RESIGN_CHECK_MIN) and (not moves % Config.RESIGN_CHECK_FREQ) and (not game_over):
-                print("STOCKFISH CALLED!")
-                resign, v = resignation(stockfish, curr_env.board)
+            moves += 1
+            game_over, v = curr_env.is_game_over(moves)
 
         ##########################
         ### Expand and evaluate###
