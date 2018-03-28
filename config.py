@@ -61,7 +61,7 @@ class Config(object):
     # MCTS
 
     RESIGN_CHECK_MIN = 30
-    RESIGN_CHECK_FREQ = 20
+    RESIGN_CHECK_FREQ = 10
     NUM_SIMULATIONS = 2
     SF_EVAL_THRESHOLD = 6.5
     BATCH_SIZE = 64

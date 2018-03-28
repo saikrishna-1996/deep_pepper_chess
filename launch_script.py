@@ -52,7 +52,8 @@ class PolicyImprover(object):
         self.champion = champion
 
     def train_model(self, new_games):
-        return train_model(model=copy.copy(self.champion.current_policy), games=new_games, min_num_games=args.championship_rounds)
+        model = copy.copy(self.champion.current_policy)
+        return train_model(model=model, games=new_games, min_num_games=args.championship_rounds)
 
     def improve_policy(self, games):
         new_policy = self.train_model(games)

@@ -35,7 +35,7 @@ def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_
         if game_data is not None:
             for data in game_data[0]:
                 features = torch.from_numpy(np.array(data[0]))
-                model = do_backprop(features, data[1], data[2], model)
+                do_backprop(features, data[1], data[2], model)
 
     return model
 

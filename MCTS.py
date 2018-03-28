@@ -70,7 +70,7 @@ class Leaf(object):
         return np.multiply(np.multiply(self.explore_factor, self.P),
                            np.divide(np.sqrt(np.sum(self.N)), (np.add(1., self.N))))
 
-    def best_action(self,act=False):
+    def best_action(self, act=False):
         if not self.env.white_to_move:
             all_moves = (np.add(self.U, -self.Q))
         else:
@@ -161,7 +161,7 @@ def MCTS(env: ChessEnv,
     """
     stockfish = Stockfish()
     # history of leafs for all previous runs
-    #env_copy = env.copy()
+    # env_copy = env.copy()
     leafs = []
     for simulation in range(Config.NUM_SIMULATIONS):
         curr_env = env.copy()
@@ -172,7 +172,7 @@ def MCTS(env: ChessEnv,
         ########################
         ######## Select ########
         ########################
-        game_over,v = curr_env.game_over()
+        game_over, v = curr_env.game_over()
         while not game_over and not resign:
             moves += 0.5
 
@@ -190,43 +190,43 @@ def MCTS(env: ChessEnv,
                     all_move_probs = init_P
                     movesh = curr_env.board.legal_moves
                     legal_move_probs = legal_mask(curr_env.board, all_move_probs)
-                    state_action_list.append(Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(), explore_factor))
+                    state_action_list.append(
+                        Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(), explore_factor))
                 leafs.append(state_action_list[-1])
 
             best_action = state_action_list[-1].best_action(True)
             best_action_index = Config.MOVETOINDEX[best_action]
-            #print("Best Action: " + repr(best_action))
-            #print(curr_env.board)
+            # print("Best Action: " + repr(best_action))
+            # print(curr_env.board)
             curr_env.step(best_action)
-            #print("White turn ? " + str(curr_env.white_to_move))
-            
+            # print("White turn ? " + str(curr_env.white_to_move))
+
             game_over, v = curr_env.game_over()
-            
+
             if (moves > Config.RESIGN_CHECK_MIN) and (not moves % Config.RESIGN_CHECK_FREQ) and (not game_over):
-                resign,v = resignation(stockfish, curr_env.board)
+                print("STOCKFISH CALLED!")
+                resign, v = resignation(stockfish, curr_env.board)
 
         ##########################
         ### Expand and evaluate###
         ##########################
 
-        #game_over_check, end_score = curr_env.game_over()
-        #if not game_over_check:
+        # game_over_check, end_score = curr_env.game_over()
+        # if not game_over_check:
         #    resign_check, resign_score = resignation(stockfish, curr_env.board)
         #    print ("Resignation?" + str(resign_check))
-        #v = 0
-        #if game_over_check:
+        # v = 0
+        # if game_over_check:
         #    v = end_score
-        #elif resign_check:
+        # elif resign_check:
         #    v = resign_score
-        #else:
+        # else:
         #    raise Exception("This should never happen!")
 
         number_batches = max(len(state_action_list) // batch_size, 1)
         start = 0
         end = min(batch_size, len(state_action_list))
         for batch in range(number_batches):
-            if batch % 10:
-                print("batch number: {}".format(batch))
             list_p = evaluate_p([state_action_list[i].env.board for i in range(start, end)], network).data
             list_p = np.exp(list_p)
             for i in range(start, end):
@@ -245,7 +245,7 @@ def MCTS(env: ChessEnv,
             state_action_list[i].N_update(action_index)
             state_action_list[i].W_update(v, action_index)
 
-        print("Simulation episode: "+str(simulation))
+        print("Simulation episode: " + str(simulation))
 
     N = leafs[0].N
 
