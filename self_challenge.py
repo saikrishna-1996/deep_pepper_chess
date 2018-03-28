@@ -10,7 +10,7 @@ class Champion(object):
     def __init__(self, current_policy):
         self.current_policy = current_policy
 
-    def self_play(self, candidate, NUMBER_GAMES=Config.NUM_GAMES):
+    def run_tournament(self, candidate, NUMBER_GAMES=Config.NUM_GAMES):
         env = ChessEnv()
 
         candidate_alpha_score = []

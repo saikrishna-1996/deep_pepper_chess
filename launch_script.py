@@ -30,16 +30,15 @@ torch.manual_seed(args.seed)
 
 
 class GameGenerator(object):
-    def __init__(self, policy: PolicyValNetwork_Giraffe, pool: multiprocessing.Pool, batch_size: int):
-        self.policy = policy
+    def __init__(self, champion: Champion, pool: multiprocessing.Pool, batch_size: int):
+        self.champion = champion
         self.pool = pool
         self.batch_size = batch_size
 
     def play_game(self, _):
-        return generate_game(self.policy)
+        return generate_game(self.champion.current_policy)
 
-    def __call__(self, policy):
-        self.policy = policy
+    def generate_games(self):
         return self.pool.map(self.play_game, range(int(self.batch_size/args.workers + 1)))
 
     def __getstate__(self):
@@ -49,33 +48,28 @@ class GameGenerator(object):
 
 
 class PolicyImprover(object):
-    def __init__(self, old_policy):
-        self.old_policy = old_policy
-        self.champion = Champion(old_policy)
+    def __init__(self, champion):
+        self.champion = champion
 
     def train_model(self, new_games):
-        return train_model(model=self.old_policy, games=new_games, min_num_games=args.championship_rounds)
+        return train_model(model=copy.copy(self.champion.current_policy), games=new_games, min_num_games=args.championship_rounds)
 
-    def run_challenge(self, new_policy):
-        return self.champion.self_play(new_policy)
-
-    def __call__(self, games):
+    def improve_policy(self, games):
         new_policy = self.train_model(games)
-        self.champion.self_play(new_policy)
-        return self.champion.current_policy
+        self.champion.run_tournament(new_policy)
 
 
 if __name__ == '__main__':
     print("hello")
     pool = multiprocessing.Pool(args.workers)
-    policy = PolicyValNetwork_Giraffe()
-    generator = GameGenerator(policy, pool, args.batch_size)
-    improver = PolicyImprover(policy)
+    champion = Champion(PolicyValNetwork_Giraffe())
+    generator = GameGenerator(champion, pool, args.batch_size)
+    improver = PolicyImprover(champion)
 
     i = 0
     while True:
         if i % 100:
-            torch.save(policy, "./{}.mdl".format(i))
-        games = generator(copy.copy(policy))
-        policy = improver(games)
+            torch.save(champion.current_policy, "./{}.mdl".format(i))
+        games = generator.generate_games()
+        improver.improve_policy(games)
         i += 1
