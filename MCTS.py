@@ -173,12 +173,14 @@ def MCTS(env: ChessEnv,
             else:  # if state unvisited get legal moves probabilities using policy network
                 if len(leafs) == 0:
                     root = Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), init_P.copy(), explore_factor)
-                    all_move_probs = init_P
+                    all_move_probs, _ = network.forward(torch.from_numpy(BoardToFeature(curr_env.board)).unsqueeze(0))
+                    all_move_probs = all_move_probs.squeeze().data.numpy()
                     legal_move_probs = legal_mask(curr_env.board, all_move_probs, dirichlet=True, epsilon=epsilon)
                     root.P = legal_move_probs
                     state_action_list.append(root)
                 else:
-                    all_move_probs = init_P
+                    all_move_probs, _ = network.forward(torch.from_numpy(BoardToFeature(curr_env.board)).unsqueeze(0))
+                    all_move_probs = all_move_probs.squeeze().data.numpy()
                     legal_move_probs = legal_mask(curr_env.board, all_move_probs)
                     state_action_list.append(
                         Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(), explore_factor))
