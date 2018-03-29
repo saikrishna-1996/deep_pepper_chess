@@ -1,8 +1,8 @@
-from chess.uci import InfoHandler, popen_engine
-import chess
-import chess.polyglot
 import platform
 
+import chess
+import chess.polyglot
+from chess.uci import InfoHandler, popen_engine
 
 evaltime = 500  # 0.5 seconds
 
