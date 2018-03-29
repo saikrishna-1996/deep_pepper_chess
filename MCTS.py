@@ -5,7 +5,6 @@ from chess_env import ChessEnv
 from config import Config
 from features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
-from heuristics import Stockfish
 from policy_network import PolicyValNetwork_Giraffe
 
 

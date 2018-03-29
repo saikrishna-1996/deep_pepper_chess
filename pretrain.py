@@ -1,11 +1,8 @@
 import chess.pgn
 import chess.uci
-from chess_env import ChessEnv
 # import random
 import torch
-from torch.autograd import Variable
 
-import features
 from policy_network import PolicyValNetwork_Giraffe
 
 # Not used

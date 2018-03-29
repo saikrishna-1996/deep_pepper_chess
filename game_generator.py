@@ -4,8 +4,8 @@ from MCTS import MCTS
 # this is hypothetical functions and classes that should be created by teamates.
 from chess_env import ChessEnv
 from config import Config
-from policy_network import PolicyValNetwork_Giraffe
 from features import BoardToFeature
+from policy_network import PolicyValNetwork_Giraffe
 
 
 def generate_game(model: PolicyValNetwork_Giraffe):
