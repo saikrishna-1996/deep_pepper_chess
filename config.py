@@ -74,7 +74,7 @@ class Config(object):
     # Game Generator
     TEMP_REDUCE_STEP = 50
     MINGAMES = 500
-    NUM_GAMES = 100
+    NUM_GAMES = 4
 
     # PATHS
     ROOTDIR = '~\home'  ##### DEFINE AS REQ'd
