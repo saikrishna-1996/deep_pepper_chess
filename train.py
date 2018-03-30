@@ -31,13 +31,27 @@ def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_
     else:
         game_data = games
 
-    for games_trained in range(min_num_games):
-        if game_data is not None:
-            for data in game_data[0]:
-                features = torch.from_numpy(np.array(data[0]))
-                do_backprop(features, data[1], data[2], model)
+    if game_data is not None:
+        for game in game_data:
+            num_batches = int(len(game)/Config.batch_size+1)
+            for i in range(num_batches):
+                game= np.array(game)
 
+                lower_bound = int(i*Config.batch_size)
+                if lower_bound>len(game):
+                    break
+                upper_bound = int((i+1)*Config.batch_size)
+                if upper_bound > len(game):
+                    upper_bound = len(game)
+                data = game[lower_bound:upper_bound,:]
+
+                features = np.vstack(data[:,0])
+
+                policy = np.vstack(data[:,1]).astype(float)
+                features = torch.from_numpy(features.astype(float))
+                do_backprop(features, policy, data[:,2], model)
     return model
+
 
 
 def cross_entropy(pred, soft_targets):
@@ -61,12 +75,12 @@ def do_backprop(features, policy, act_val, model):
     #    batch_feature[i,:] = features.BoardToFeature(batch_board[i,board])
 
     # pvng_model = pvng(d_in, gf, pc, sc, h1a, h1b, h1c, h2p, h2e, d_out, eval_out=1)
-    features = features.view(1, -1)
+    #features = features.view(1, -1)
     # act_val = torch.autograd.Variable(act_val)
     # policy = torch.autograd.Variable(policy)
     nn_policy_out, nn_val_out = model(features)
-    act_val = torch.autograd.Variable(torch.Tensor([act_val]))
-    policy = torch.autograd.Variable((torch.from_numpy(policy)).long())
+    act_val = torch.autograd.Variable(torch.Tensor([act_val])).view(-1,1)
+    policy = torch.autograd.Variable(torch.from_numpy(policy).long())
     loss1 = criterion1(nn_val_out, act_val)
     # loss2 = criterion2(nn_policy_out,policy)
     loss2 = cross_entropy(nn_policy_out, policy)
