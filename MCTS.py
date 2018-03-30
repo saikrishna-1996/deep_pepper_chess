@@ -153,7 +153,6 @@ def MCTS(env: ChessEnv, temp: float,
         state_action_list, v = select(env, leafs, network)
         expand_and_eval(batch_size, network, state_action_list)
         backup(state_action_list, v)
-        print("Process ID: {}, simulation episode: {}".format(os.getpid(), simulation))
 
     N = leafs[0].N
 

@@ -1,3 +1,5 @@
+import multiprocessing
+
 import numpy as np
 
 from MCTS import MCTS
@@ -29,6 +31,7 @@ def generate_game(model: PolicyValNetwork_Giraffe):
         triplets.append([feature, pi])
         print('')
         print(env.board)
+        print("Running on {} ".format(multiprocessing.current_process()))
         env.step(Config.INDEXTOMOVE[action_index])
         game_over, z = env.is_game_over(moves)
 
