@@ -9,7 +9,7 @@ from policy_network import PolicyValNetwork_Giraffe
 
 
 def generate_game(model: PolicyValNetwork_Giraffe):
-    triplet = []
+    triplets = []
     step_game = 0
     temperature = 1
     env = ChessEnv()
@@ -26,13 +26,13 @@ def generate_game(model: PolicyValNetwork_Giraffe):
 
         action_index = np.argmax(pi)
         feature = BoardToFeature(env.board)
-        triplet.append([feature, pi])
+        triplets.append([feature, pi])
         print('')
         print(env.board)
         env.step(Config.INDEXTOMOVE[action_index])
         game_over, z = env.is_game_over(moves)
 
-    for i in range(len(triplet) - step_game, len(triplet)):
-        triplet[i].append(z)
+    for i in range(len(triplets) - step_game, len(triplets)):
+        triplets[i].append(z)
 
-    return triplet
+    return triplets

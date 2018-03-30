@@ -22,7 +22,7 @@ parser.add_argument('--checkpoint-path', type=str, default=None, help='Path for 
 parser.add_argument('--data-path', type=str, default='./data', help='Path to data')
 parser.add_argument('--workers', type=int, help='Number of workers used for generating games', default=2)
 parser.add_argument('--seed', type=int, default=1, help='random seed (default: 1)')
-parser.add_argument('--no-cuda', action='store_true', default=False, help='Disables GPU use')
+parser.add_argument('--no-cuda', action='store_true', default=True, help='Disables GPU use')
 
 args = parser.parse_args()
 args.cuda = True if not args.no_cuda and torch.cuda.is_available() else False
@@ -69,8 +69,7 @@ if __name__ == '__main__':
 
     i = 0
     while True:
-        if i % 100:
-            torch.save(champion.current_policy, "./{}.mdl".format(i))
+        torch.save(champion.current_policy, "./{}.mdl".format(i))
         games = generator.generate_games()
         improver.improve_policy(games)
         i += 1

@@ -1,11 +1,13 @@
 import numpy as np
 import torch
 
+import os
 from chess_env import ChessEnv
 from config import Config
 from features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
 from policy_network import PolicyValNetwork_Giraffe
+from utils import timeit
 
 
 def evaluate_p(list_board, network):
@@ -127,14 +129,9 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array
 def MCTS(env: ChessEnv,
          temp: float,
          network: PolicyValNetwork_Giraffe,
-         explore_factor=Config.EXPLORE_FACTOR,
          dirichlet_alpha=Config.D_ALPHA,
-         epsilon: float = Config.EPS,
          batch_size: int = Config.BATCH_SIZE,
-         init_W=np.zeros((Config.d_out,)),
-         init_N=np.ones((Config.d_out,)) * 0.001,
-         init_P=np.ones((Config.d_out,)) * (1 / Config.d_out)) -> np.ndarray:
-    # we can add here all our hyper-parameters
+         ) -> np.ndarray:
     """
     Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
     arguments: state: the root state from where the stimulation start. A board.
@@ -156,80 +153,10 @@ def MCTS(env: ChessEnv,
     # env_copy = env.copy()
     leafs = []
     for simulation in range(Config.NUM_SIMULATIONS):
-        curr_env = env.copy()
-        state_action_list = []  # list of leafs in the same run
-        moves = 0
-        resign = False
-
-        ########################
-        ######## Select ########
-        ########################
-        game_over, v = curr_env.is_game_over(moves)
-        while not game_over and not resign:
-            visited, index = state_visited(leafs, curr_env.board)
-            if visited:
-                state_action_list.append(leafs[index])
-            else:  # if state unvisited get legal moves probabilities using policy network
-                if len(leafs) == 0:
-                    root = Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), init_P.copy(), explore_factor)
-                    all_move_probs = init_P
-                    legal_move_probs = legal_mask(curr_env.board, all_move_probs, dirichlet=True, epsilon=epsilon)
-                    root.P = legal_move_probs
-                    state_action_list.append(root)
-                else:
-                    all_move_probs = init_P
-                    legal_move_probs = legal_mask(curr_env.board, all_move_probs)
-                    state_action_list.append(
-                        Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(), explore_factor))
-                leafs.append(state_action_list[-1])
-
-            best_action = state_action_list[-1].best_action(True)
-            best_action_index = Config.MOVETOINDEX[best_action]
-            # print("Best Action: " + repr(best_action))
-            # print(curr_env.board)
-            curr_env.step(best_action)
-            moves += 1
-            game_over, v = curr_env.is_game_over(moves)
-
-        ##########################
-        ### Expand and evaluate###
-        ##########################
-
-        # game_over_check, end_score = curr_env.game_over()
-        # if not game_over_check:
-        #    resign_check, resign_score = resignation(stockfish, curr_env.board)
-        #    print ("Resignation?" + str(resign_check))
-        # v = 0
-        # if game_over_check:
-        #    v = end_score
-        # elif resign_check:
-        #    v = resign_score
-        # else:
-        #    raise Exception("This should never happen!")
-
-        number_batches = max(len(state_action_list) // batch_size, 1)
-        start = 0
-        end = min(batch_size, len(state_action_list))
-        for batch in range(number_batches):
-            list_p = evaluate_p([state_action_list[i].env.board for i in range(start, end)], network).data
-            list_p = np.exp(list_p)
-            for i in range(start, end):
-                legal_move_probs = legal_mask(state_action_list[i].env.board, list_p[i - start])
-                state_action_list[i].P_update(legal_move_probs)
-            start = end
-            end += min(batch_size, len(state_action_list) - start)
-
-        ###############
-        ### Back-up ###
-        ###############
-
-        for i in list(reversed(range(len(state_action_list)))):
-            action = state_action_list[i].taken_action  # always legal since best_action
-            action_index = Config.MOVETOINDEX[action]
-            state_action_list[i].N_update(action_index)
-            state_action_list[i].W_update(v, action_index)
-
-        print("Simulation episode: " + str(simulation))
+        state_action_list, v = select(env, leafs)
+        expand_and_eval(batch_size, network, state_action_list)
+        backup(state_action_list, v)
+        print("Process ID: {}, simulation episode: {}".format(os.getpid(), simulation))
 
     N = leafs[0].N
 
@@ -238,3 +165,85 @@ def MCTS(env: ChessEnv,
     pi = np.divide(np.power(N, temp), norm_factor)
 
     return pi
+
+
+###############
+### Back-up ###
+###############
+
+def backup(state_action_list, v):
+    for i in list(reversed(range(len(state_action_list)))):
+        action = state_action_list[i].taken_action  # always legal since best_action
+        action_index = Config.MOVETOINDEX[action]
+        state_action_list[i].N_update(action_index)
+        state_action_list[i].W_update(v, action_index)
+
+
+##########################
+### Expand and evaluate###
+##########################
+
+def expand_and_eval(batch_size, network, state_action_list):
+    # game_over_check, end_score = curr_env.game_over()
+    # if not game_over_check:
+    #    resign_check, resign_score = resignation(stockfish, curr_env.board)
+    #    print ("Resignation?" + str(resign_check))
+    # v = 0
+    # if game_over_check:
+    #    v = end_score
+    # elif resign_check:
+    #    v = resign_score
+    # else:
+    #    raise Exception("This should never happen!")
+    number_batches = max(len(state_action_list) // batch_size, 1)
+    start = 0
+    end = min(batch_size, len(state_action_list))
+    for batch in range(number_batches):
+        list_p = evaluate_p([state_action_list[i].env.board for i in range(start, end)], network).data
+        list_p = np.exp(list_p)
+        for i in range(start, end):
+            legal_move_probs = legal_mask(state_action_list[i].env.board, list_p[i - start])
+            state_action_list[i].P_update(legal_move_probs)
+        start = end
+        end += min(batch_size, len(state_action_list) - start)
+
+
+########################
+######## Select ########
+########################
+
+def select(env, leafs):
+    init_W = np.zeros((Config.d_out,))
+    init_N = np.ones((Config.d_out,)) * 0.001,
+    init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
+    curr_env = env.copy()
+    state_action_list = []  # list of leafs in the same run
+    moves = 0
+    resign = False
+    game_over, v = curr_env.is_game_over(moves)
+    while not game_over and not resign:
+        visited, index = state_visited(leafs, curr_env.board)
+        if visited:
+            state_action_list.append(leafs[index])
+        else:  # if state unvisited get legal moves probabilities using policy network
+            if len(leafs) == 0:
+                root = Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), init_P.copy(), Config.EXPLORE_FACTOR)
+                all_move_probs = init_P
+                legal_move_probs = legal_mask(curr_env.board, all_move_probs, dirichlet=True, epsilon=Config.EPS)
+                root.P = legal_move_probs
+                state_action_list.append(root)
+            else:
+                all_move_probs = init_P
+                legal_move_probs = legal_mask(curr_env.board, all_move_probs)
+                state_action_list.append(
+                    Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(), Config.EXPLORE_FACTOR))
+            leafs.append(state_action_list[-1])
+
+        best_action = state_action_list[-1].best_action(True)
+        best_action_index = Config.MOVETOINDEX[best_action]
+        # print("Best Action: " + repr(best_action))
+        # print(curr_env.board)
+        curr_env.step(best_action)
+        moves += 1
+        game_over, v = curr_env.is_game_over(moves)
+    return state_action_list, v
