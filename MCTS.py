@@ -7,7 +7,6 @@ from config import Config
 from features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
 from policy_network import PolicyValNetwork_Giraffe
-from utils import timeit
 
 
 def evaluate_p(list_board, network):
@@ -126,12 +125,10 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array
 
 # state type and shape does not matter
 
-def MCTS(env: ChessEnv,
-         temp: float,
+def MCTS(env: ChessEnv, temp: float,
          network: PolicyValNetwork_Giraffe,
          dirichlet_alpha=Config.D_ALPHA,
-         batch_size: int = Config.BATCH_SIZE,
-         ) -> np.ndarray:
+         batch_size: int = Config.BATCH_SIZE) -> np.ndarray:
     """
     Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
     arguments: state: the root state from where the stimulation start. A board.
@@ -153,7 +150,7 @@ def MCTS(env: ChessEnv,
     # env_copy = env.copy()
     leafs = []
     for simulation in range(Config.NUM_SIMULATIONS):
-        state_action_list, v = select(env, leafs)
+        state_action_list, v = select(env, leafs, network)
         expand_and_eval(batch_size, network, state_action_list)
         backup(state_action_list, v)
         print("Process ID: {}, simulation episode: {}".format(os.getpid(), simulation))
@@ -212,7 +209,7 @@ def expand_and_eval(batch_size, network, state_action_list):
 ######## Select ########
 ########################
 
-def select(env, leafs):
+def select(env, leafs, network):
     init_W = np.zeros((Config.d_out,))
     init_N = np.ones((Config.d_out,)) * 0.001,
     init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
@@ -228,15 +225,17 @@ def select(env, leafs):
         else:  # if state unvisited get legal moves probabilities using policy network
             if len(leafs) == 0:
                 root = Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), init_P.copy(), Config.EXPLORE_FACTOR)
-                all_move_probs = init_P
+                all_move_probs, _ = network.forward(torch.from_numpy(BoardToFeature(curr_env.board)).unsqueeze(0))
+                all_move_probs = all_move_probs.squeeze().data.numpy()
                 legal_move_probs = legal_mask(curr_env.board, all_move_probs, dirichlet=True, epsilon=Config.EPS)
                 root.P = legal_move_probs
                 state_action_list.append(root)
             else:
-                all_move_probs = init_P
+                all_move_probs, _ = network.forward(torch.from_numpy(BoardToFeature(curr_env.board)).unsqueeze(0))
+                all_move_probs = all_move_probs.squeeze().data.numpy()
                 legal_move_probs = legal_mask(curr_env.board, all_move_probs)
-                state_action_list.append(
-                    Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(), Config.EXPLORE_FACTOR))
+                leaf = Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(), Config.EXPLORE_FACTOR)
+                state_action_list.append(leaf)
             leafs.append(state_action_list[-1])
 
         best_action = state_action_list[-1].best_action(True)
