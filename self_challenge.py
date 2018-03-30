@@ -45,6 +45,7 @@ class Champion(object):
         p = np.random.binomial(1, 0.5) == 1
         white, black = (self.current_policy, candidate) if p else (candidate, self.current_policy)
         env = ChessEnv()
+        env.reset()
         game_over, z = env.is_game_over(moves)
         while not game_over:
             if env.white_to_move:
