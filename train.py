@@ -9,7 +9,6 @@ import torch.nn as nn
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
 from config import Config
 from policy_network import PolicyValNetwork_Giraffe
-from utils import timeit
 
 
 def load_gamefile(net_number):  # I'm not married to this, I think it could be done better.
