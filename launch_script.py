@@ -41,7 +41,8 @@ class GameGenerator(object):
 
     def generate_games(self):
         start = time.time()
-        games = self.pool.map(self.play_game, range(int(self.batch_size / args.workers + 1)))
+        games_per_worker = range(int(self.batch_size / args.workers + 1))
+        games = self.pool.map(self.play_game, games_per_worker)
         print("Generated {} games in {}".format(len(games), time.time() - start))
         return games
 
@@ -59,10 +60,10 @@ class PolicyImprover(object):
         model = copy.copy(self.champion.current_policy)
         return train_model(model=model, games=new_games, min_num_games=args.championship_rounds)
 
-    def improve_policy(self, games):
+    def improve_policy(self, games, pool):
         start = time.time()
         new_policy = self.train_model(games)
-        self.champion.run_tournament(new_policy)
+        self.champion.test_candidate(new_policy, pool)
         print("Improved policy in: {}".format(time.time() - start))
 
 
@@ -77,5 +78,5 @@ if __name__ == '__main__':
     while True:
         torch.save(champion.current_policy, "./{}.mdl".format(i))
         games = generator.generate_games()
-        improver.improve_policy(games)
+        improver.improve_policy(games, pool)
         i += 1

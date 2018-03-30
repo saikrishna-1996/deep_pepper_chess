@@ -1,3 +1,6 @@
+from functools import partial
+from multiprocessing import Manager
+
 import numpy as np
 
 from MCTS import MCTS
@@ -10,48 +13,58 @@ class Champion(object):
     def __init__(self, current_policy):
         self.current_policy = current_policy
 
-    def run_tournament(self, candidate, NUMBER_GAMES=Config.NUM_GAMES):
+    def test_candidate(self, candidate, pool):
         print('START TOURNAMENT')
-        env = ChessEnv()
 
-        candidate_alpha_score = []
-        old_alpha_score = []
+        with Manager() as manager:
+            candidate_alpha_scores = manager.list()
+            incumbent_alpha_scores = manager.list()
+            print(candidate_alpha_scores)
 
-        for game_number in range(NUMBER_GAMES):
-            moves = 0
-            temperature = 10e-6
+            games_per_worker = range(int(Config.NUM_GAMES / pool._processes + 1))
+            func = partial(self.run_tournament, candidate, candidate_alpha_scores, incumbent_alpha_scores)
+            pool.map(func, games_per_worker)
 
-            p = np.random.binomial(1, 0.5) == 1
-            white, black = (self.current_policy, candidate) if p else (candidate, self.current_policy)
-            env.reset()
-            game_over, z = env.is_game_over(moves)
-            while not game_over:
-                if env.white_to_move:
-                    player = white
-                else:
-                    player = black
+            candidate_total = sum(candidate_alpha_scores)
+            incumbent_total = sum(incumbent_alpha_scores)
 
-                pi = MCTS(env, temp=temperature, network=player)
-                action_index = np.argmax(pi)
-                env.step(Config.INDEXTOMOVE[action_index])
-                moves += 1
-                game_over, z = env.is_game_over(moves)
-                # should be able to give the same state even if no room for legal move
-
-            # from white perspective
-
-            if white == candidate:
-                candidate_alpha_score.append(+z)
-                old_alpha_score.append(-z)
+            if candidate_total > incumbent_total:
+                winner = 'new_alpha'
+                self.current_policy = candidate
+            elif candidate_total < incumbent_total:
+                winner = 'old_alpha'
             else:
-                candidate_alpha_score.append(-z)
-                old_alpha_score.append(+z)
+                winner = None
 
-        if sum(candidate_alpha_score) > sum(old_alpha_score):
-            winner = 'new_alpha'
-            self.current_policy = candidate
-        elif sum(candidate_alpha_score) < sum(old_alpha_score):
-            winner = 'old_alpha'
+            print("Candidate Score / Old Score / Winner: {} / {} / {}".format(candidate_total, incumbent_total, winner))
+
+    def run_tournament(self, candidate, candidate_alpha_scores, incumbent_alpha_scores, _):
+        moves = 0
+        temperature = 10e-6
+
+        p = np.random.binomial(1, 0.5) == 1
+        white, black = (self.current_policy, candidate) if p else (candidate, self.current_policy)
+        env = ChessEnv()
+        game_over, z = env.is_game_over(moves)
+        while not game_over:
+            if env.white_to_move:
+                player = white
+            else:
+                player = black
+
+            pi = MCTS(env, temp=temperature, network=player)
+            action_index = np.argmax(pi)
+            env.step(Config.INDEXTOMOVE[action_index])
+            moves += 1
+            game_over, z = env.is_game_over(moves)
+            # should be able to give the same state even if no room for legal move
+
+        # from white perspective
+
+        if white == candidate:
+            candidate_alpha_scores.append(+z)
+            incumbent_alpha_scores.append(-z)
         else:
-            winner = None
-        print(winner)
+            candidate_alpha_scores.append(-z)
+            incumbent_alpha_scores.append(+z)
+
