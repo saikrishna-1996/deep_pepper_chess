@@ -211,7 +211,7 @@ def expand_and_eval(batch_size, network, state_action_list):
 
 def select(env, leafs, network):
     init_W = np.zeros((Config.d_out,))
-    init_N = np.ones((Config.d_out,)) * 0.001,
+    init_N = np.ones((Config.d_out,)) * 0.001
     init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
     curr_env = env.copy()
     state_action_list = []  # list of leafs in the same run

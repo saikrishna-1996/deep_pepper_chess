@@ -3,6 +3,7 @@
 import argparse
 import copy
 import multiprocessing
+import time
 
 import torch
 
@@ -39,7 +40,10 @@ class GameGenerator(object):
         return generate_game(self.champion.current_policy)
 
     def generate_games(self):
-        return self.pool.map(self.play_game, range(int(self.batch_size/args.workers + 1)))
+        start = time.time()
+        games = self.pool.map(self.play_game, range(int(self.batch_size / args.workers + 1)))
+        print("Generated {} games in {}".format(len(games), time.time() - start))
+        return games
 
     def __getstate__(self):
         self_dict = self.__dict__.copy()
@@ -56,12 +60,14 @@ class PolicyImprover(object):
         return train_model(model=model, games=new_games, min_num_games=args.championship_rounds)
 
     def improve_policy(self, games):
+        start = time.time()
         new_policy = self.train_model(games)
         self.champion.run_tournament(new_policy)
+        print("Improved policy in: {}".format(time.time() - start))
 
 
 if __name__ == '__main__':
-    print("hello")
+    print("Launching Deep Pepper...")
     pool = multiprocessing.Pool(args.workers)
     champion = Champion(PolicyValNetwork_Giraffe())
     generator = GameGenerator(champion, pool, args.batch_size)
