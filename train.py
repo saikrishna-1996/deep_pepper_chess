@@ -42,8 +42,7 @@ def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_
 
 
 def cross_entropy(pred, soft_targets):
-    logsoftmax = nn.LogSoftmax()
-    return torch.mean(torch.sum(- soft_targets.double() * logsoftmax(pred).double(), 1))
+    return torch.mean(torch.sum(- soft_targets.double() * torch.log(pred).double(), 1))
 
 
 def do_backprop(features, policy, act_val, model):
