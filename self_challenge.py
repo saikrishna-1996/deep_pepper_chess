@@ -11,6 +11,7 @@ class Champion(object):
         self.current_policy = current_policy
 
     def run_tournament(self, candidate, NUMBER_GAMES=Config.NUM_GAMES):
+        print('START TOURNAMENT')
         env = ChessEnv()
 
         candidate_alpha_score = []
@@ -48,9 +49,9 @@ class Champion(object):
 
         if sum(candidate_alpha_score) > sum(old_alpha_score):
             winner = 'new_alpha'
+            self.current_policy = candidate
         elif sum(candidate_alpha_score) < sum(old_alpha_score):
             winner = 'old_alpha'
         else:
             winner = None
-
-        self.current_policy = winner
+        print(winner)
