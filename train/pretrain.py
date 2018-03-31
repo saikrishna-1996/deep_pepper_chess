@@ -24,6 +24,9 @@ batch_size = 32
 # optimizer = torch.optim.SGD(critic_model.parameters(), lr=1e-4, momentum=0.9)  # change it Adam or Adagrad may be
 
 
+def cross_entropy(pred, soft_targets):
+    return torch.mean(torch.sum(- soft_targets.doble() * torch.log(pred).double(), 1))
+
 def pretrain_model(model=PolicyValNetwork_Giraffe(), games=None):
     if games is None:
         game_data = load_kaspagames
