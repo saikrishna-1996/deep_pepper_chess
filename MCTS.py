@@ -16,8 +16,8 @@ def evaluate_p(list_board, network):
     probability = network.forward(tensor)[0]
     return probability.data.numpy()
 #
-# def Leaf(state, leafs_list):
-#     if state_visited(leafs_list, state)[0]:
+# def Leaf(state, archive_list):
+#     if state_visited(archive_list, state)[0]:
 #         return False
 #     return True
 
@@ -61,6 +61,8 @@ class Leaf(object):
 
     @property
     def Q(self):
+        if not np.sum(self.N):
+            return self.N
         return np.divide(self.W, self.N)
 
     @property
@@ -151,21 +153,20 @@ def MCTS(env: ChessEnv, temp: float,
     :return: return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
     """
 
-    # history of leafs for all previous runs
+    # history of archive for all previous runs
     # env_copy = env.copy()
-    leafs = []
+    archive = []
     for simulation in range(Config.NUM_SIMULATIONS):
-        print(simulation)
         init_W = np.zeros((Config.d_out,))
-        init_N = np.ones((Config.d_out,)) * 0.001
+        init_N = np.ones((Config.d_out,))
         init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
 
-        curr_env, state_action_list, moves = select(env, leafs)
-        v = expand_and_eval(curr_env, leafs, network, state_action_list, init_W, init_N)
+        curr_env, state_action_list, moves = select(env, archive)
+        v = expand_and_eval(curr_env, archive, network, state_action_list, init_W, init_N)
         backup(state_action_list, v)
 
 
-    N = leafs[0].N
+    N = archive[0].N
 
     norm_factor = np.sum(np.power(N, temp))
     # optimum policy
@@ -178,11 +179,17 @@ def MCTS(env: ChessEnv, temp: float,
 ###############
 
 def backup(state_action_list, v):
+    index = 0
     for state in list(reversed(state_action_list)):
-        action = state.taken_action  # always legal since best_action
-        action_index = Config.MOVETOINDEX[action]
-        state.N_update(action_index)
-        state.W_update(v, action_index)
+        if index == 0:
+            index += 1
+            continue
+        else:
+            action = state.taken_action  # always legal since best_action
+            action_index = Config.MOVETOINDEX[action]
+            state.N_update(action_index)
+            state.W_update(v, action_index)
+
     return
 
 
@@ -190,18 +197,18 @@ def backup(state_action_list, v):
 ### Expand and evaluate###
 ##########################
 
-def expand_and_eval(state, leafs, network, state_action_list, init_W, init_N):
+def expand_and_eval(state, archive, network, state_action_list, init_W, init_N):
     all_move_probs, v = network.forward(torch.from_numpy(BoardToFeature(state.board)).unsqueeze(0))
     all_move_probs = all_move_probs.squeeze().data.numpy()
-    if not leafs:
+    if not archive:
         legal_move_probs = legal_mask(state.board, all_move_probs, dirichlet=True, epsilon=Config.EPS)
     else:
         legal_move_probs = legal_mask(state.board, all_move_probs)
     leaf = Leaf(state.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(),
                 Config.EXPLORE_FACTOR)
-    leaf.best_action(act=True)
+    # leaf.best_action(act=True)
     state_action_list.append(leaf)
-    leafs.append(state_action_list[-1])
+    archive.append(state_action_list[-1])
     return v
 
 
@@ -209,22 +216,19 @@ def expand_and_eval(state, leafs, network, state_action_list, init_W, init_N):
 ######## Select ########
 ########################
 
-def select(env, leafs):
+def select(env, archive):
     curr_env = env.copy()
-    state_action_list = []  # list of leafs in the same run
+    state_action_list = []  # list of archive in the same run
     moves = 0
 
     leaf = False
     while not leaf:
-        visited, index = state_visited(leafs, curr_env.board)
+        visited, index = state_visited(archive, curr_env.board)
         game_over, v = curr_env.is_game_over(moves)
         if visited and not game_over:
 
-            state_action_list.append(leafs[index])
+            state_action_list.append(archive[index])
             best_action = state_action_list[-1].best_action(True)
-            best_action_index = Config.MOVETOINDEX[best_action]
-            # print("Best Action: " + repr(best_action))
-            # print(curr_env.board)
             curr_env.step(best_action)
             moves += 1
         else:
