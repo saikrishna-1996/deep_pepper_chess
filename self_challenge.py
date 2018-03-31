@@ -69,4 +69,3 @@ class Champion(object):
             candidate_alpha_scores.append(-z)
             incumbent_alpha_scores.append(+z)
             print("Incumbent won!")
-

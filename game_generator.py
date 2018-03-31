@@ -3,7 +3,6 @@ import multiprocessing
 import numpy as np
 
 from MCTS import MCTS
-# this is hypothetical functions and classes that should be created by teamates.
 from chess_env import ChessEnv
 from config import Config
 from features import BoardToFeature

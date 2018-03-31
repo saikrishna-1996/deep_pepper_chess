@@ -3,7 +3,6 @@ import os
 
 import numpy as np
 import torch
-import torch.nn as nn
 
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
@@ -33,25 +32,24 @@ def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_
 
     if game_data is not None:
         for game in game_data:
-            num_batches = int(len(game)/Config.batch_size+1)
+            num_batches = int(len(game) / Config.batch_size + 1)
             for i in range(num_batches):
-                game= np.array(game)
+                game = np.array(game)
 
-                lower_bound = int(i*Config.batch_size)
-                if lower_bound>len(game):
+                lower_bound = int(i * Config.batch_size)
+                if lower_bound > len(game):
                     break
-                upper_bound = int((i+1)*Config.batch_size)
+                upper_bound = int((i + 1) * Config.batch_size)
                 if upper_bound > len(game):
                     upper_bound = len(game)
-                data = game[lower_bound:upper_bound,:]
+                data = game[lower_bound:upper_bound, :]
 
-                features = np.vstack(data[:,0])
+                features = np.vstack(data[:, 0])
 
-                policy = np.vstack(data[:,1]).astype(float)
+                policy = np.vstack(data[:, 1]).astype(float)
                 features = torch.from_numpy(features.astype(float))
-                do_backprop(features, policy, data[:,2], model)
+                do_backprop(features, policy, data[:, 2], model)
     return model
-
 
 
 def cross_entropy(pred, soft_targets):
@@ -75,11 +73,11 @@ def do_backprop(features, policy, act_val, model):
     #    batch_feature[i,:] = features.BoardToFeature(batch_board[i,board])
 
     # pvng_model = pvng(d_in, gf, pc, sc, h1a, h1b, h1c, h2p, h2e, d_out, eval_out=1)
-    #features = features.view(1, -1)
+    # features = features.view(1, -1)
     # act_val = torch.autograd.Variable(act_val)
     # policy = torch.autograd.Variable(policy)
     nn_policy_out, nn_val_out = model(features)
-    act_val = torch.autograd.Variable(torch.Tensor([act_val])).view(-1,1)
+    act_val = torch.autograd.Variable(torch.Tensor([act_val])).view(-1, 1)
     policy = torch.autograd.Variable(torch.from_numpy(policy).long())
     loss1 = criterion1(nn_val_out, act_val)
     # loss2 = criterion2(nn_policy_out,policy)

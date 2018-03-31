@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 
-import os
 from chess_env import ChessEnv
 from config import Config
 from features import BoardToFeature
