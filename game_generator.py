@@ -10,6 +10,7 @@ from policy_network import PolicyValNetwork_Giraffe
 
 
 def generate_game(model: PolicyValNetwork_Giraffe):
+    np.random.seed()
     triplets = []
     step_game = 0
     temperature = 1
