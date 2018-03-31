@@ -1,11 +1,11 @@
 import numpy as np
 import torch
 
-from chess_env import ChessEnv
-from config import Config
-from features import BoardToFeature
+from game.chess_env import ChessEnv
+from game.features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
-from policy_network import PolicyValNetwork_Giraffe
+from config import Config
+from network.policy_network import PolicyValNetwork_Giraffe
 
 
 def evaluate_p(list_board, network):
@@ -31,7 +31,7 @@ def Q(N, W):
 
 class Leaf(object):
     # This class inherit the Board class which control the board representation,
-    # find legale move and next board represenation.
+    # find legal move and next board represenation.
     # It has the ability to store and update for each leaf the
     #  number of state-action N(s,a), Q(s,a) and P(s,a)
     def __init__(self, env: ChessEnv, init_W, init_N, init_P, explore_factor):

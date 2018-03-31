@@ -3,7 +3,7 @@ import chess.uci
 # import random
 import torch
 
-from policy_network import PolicyValNetwork_Giraffe
+from network.policy_network import PolicyValNetwork_Giraffe
 
 # Not used
 
@@ -58,6 +58,7 @@ def get_triplet_and_backprop(board_positions):
 
 def stockfish_pol(board_position):
     pass
+
 
 def do_backprop(features, policy, val, model):
     criterion1 = torch.nn.MSELoss(size_average=False)

@@ -3,9 +3,8 @@ from multiprocessing import Manager
 
 import numpy as np
 
-from MCTS import MCTS
-from chess_env import ChessEnv
-# this is hypothetical functions and classes that should be created by teamates.
+from train.MCTS import MCTS
+from game.chess_env import ChessEnv
 from config import Config
 
 

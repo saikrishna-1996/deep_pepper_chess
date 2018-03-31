@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 
 import argparse
-import copy
 import multiprocessing
-import time
 
 import torch
 
-from game_generator import generate_game
+from game_generator import GameGenerator
+from policy_improver import PolicyImprover
 from policy_network import PolicyValNetwork_Giraffe
 from self_challenge import Champion
-from train import train_model
 
 parser = argparse.ArgumentParser(description='Launcher for distributed Chess trainer')
 
@@ -30,49 +28,12 @@ args.cuda = True if not args.no_cuda and torch.cuda.is_available() else False
 torch.manual_seed(args.seed)
 
 
-class GameGenerator(object):
-    def __init__(self, champion: Champion, pool: multiprocessing.Pool, batch_size: int):
-        self.champion = champion
-        self.pool = pool
-        self.batch_size = batch_size
-
-    def play_game(self, _):
-        return generate_game(self.champion.current_policy)
-
-    def generate_games(self):
-        start = time.time()
-        games_per_worker = range(int(self.batch_size / args.workers + 1))
-        games = self.pool.map(self.play_game, games_per_worker)
-        print("Generated {} games in {}".format(len(games), time.time() - start))
-        return games
-
-    def __getstate__(self):
-        self_dict = self.__dict__.copy()
-        del self_dict['pool']
-        return self_dict
-
-
-class PolicyImprover(object):
-    def __init__(self, champion):
-        self.champion = champion
-
-    def train_model(self, new_games):
-        model = copy.copy(self.champion.current_policy)
-        return train_model(model=model, games=new_games, min_num_games=args.championship_rounds)
-
-    def improve_policy(self, games, pool):
-        start = time.time()
-        new_policy = self.train_model(games)
-        self.champion.test_candidate(new_policy, pool)
-        print("Improved policy in: {}".format(time.time() - start))
-
-
-if __name__ == '__main__':
+def main():
     print("Launching Deep Pepper...")
     pool = multiprocessing.Pool(args.workers)
     champion = Champion(PolicyValNetwork_Giraffe())
-    generator = GameGenerator(champion, pool, args.batch_size)
-    improver = PolicyImprover(champion)
+    generator = GameGenerator(champion, pool, args.batch_size, args.workers)
+    improver = PolicyImprover(champion, args.championship_rounds)
 
     i = 0
     while True:
@@ -80,3 +41,7 @@ if __name__ == '__main__':
         games = generator.generate_games()
         improver.improve_policy(games, pool)
         i += 1
+
+
+if __name__ == '__main__':
+    main()
