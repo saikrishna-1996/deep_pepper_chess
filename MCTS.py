@@ -179,16 +179,11 @@ def MCTS(env: ChessEnv, temp: float,
 ###############
 
 def backup(state_action_list, v):
-    index = 0
     for state in list(reversed(state_action_list)):
-        if index == 0:
-            index += 1
-            continue
-        else:
-            action = state.taken_action  # always legal since best_action
-            action_index = Config.MOVETOINDEX[action]
-            state.N_update(action_index)
-            state.W_update(v, action_index)
+        action = state.taken_action  # always legal since best_action
+        action_index = Config.MOVETOINDEX[action]
+        state.N_update(action_index)
+        state.W_update(v, action_index)
 
     return
 
@@ -207,8 +202,7 @@ def expand_and_eval(state, archive, network, state_action_list, init_W, init_N):
     leaf = Leaf(state.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(),
                 Config.EXPLORE_FACTOR)
     # leaf.best_action(act=True)
-    state_action_list.append(leaf)
-    archive.append(state_action_list[-1])
+    archive.append(leaf)
     return v
 
 
