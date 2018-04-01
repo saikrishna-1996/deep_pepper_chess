@@ -161,8 +161,8 @@ def MCTS(env: ChessEnv, temp: float,
         init_N = np.ones((Config.d_out,))
         init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
 
-        curr_env, state_action_list, moves = select(env, archive)
-        v = expand_and_eval(curr_env, archive, network, state_action_list, init_W, init_N)
+        curr_env, state_action_list, moves, game_over, z = select(env, archive)
+        v = expand_and_eval(curr_env, archive, network, state_action_list, init_W, init_N, game_over, z)
         backup(state_action_list, v)
 
 
@@ -192,7 +192,9 @@ def backup(state_action_list, v):
 ### Expand and evaluate###
 ##########################
 
-def expand_and_eval(state, archive, network, state_action_list, init_W, init_N):
+def expand_and_eval(state, archive, network, state_action_list, init_W, init_N, game_over, z):
+    if game_over:
+        return z
     all_move_probs, v = network.forward(torch.from_numpy(BoardToFeature(state.board)).unsqueeze(0))
     all_move_probs = all_move_probs.squeeze().data.numpy()
     if not archive:
@@ -218,7 +220,7 @@ def select(env, archive):
     leaf = False
     while not leaf:
         visited, index = state_visited(archive, curr_env.board)
-        game_over, v = curr_env.is_game_over(moves)
+        game_over, z = curr_env.is_game_over(moves)
         if visited and not game_over:
 
             state_action_list.append(archive[index])
@@ -227,4 +229,4 @@ def select(env, archive):
             moves += 1
         else:
             leaf = True
-    return curr_env, state_action_list, moves
+    return curr_env, state_action_list, moves, game_over, z
