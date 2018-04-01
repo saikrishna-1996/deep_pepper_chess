@@ -33,8 +33,9 @@ def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_
     if game_data is not None:
         for game in game_data:
             num_batches = int(len(game) / Config.batch_size + 1)
+            game = np.array(game)
             for i in range(num_batches):
-                game = np.array(game)
+                
 
                 lower_bound = int(i * Config.batch_size)
                 if lower_bound > len(game):
@@ -42,13 +43,14 @@ def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_
                 upper_bound = int((i + 1) * Config.batch_size)
                 if upper_bound > len(game):
                     upper_bound = len(game)
-                data = game[lower_bound:upper_bound, :]
+                if (data.shape[0]!= 0):
+                    data = game[lower_bound:upper_bound, :]
 
-                features = np.vstack(data[:, 0])
+                    features = np.vstack(data[:, 0])
 
-                policy = np.vstack(data[:, 1]).astype(float)
-                features = torch.from_numpy(features.astype(float))
-                do_backprop(features, policy, data[:, 2], model)
+                    policy = np.vstack(data[:, 1]).astype(float)
+                    features = torch.from_numpy(features.astype(float))
+                    do_backprop(features, policy, data[:, 2], model)
     return model
 
 
