@@ -2,6 +2,8 @@ import chess.pgn
 import chess.uci
 # import random
 import torch
+import numpy as np
+from config import Config
 
 from network.policy_network import PolicyValNetwork_Giraffe
 
@@ -33,7 +35,22 @@ def pretrain_model(model=PolicyValNetwork_Giraffe(), games=None):
     else:
         game_data = games
 
-    # for games_trained in range(
+    if game_data is not None:
+        for game in game_data:
+            num_batches = int(len(game) / Config.batch_size + 1)
+            for i in range(num_batches):
+                game = np.array(game)
+                lower_bound = int(I * Config.batch_size)
+                if lower_bound > len(game):
+                    break
+                upper_bound = int((i+1) * Config.batch_size)
+                if upper_bound > len(game):
+                    upper_bound = len(game)
+
+                data = game[lower_bound:upper_bound, :]
+                features = np.vstack(data[:, 0])
+                policy = np.vstack(data[:, 1]).astype(float)
+
 
 
 def play_pgn():
