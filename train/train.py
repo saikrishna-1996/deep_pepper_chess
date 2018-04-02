@@ -43,9 +43,9 @@ def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_
                 upper_bound = int((i + 1) * Config.batch_size)
                 if upper_bound > len(game):
                     upper_bound = len(game)
+                
+                data = game[lower_bound:upper_bound, :]
                 if (data.shape[0]!= 0):
-                    data = game[lower_bound:upper_bound, :]
-
                     features = np.vstack(data[:, 0])
 
                     policy = np.vstack(data[:, 1]).astype(float)
