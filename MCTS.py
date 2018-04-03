@@ -1,13 +1,13 @@
+
 import numpy as np
 import torch
-
-import os
+import sys
 from chess_env import ChessEnv
-from config import Config
 from features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
+from config import Config
 from policy_network import PolicyValNetwork_Giraffe
-
+import copy
 
 def evaluate_p(list_board, network):
     list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
@@ -15,18 +15,13 @@ def evaluate_p(list_board, network):
     # expect that neural net ouput is a vector of probability
     probability = network.forward(tensor)[0]
     return probability.data.numpy()
-#
-# def Leaf(state, archive_list):
-#     if state_visited(archive_list, state)[0]:
-#         return False
-#     return True
 
 
 def state_visited(state_list, state):
     if not state_list:
         return False, None
-    for i, instance in enumerate(state_list):
-        if np.array_equal(instance.env.board, state):
+    for i in range(len(state_list)):
+        if np.array_equal(state_list[i].env.board, state):
             return True, i
     return False, None
 
@@ -35,23 +30,31 @@ def Q(N, W):
     return W / float(N)
 
 
-class Leaf(object):
+class Node(object):
     # This class inherit the Board class which control the board representation,
-    # find legale move and next board represenation.
+    # find legal move and next board represenation.
     # It has the ability to store and update for each leaf the
     #  number of state-action N(s,a), Q(s,a) and P(s,a)
-    def __init__(self, env: ChessEnv, init_W, init_N, init_P, explore_factor):
+    def __init__(self, env: ChessEnv, init_W, init_N, init_P, explore_factor, parent=None):
         assert init_N.shape == (Config.d_out,)
         assert init_W.shape == (Config.d_out,)
         assert init_P.shape == (Config.d_out,)
+
         self.env = env
+        self.init_p = init_P
+        self.init_n = init_N
+        self.init_w = init_W
         self.P = init_P
         self.N = init_N
         self.W = init_W
+        self.parent = parent
+        self.children = []
         self.explore_factor = explore_factor
         self.legal_move_inds = []
         self.legal_moves = []
         self.taken_action = None
+        self.best_child = None
+        self.best_action = None
         legal_moves = env.board.legal_moves
         for move in legal_moves:
             legal_move_uci = move.uci()
@@ -61,16 +64,16 @@ class Leaf(object):
 
     @property
     def Q(self):
-        if not np.sum(self.N):
-            return self.N
-        return np.divide(self.W, self.N)
+        Q =np.divide(self.W, self.N)
+        Q[np.isnan(Q)] = 0
+        return Q
 
     @property
     def U(self):
         return np.multiply(np.multiply(self.explore_factor, self.P),
                            np.divide(np.sqrt(np.sum(self.N)), (np.add(1., self.N))))
-
-    def best_action(self, act=False):
+    @property
+    def best_action_update(self):
         if not self.env.white_to_move:
             all_moves = (np.add(self.U, -self.Q))
         else:
@@ -80,27 +83,47 @@ class Leaf(object):
         max_list = np.argwhere(all_moves[self.legal_move_inds] == np.amax(all_moves[self.legal_move_inds]))
 
         move = self.legal_moves[np.random.choice(max_list.flatten(), 1)[0]]
-        if act:
-            self.taken_action = move
+
+        self.taken_action = move
         return move
 
     @property
-    def next_board(self):
-        best_index = self.best_action
-        mymove = Config.INDEXTOMOVE[best_index]
-        self.env.step(mymove)
-        return self.env.board
-        # return self.render_action(self.board, self.best_action)#assuming the function you did
-        # Do chess.Move()
+    def next_env(self):
+        best_index = self.taken_action
+        next_env = self.env.copy()
+        next_env.step(best_index)
+        return next_env
+
+    def expand(self):
+        children = []
+        for action in self.env.legal_moves:
+            next_env = self.env.copy()
+            next_env.step(str(action))
+            children.append(Node(next_env.copy(), self.init_w, self.init_n, self.init_p, self.explore_factor, self))
+        self.children = children
+        return
+
+
+    def best_child_update(self):
+        best_child = self.env.copy()
+        best_child.step(self.best_action_update)
+        for child in self.children:
+            if child.env.board == best_child.board:
+                self.best_child = child
+                return
+        raise ("Best child does not match with any of children ")
 
     def N_update(self, action_index):
         self.N[action_index] += 1
+        if not self.parent:
+            print(sum(self.N))
 
     def W_update(self, V_next, action_index):
         self.W[action_index] += V_next
 
     def P_update(self, new_P):
         self.P = new_P
+
 
 
 def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array:
@@ -152,21 +175,21 @@ def MCTS(env: ChessEnv, temp: float,
     :param init_P:
     :return: return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
     """
-
     # history of archive for all previous runs
     # env_copy = env.copy()
-    archive = []
+    init_W = np.zeros((Config.d_out,))
+    init_N = np.zeros((Config.d_out,))
+    init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
+
+    root_node = Node(env, init_W, init_N, init_P, Config.EXPLORE_FACTOR)
     for simulation in range(Config.NUM_SIMULATIONS):
-        init_W = np.zeros((Config.d_out,))
-        init_N = np.ones((Config.d_out,))
-        init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
-
-        curr_env, state_action_list, moves, game_over, z = select(env, archive)
-        v = expand_and_eval(curr_env, archive, network, state_action_list, init_W, init_N, game_over, z)
-        backup(state_action_list, v)
+        # print(simulation)
+        curr_node, moves, game_over, z = select(root_node, init_W.copy(), init_N.copy(), init_P.copy())
+        v, leaf = expand_and_eval(curr_node, network, init_W, init_N, init_P, game_over, z)
+        backup(leaf, v)
 
 
-    N = archive[0].N
+    N = root_node.N
 
     norm_factor = np.sum(np.power(N, temp))
     # optimum policy
@@ -174,59 +197,65 @@ def MCTS(env: ChessEnv, temp: float,
     return pi
 
 
-###############
-### Back-up ###
-###############
-
-def backup(state_action_list, v):
-    for state in list(reversed(state_action_list)):
-        action = state.taken_action  # always legal since best_action
-        action_index = Config.MOVETOINDEX[action]
-        state.N_update(action_index)
-        state.W_update(v, action_index)
-
-    return
-
-
-##########################
-### Expand and evaluate###
-##########################
-
-def expand_and_eval(state, archive, network, state_action_list, init_W, init_N, game_over, z):
-    if game_over:
-        return z
-    all_move_probs, v = network.forward(torch.from_numpy(BoardToFeature(state.board)).unsqueeze(0))
-    all_move_probs = all_move_probs.squeeze().data.numpy()
-    if not archive:
-        legal_move_probs = legal_mask(state.board, all_move_probs, dirichlet=True, epsilon=Config.EPS)
-    else:
-        legal_move_probs = legal_mask(state.board, all_move_probs)
-    leaf = Leaf(state.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(),
-                Config.EXPLORE_FACTOR)
-    # leaf.best_action(act=True)
-    archive.append(leaf)
-    return v
 
 
 ########################
 ######## Select ########
 ########################
 
-def select(env, archive):
-    curr_env = env.copy()
-    state_action_list = []  # list of archive in the same run
+def select(root_node, init_W, init_N, init_P):
+    curr_node = root_node
     moves = 0
+    game_over, z = curr_node.env.is_game_over(moves)
+    while curr_node.children and not game_over:
+        curr_node.best_child_update()
+        curr_node = curr_node.best_child
+        moves += 1
+        print(moves)
+        game_over, z = curr_node.env.is_game_over(moves)
+    return curr_node, moves, game_over, z
 
-    leaf = False
-    while not leaf:
-        visited, index = state_visited(archive, curr_env.board)
-        game_over, z = curr_env.is_game_over(moves)
-        if visited and not game_over:
 
-            state_action_list.append(archive[index])
-            best_action = state_action_list[-1].best_action(True)
-            curr_env.step(best_action)
-            moves += 1
-        else:
-            leaf = True
-    return curr_env, state_action_list, moves, game_over, z
+##########################
+### Expand and evaluate###
+##########################
+
+def expand_and_eval(node, network, init_W, init_N, init_P, game_over, z):
+
+    if game_over:
+        return z, node
+    #expand
+    node.expand()
+    #evaluate
+
+    all_move_probs, v = network.forward(torch.from_numpy(BoardToFeature(node.env.board)).unsqueeze(0))
+    all_move_probs = all_move_probs.squeeze().data.numpy()
+    if node.parent:
+        legal_move_probs = legal_mask(node.env.board, all_move_probs)
+    else:
+        legal_move_probs = legal_mask(node.env.board, all_move_probs, dirichlet=True, epsilon=Config.EPS)
+    node.P_update(legal_move_probs)
+    #node.best_action_update(True)
+
+    return v.squeeze().data.numpy(), node
+
+
+
+
+###############
+### Back-up ###
+###############
+
+def backup(leaf_node, v):
+    node = leaf_node.parent
+    if not node: return
+    x =0
+    while node:
+        # print(x)
+        x+=1
+        action_index = Config.MOVETOINDEX[node.taken_action]
+        node.N_update(action_index)
+        node.W_update(v.copy(), action_index)
+        node = node.parent
+    return
+
