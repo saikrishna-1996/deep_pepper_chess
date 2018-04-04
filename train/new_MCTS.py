@@ -1,11 +1,11 @@
 import numpy as np
 import torch
 import sys
-from chess_env import ChessEnv
-from features import BoardToFeature
+from game.chess_env import ChessEnv
+from game.features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
 from config import Config
-from policy_network import PolicyValNetwork_Giraffe
+from network.policy_network import PolicyValNetwork_Giraffe
 import copy
 
 def evaluate_p(list_board, network):
@@ -77,12 +77,11 @@ class Node(object):
             all_moves = (np.add(self.U, -self.Q))
         else:
             all_moves = (np.add(self.U, self.Q))
-        # print('MOVE IND:  '+ repr(np.argmax(all_moves[self.legal_move_inds])))
 
         max_list = np.argwhere(all_moves[self.legal_move_inds] == np.amax(all_moves[self.legal_move_inds]))
-
+        #print('Max List: {}'.format(max_list))
         move = self.legal_moves[np.random.choice(max_list.flatten(), 1)[0]]
-
+        print('Best move: {}'.format(move))
         self.taken_action = move
         return move
 
@@ -98,7 +97,7 @@ class Node(object):
         for action in self.env.legal_moves:
             next_env = self.env.copy()
             next_env.step(str(action))
-            children.append(Node(next_env.copy(), self.init_w, self.init_n, self.init_p, self.explore_factor, self))
+            children.append(Node(next_env.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(), self.explore_factor, self))
         self.children = children
         return
 
@@ -114,8 +113,8 @@ class Node(object):
 
     def N_update(self, action_index):
         self.N[action_index] += 1
-        if not self.parent:
-            print(sum(self.N))
+        #if not self.parent:
+            #print('Node N sum: {}'.format(sum(self.N)))
 
     def W_update(self, V_next, action_index):
         self.W[action_index] += V_next
@@ -180,11 +179,13 @@ def MCTS(env: ChessEnv, temp: float,
     init_N = np.zeros((Config.d_out,))
     init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
 
-    root_node = Node(env, init_W, init_N, init_P, Config.EXPLORE_FACTOR)
+    root_node = Node(env, init_W.copy(), init_N.copy(), init_P.copy(), Config.EXPLORE_FACTOR)
     for simulation in range(Config.NUM_SIMULATIONS):
-        # print(simulation)
+        print('Simulation: {}'.format(simulation))
+        print('Root node sum: {}'.format(sum(root_node.N)))
+        print('Root node non zero N: {}'.format(np.where(root_node.N!=0)))
         curr_node, moves, game_over, z = select(root_node, init_W.copy(), init_N.copy(), init_P.copy())
-        v, leaf = expand_and_eval(curr_node, network, init_W, init_N, init_P, game_over, z)
+        v, leaf = expand_and_eval(curr_node, network, game_over, z)
         backup(leaf, v)
 
 
@@ -193,6 +194,7 @@ def MCTS(env: ChessEnv, temp: float,
     norm_factor = np.sum(np.power(N, temp))
     # optimum policy
     pi = np.divide(np.power(N, temp), norm_factor)
+    print(sum(pi))
     return pi
 
 
@@ -201,7 +203,7 @@ def MCTS(env: ChessEnv, temp: float,
 ########################
 ######## Select ########
 ########################
-
+# Traverses from root node to leaf node using UCB selection
 def select(root_node, init_W, init_N, init_P):
     curr_node = root_node
     moves = 0
@@ -210,7 +212,8 @@ def select(root_node, init_W, init_N, init_P):
         curr_node.best_child_update()
         curr_node = curr_node.best_child
         moves += 1
-        print(moves)
+        #print('MOVES')
+        #print(moves)
         game_over, z = curr_node.env.is_game_over(moves)
     return curr_node, moves, game_over, z
 
@@ -218,15 +221,14 @@ def select(root_node, init_W, init_N, init_P):
 ##########################
 ### Expand and evaluate###
 ##########################
-
-def expand_and_eval(node, network, init_W, init_N, init_P, game_over, z):
+# Once at a leaf node expand using the network and 
+def expand_and_eval(node, network,game_over, z):
 
     if game_over:
         return z, node
     #expand
     node.expand()
     #evaluate
-
     all_move_probs, v = network.forward(torch.from_numpy(BoardToFeature(node.env.board)).unsqueeze(0))
     all_move_probs = all_move_probs.squeeze().data.numpy()
     if node.parent:
@@ -246,9 +248,16 @@ def expand_and_eval(node, network, init_W, init_N, init_P, game_over, z):
 ###############
 
 def backup(leaf_node, v):
+    z = leaf_node
     node = leaf_node.parent
     if not node: return
     x =0
+    
+    count = 0
+    while (z.parent != None):
+        print('Depth Count: {}'.format(count) )
+        z=z.parent
+        count+=1
     while node:
         # print(x)
         x+=1
