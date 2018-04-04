@@ -65,7 +65,6 @@ class Node(object):
     def Q(self):
         Q =np.divide(self.W, self.N)
         Q[np.isnan(Q)] = 0
-        print(np.sum(Q))
         return Q
 
     @property
@@ -80,9 +79,8 @@ class Node(object):
             all_moves = (np.add(self.U, self.Q))
 
         max_list = np.argwhere(all_moves[self.legal_move_inds] == np.amax(all_moves[self.legal_move_inds]))
-        #print('Max List: {}'.format(max_list))
         move = self.legal_moves[np.random.choice(max_list.flatten(), 1)[0]]
-        #print('Best move: {}'.format(move))
+
         self.taken_action = move
         return move
 
@@ -114,8 +112,6 @@ class Node(object):
 
     def N_update(self, action_index):
         self.N[action_index] += 1
-        #if not self.parent:
-            #print('Node N sum: {}'.format(sum(self.N)))
 
     def W_update(self, V_next, action_index):
         self.W[action_index] += V_next
@@ -192,7 +188,7 @@ def MCTS(env: ChessEnv, temp: float,
     norm_factor = np.sum(np.power(N, temp))
     # optimum policy
     pi = np.divide(np.power(N, temp), norm_factor)
-    print(sum(pi))
+
     return pi
 
 
@@ -210,9 +206,6 @@ def select(root_node, init_W, init_N, init_P):
         curr_node.best_child_update()
         curr_node = curr_node.best_child
         moves += 1
-        #print('Depth step {}'.format(moves))
-        #print('MOVES')
-        #print(moves)
         game_over, z = curr_node.env.is_game_over(moves)
     return curr_node, moves, game_over, z
 
@@ -252,12 +245,7 @@ def backup(leaf_node, v):
     node = leaf_node.parent
     if not node: return
     x = 0
-    
-    count = 0
-    #while (z.parent != None):
-    #    print('Depth Count: {}'.format(count) )
-    #    z=z.parent
-    #    count+=1
+
     while node:
         x+=1
         action_index = Config.MOVETOINDEX[node.taken_action]
