@@ -76,6 +76,9 @@ class Config(object):
     MINGAMES = 500
     NUM_GAMES = 4
 
+    #Playbook
+    NUM_PLAYBOOK = 16
+
     # PATHS
     ROOTDIR = '~\home'  ##### DEFINE AS REQ'd
     GAMEPATH = os.path.join(ROOTDIR, 'saved_games')

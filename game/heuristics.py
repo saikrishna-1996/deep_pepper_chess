@@ -10,15 +10,20 @@ import chess
 
 evaltime = 500  # 0.5 seconds
 
-
-def play_opening(n):
-    # n is the number of half moves
-    board = chess.Board()
-    with chess.polyglot.open_reader(basepath + "komodo_bin/strong/komodo.bin") as reader:
-        for i in range(n):
-            my_move = reader.choice(board).move
-            board.push(my_move)
-        return board
+class Playbook(object):
+    def __init__(self):
+        self.reader = chess.polyglot.open_reader(basepath + "komodo_bin/strong/komodo.bin")
+    def play_opening(n,env):
+        # n is the number of half moves
+        board = chess.Board()
+        with self.reader as reader:
+            try:
+                for i in range(n):
+                    my_move = reader.choice(env.board).move.uci()
+                    env.step(my_move)
+            except:
+                print('Error when using playbook')
+            return env, i
 
 
 class Stockfish(object):

@@ -9,6 +9,7 @@ from game.features import BoardToFeature
 from network.policy_network import PolicyValNetwork_Giraffe
 from train.MCTS import MCTS
 from train.self_challenge import Champion
+from game.heuristics import Playbook
 
 
 class GameGenerator(object):
@@ -20,6 +21,7 @@ class GameGenerator(object):
 
     def generate_game(self, model: PolicyValNetwork_Giraffe):
         np.random.seed()
+        playbook = Playbook()
         triplets = []
         step_game = 0
         temperature = 1
@@ -27,6 +29,7 @@ class GameGenerator(object):
         env.reset()
         game_over = False
         moves = 0
+        env, moves = playbook.play_opening(env,Config.NUM_PLAYBOOK)
         game_over, z = env.is_game_over(moves)
         while not game_over:
             moves += 1
