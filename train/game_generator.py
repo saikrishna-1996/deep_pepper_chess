@@ -7,7 +7,7 @@ from config import Config
 from game.chess_env import ChessEnv
 from game.features import BoardToFeature
 from network.policy_network import PolicyValNetwork_Giraffe
-from train.MCTS import MCTS
+from train.new_MCTS import MCTS
 from train.self_challenge import Champion
 
 

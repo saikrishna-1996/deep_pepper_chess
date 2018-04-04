@@ -65,6 +65,7 @@ class Node(object):
     def Q(self):
         Q =np.divide(self.W, self.N)
         Q[np.isnan(Q)] = 0
+        print(np.sum(Q))
         return Q
 
     @property
@@ -81,7 +82,7 @@ class Node(object):
         max_list = np.argwhere(all_moves[self.legal_move_inds] == np.amax(all_moves[self.legal_move_inds]))
         #print('Max List: {}'.format(max_list))
         move = self.legal_moves[np.random.choice(max_list.flatten(), 1)[0]]
-        print('Best move: {}'.format(move))
+        #print('Best move: {}'.format(move))
         self.taken_action = move
         return move
 
@@ -181,9 +182,6 @@ def MCTS(env: ChessEnv, temp: float,
 
     root_node = Node(env, init_W.copy(), init_N.copy(), init_P.copy(), Config.EXPLORE_FACTOR)
     for simulation in range(Config.NUM_SIMULATIONS):
-        print('Simulation: {}'.format(simulation))
-        print('Root node sum: {}'.format(sum(root_node.N)))
-        print('Root node non zero N: {}'.format(np.where(root_node.N!=0)))
         curr_node, moves, game_over, z = select(root_node, init_W.copy(), init_N.copy(), init_P.copy())
         v, leaf = expand_and_eval(curr_node, network, game_over, z)
         backup(leaf, v)
@@ -212,6 +210,7 @@ def select(root_node, init_W, init_N, init_P):
         curr_node.best_child_update()
         curr_node = curr_node.best_child
         moves += 1
+        #print('Depth step {}'.format(moves))
         #print('MOVES')
         #print(moves)
         game_over, z = curr_node.env.is_game_over(moves)
@@ -221,7 +220,7 @@ def select(root_node, init_W, init_N, init_P):
 ##########################
 ### Expand and evaluate###
 ##########################
-# Once at a leaf node expand using the network and 
+# Once at a leaf node expand using the network to get it's P values and it's estimated value
 def expand_and_eval(node, network,game_over, z):
 
     if game_over:
@@ -232,6 +231,7 @@ def expand_and_eval(node, network,game_over, z):
     all_move_probs, v = network.forward(torch.from_numpy(BoardToFeature(node.env.board)).unsqueeze(0))
     all_move_probs = all_move_probs.squeeze().data.numpy()
     if node.parent:
+        
         legal_move_probs = legal_mask(node.env.board, all_move_probs)
     else:
         legal_move_probs = legal_mask(node.env.board, all_move_probs, dirichlet=True, epsilon=Config.EPS)
@@ -251,18 +251,16 @@ def backup(leaf_node, v):
     z = leaf_node
     node = leaf_node.parent
     if not node: return
-    x =0
+    x = 0
     
     count = 0
-    while (z.parent != None):
-        print('Depth Count: {}'.format(count) )
-        z=z.parent
-        count+=1
+    #while (z.parent != None):
+    #    print('Depth Count: {}'.format(count) )
+    #    z=z.parent
+    #    count+=1
     while node:
-        # print(x)
         x+=1
         action_index = Config.MOVETOINDEX[node.taken_action]
         node.N_update(action_index)
         node.W_update(v.copy(), action_index)
         node = node.parent
-    return
