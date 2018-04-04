@@ -1,0 +1,10 @@
+certifi==2018.1.18
+cffi==1.11.5
+numpy==1.14.2
+olefile==0.45.1
+Pillow==5.0.0
+pycparser==2.18
+python-chess==0.22.2
+six==1.11.0
+torch==0.3.1.post2
+torchvision==0.2.0
