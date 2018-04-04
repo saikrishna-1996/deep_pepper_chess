@@ -1,29 +1,27 @@
 import platform
 
 from chess.uci import popen_engine, InfoHandler
-
+import chess.polyglot
 from os import path
 
-basepath = str(path.abspath(path.dirname(__file__)))
+
 
 import chess
-
+basepath = str(path.abspath(path.dirname(__file__)))
 evaltime = 500  # 0.5 seconds
 
 class Playbook(object):
     def __init__(self):
-        self.reader = chess.polyglot.open_reader(basepath + "komodo_bin/strong/komodo.bin")
-    def play_opening(n,env):
+        self.reader = chess.polyglot.open_reader(basepath + "/komodo_bin/strong/komodo.bin")
+    def play_opening(self,env,n):
         # n is the number of half moves
-        board = chess.Board()
-        with self.reader as reader:
-            try:
-                for i in range(n):
-                    my_move = reader.choice(env.board).move.uci()
-                    env.step(my_move)
-            except:
-                print('Error when using playbook')
-            return env, i
+        try:
+            for i in range(n):
+                my_move = self.reader.choice(env.board).move().uci()
+                env.step(my_move)
+        except(exception):
+            print('Error when using playbook: {}'.format(exception))
+        return env, i
 
 
 class Stockfish(object):

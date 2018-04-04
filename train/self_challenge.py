@@ -6,6 +6,7 @@ import numpy as np
 from train.MCTS import MCTS
 from game.chess_env import ChessEnv
 from config import Config
+from game.heuristics import Playbook
 
 
 class Champion(object):
@@ -39,11 +40,12 @@ class Champion(object):
     def run_tournament(self, candidate, candidate_alpha_scores, incumbent_alpha_scores, _):
         moves = 0
         temperature = 10e-6
-
+        playbook = Playbook()
         p = np.random.binomial(1, 0.5) == 1
         white, black = (self.current_policy, candidate) if p else (candidate, self.current_policy)
         env = ChessEnv()
         env.reset()
+        env, moves = playbook.play_opening(env,Config.NUM_PLAYBOOK)
         game_over, z = env.is_game_over(moves)
         while not game_over:
             if env.white_to_move:
