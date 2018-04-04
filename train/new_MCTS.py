@@ -1,12 +1,35 @@
 import numpy as np
 import torch
 import sys
-from game.chess_env import ChessEnv
-from game.features import BoardToFeature
+from chess_env import ChessEnv
+from features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
-from config import Config
-from network.policy_network import PolicyValNetwork_Giraffe
+from chess_project.config import Config
+from policy_network import PolicyValNetwork_Giraffe
 import copy
+import sys
+
+def get_size(obj, seen=None):
+    """Recursively finds size of objects"""
+    size = sys.getsizeof(obj)
+    if seen is None:
+        seen = set()
+    obj_id = id(obj)
+    if obj_id in seen:
+        return 0
+    # Important mark as seen *before* entering recursion to gracefully handle
+    # self-referential objects
+    seen.add(obj_id)
+    if isinstance(obj, dict):
+        size += sum([get_size(v, seen) for v in obj.values()])
+        size += sum([get_size(k, seen) for k in obj.keys()])
+    elif hasattr(obj, '__dict__'):
+        size += get_size(obj.__dict__, seen)
+    elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes, bytearray)):
+        size += sum([get_size(i, seen) for i in obj])
+    return size
+
+
 
 def evaluate_p(list_board, network):
     list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
@@ -54,6 +77,7 @@ class Node(object):
         self.taken_action = None
         self.best_child = None
         self.best_action = None
+        self.new_action = None
         legal_moves = env.board.legal_moves
         for move in legal_moves:
             legal_move_uci = move.uci()
@@ -80,6 +104,10 @@ class Node(object):
 
         max_list = np.argwhere(all_moves[self.legal_move_inds] == np.amax(all_moves[self.legal_move_inds]))
         move = self.legal_moves[np.random.choice(max_list.flatten(), 1)[0]]
+        self.new_action = True
+        if move == self.taken_action:
+            self.new_action = False
+
 
         self.taken_action = move
         return move
@@ -92,23 +120,34 @@ class Node(object):
         return next_env
 
     def expand(self):
-        children = []
-        for action in self.env.legal_moves:
-            next_env = self.env.copy()
-            next_env.step(str(action))
-            children.append(Node(next_env.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(), self.explore_factor, self))
-        self.children = children
+        # children = []
+        # for action in self.env.legal_moves:
+        #     next_env = self.env.copy()
+        #     next_env.step(str(action))
+        #     children.append(Node(next_env.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(), self.explore_factor, self))
+        # self.children = children
+        # return
+        new_child = self.env.copy()
+        new_child.step(self.best_action_update)
+        self.best_child = Node(new_child.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(), self.explore_factor, self)
+        self.children.append(self.best_child)
         return
-
-
     def best_child_update(self):
+
         best_child = self.env.copy()
         best_child.step(self.best_action_update)
-        for child in self.children:
-            if child.env.board == best_child.board:
-                self.best_child = child
-                return
-        raise ("Best child does not match with any of children ")
+        if self.new_action:
+            # self.best_child = Node(best_child.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(), self.explore_factor, self)
+            # self.children.append(self.best_child)
+
+            for child in self.children:
+                  if child.env.board == best_child.board:
+                      self.best_child = child
+                      return
+            self.best_child = Node(best_child.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(),
+                                   self.explore_factor, self)
+            self.children.append(self.best_child)
+        return
 
     def N_update(self, action_index):
         self.N[action_index] += 1
@@ -206,7 +245,10 @@ def select(root_node, init_W, init_N, init_P):
         curr_node.best_child_update()
         curr_node = curr_node.best_child
         moves += 1
+        # print(moves)
         game_over, z = curr_node.env.is_game_over(moves)
+
+    # print(len(curr_node.children))
     return curr_node, moves, game_over, z
 
 
@@ -250,5 +292,5 @@ def backup(leaf_node, v):
         x+=1
         action_index = Config.MOVETOINDEX[node.taken_action]
         node.N_update(action_index)
-        node.W_update(float(v), action_index)
+        node.W_update(v.copy(), action_index)
         node = node.parent
