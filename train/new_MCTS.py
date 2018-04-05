@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import sys
-from chess_env import ChessEnv
+from game.chess_env import ChessEnv
 from features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
 from chess_project.config import Config
