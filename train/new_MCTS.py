@@ -1,13 +1,14 @@
+import sys
+
 import numpy as np
 import torch
-import sys
-from game.chess_env import ChessEnv
-from game.features import BoardToFeature
+
 # this is hypothetical functions and classes that should be created by teamates.
 from config import Config
+from game.chess_env import ChessEnv
+from game.features import board_to_feature
 from network.policy_network import PolicyValNetwork_Giraffe
-import copy
-import sys
+
 
 def get_size(obj, seen=None):
     """Recursively finds size of objects"""
@@ -30,9 +31,8 @@ def get_size(obj, seen=None):
     return size
 
 
-
 def evaluate_p(list_board, network):
-    list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
+    list_board = [board_to_feature(list_board[i]) for i in range(len(list_board))]
     tensor = torch.from_numpy(np.array(list_board))
     # expect that neural net ouput is a vector of probability
     probability = network.forward(tensor)[0]
@@ -87,7 +87,7 @@ class Node(object):
 
     @property
     def Q(self):
-        Q =np.divide(self.W, self.N)
+        Q = np.divide(self.W, self.N)
         Q[np.isnan(Q)] = 0
         return Q
 
@@ -95,6 +95,7 @@ class Node(object):
     def U(self):
         return np.multiply(np.multiply(self.explore_factor, self.P),
                            np.divide(np.sqrt(np.sum(self.N)), (np.add(1., self.N))))
+
     @property
     def best_action_update(self):
         if not self.env.white_to_move:
@@ -107,7 +108,6 @@ class Node(object):
         self.new_action = True
         if move == self.taken_action:
             self.new_action = False
-
 
         self.taken_action = move
         return move
@@ -132,6 +132,7 @@ class Node(object):
         self.best_child = Node(new_child.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(), self.explore_factor, self)
         self.children.append(self.best_child)
         return
+
     def best_child_update(self):
 
         best_child = self.env.copy()
@@ -141,9 +142,9 @@ class Node(object):
             # self.children.append(self.best_child)
 
             for child in self.children:
-                  if child.env.board == best_child.board:
-                      self.best_child = child
-                      return
+                if child.env.board == best_child.board:
+                    self.best_child = child
+                    return
             self.best_child = Node(best_child.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(),
                                    self.explore_factor, self)
             self.children.append(self.best_child)
@@ -157,7 +158,6 @@ class Node(object):
 
     def P_update(self, new_P):
         self.P = new_P
-
 
 
 def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array:
@@ -221,7 +221,6 @@ def MCTS(env: ChessEnv, temp: float,
         v, leaf = expand_and_eval(curr_node, network, game_over, z)
         backup(leaf, v)
 
-
     N = root_node.N
 
     norm_factor = np.sum(np.power(N, temp))
@@ -229,8 +228,6 @@ def MCTS(env: ChessEnv, temp: float,
     pi = np.divide(np.power(N, temp), norm_factor)
 
     return pi
-
-
 
 
 ########################
@@ -256,26 +253,23 @@ def select(root_node, init_W, init_N, init_P):
 ### Expand and evaluate###
 ##########################
 # Once at a leaf node expand using the network to get it's P values and it's estimated value
-def expand_and_eval(node, network,game_over, z):
-
+def expand_and_eval(node, network, game_over, z):
     if game_over:
         return z, node
-    #expand
+    # expand
     node.expand()
-    #evaluate
-    all_move_probs, v = network.forward(torch.from_numpy(BoardToFeature(node.env.board)).unsqueeze(0))
+    # evaluate
+    all_move_probs, v = network.forward(torch.from_numpy(board_to_feature(node.env.board)).unsqueeze(0))
     all_move_probs = all_move_probs.squeeze().data.numpy()
     if node.parent:
-        
+
         legal_move_probs = legal_mask(node.env.board, all_move_probs)
     else:
         legal_move_probs = legal_mask(node.env.board, all_move_probs, dirichlet=True, epsilon=Config.EPS)
     node.P_update(legal_move_probs)
-    #node.best_action_update(True)
+    # node.best_action_update(True)
 
     return v.squeeze().data.numpy(), node
-
-
 
 
 ###############
@@ -285,11 +279,12 @@ def expand_and_eval(node, network,game_over, z):
 def backup(leaf_node, v):
     z = leaf_node
     node = leaf_node.parent
-    if not node: return
+    if not node:
+        return
     x = 0
 
     while node:
-        x+=1
+        x += 1
         action_index = Config.MOVETOINDEX[node.taken_action]
         node.N_update(action_index)
         node.W_update(v, action_index)

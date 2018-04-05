@@ -6,7 +6,7 @@ import chess.pgn
 import numpy as np
 
 from config import Config
-from game.heuristics import Stockfish
+from game.stockfish import Stockfish
 
 logger = getLogger(__name__)
 

@@ -1,15 +1,15 @@
 import numpy as np
 import torch
 
-from game.chess_env import ChessEnv
-from game.features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
 from config import Config
+from game.chess_env import ChessEnv
+from game.features import board_to_feature
 from network.policy_network import PolicyValNetwork_Giraffe
 
 
 def evaluate_p(list_board, network):
-    list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
+    list_board = [board_to_feature(list_board[i]) for i in range(len(list_board))]
     tensor = torch.from_numpy(np.array(list_board))
     # expect that neural net ouput is a vector of probability
     probability = network.forward(tensor)[0]
@@ -223,13 +223,13 @@ def select(env, leafs, network):
         else:  # if state unvisited get legal moves probabilities using policy network
             if len(leafs) == 0:
                 root = Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), init_P.copy(), Config.EXPLORE_FACTOR)
-                all_move_probs, _ = network.forward(torch.from_numpy(BoardToFeature(curr_env.board)).unsqueeze(0))
+                all_move_probs, _ = network.forward(torch.from_numpy(board_to_feature(curr_env.board)).unsqueeze(0))
                 all_move_probs = all_move_probs.squeeze().data.numpy()
                 legal_move_probs = legal_mask(curr_env.board, all_move_probs, dirichlet=True, epsilon=Config.EPS)
                 root.P = legal_move_probs
                 state_action_list.append(root)
             else:
-                all_move_probs, _ = network.forward(torch.from_numpy(BoardToFeature(curr_env.board)).unsqueeze(0))
+                all_move_probs, _ = network.forward(torch.from_numpy(board_to_feature(curr_env.board)).unsqueeze(0))
                 all_move_probs = all_move_probs.squeeze().data.numpy()
                 legal_move_probs = legal_mask(curr_env.board, all_move_probs)
                 leaf = Leaf(curr_env.copy(), init_W.copy(), init_N.copy(), legal_move_probs.copy(), Config.EXPLORE_FACTOR)

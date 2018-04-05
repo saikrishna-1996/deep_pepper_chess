@@ -3,9 +3,9 @@ from multiprocessing import Manager
 
 import numpy as np
 
-from train.MCTS import MCTS
-from game.chess_env import ChessEnv
 from config import Config
+from game.chess_env import ChessEnv
+from train.MCTS import MCTS
 
 
 class Champion(object):
