@@ -5,10 +5,10 @@ import multiprocessing
 
 import torch
 
-from train.game_generator import GameGenerator
-from train.policy_improver import PolicyImprover
-from network.policy_network import PolicyValNetwork_Giraffe
-from train.self_challenge import Champion
+from game_generator import GameGenerator
+from policy_improver import PolicyImprover
+from policy_network import PolicyValNetwork_Giraffe
+from self_challenge import Champion
 
 parser = argparse.ArgumentParser(description='Launcher for distributed Chess trainer')
 
@@ -19,7 +19,7 @@ parser.add_argument('--championship-rounds', type=int, default=10,
                     help='Number of rounds in the championship. Default=10')
 parser.add_argument('--checkpoint-path', type=str, default=None, help='Path for checkpointing')
 parser.add_argument('--data-path', type=str, default='./data', help='Path to data')
-parser.add_argument('--workers', type=int, help='Number of workers used for generating games', default=4)
+parser.add_argument('--workers', type=int, help='Number of workers used for generating games', default=1)
 parser.add_argument('--seed', type=int, default=1, help='random seed (default: 1)')
 parser.add_argument('--no-cuda', action='store_true', default=True, help='Disables GPU use')
 

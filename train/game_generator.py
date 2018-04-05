@@ -1,15 +1,15 @@
+import os,sys, inspect
 import multiprocessing
 import time
 
 import numpy as np
-
-from config import Config
-from game.chess_env import ChessEnv
-from game.features import BoardToFeature
-from network.policy_network import PolicyValNetwork_Giraffe
-from train.new_MCTS import MCTS
-from train.self_challenge import Champion
-
+from chess_project.config import Config
+from chess_env import ChessEnv
+from features import BoardToFeature
+from policy_network import PolicyValNetwork_Giraffe
+from draft_mcts import MCTS
+from self_challenge import Champion
+import time
 
 class GameGenerator(object):
     def __init__(self, champion: Champion, pool: multiprocessing.Pool, batch_size: int, workers: int):
@@ -23,27 +23,25 @@ class GameGenerator(object):
         triplets = []
         step_game = 0
         temperature = 1
-        env = ChessEnv()
-        env.reset()
+        # env = ChessEnv()
+        # env.reset()
         game_over = False
         moves = 0
-        game_over, z = env.is_game_over(moves)
+        #game_over, z = env.is_game_over(moves)
+        root_node = None
         while not game_over:
             moves += 1
             step_game += 1
             if step_game == 50:
                 temperature = 10e-6
-            pi = MCTS(env, temp=temperature, network=model)
-
-            action_index = np.argmax(pi)
-            feature = BoardToFeature(env.board)
+            pi, successor, root_node = MCTS(temp=temperature, network=model, root_node=root_node)
+            feature = BoardToFeature(root_node.env.board)
             triplets.append([feature, pi])
             print('')
-            print(env.board)
+            print(root_node.env.board)
             print("Running on {} ".format(multiprocessing.current_process()))
-            env.step(Config.INDEXTOMOVE[action_index])
-            game_over, z = env.is_game_over(moves)
-
+            game_over, z = root_node.env.is_game_over(moves)
+            root_node = successor
         for i in range(len(triplets) - step_game, len(triplets)):
             triplets[i].append(z)
 

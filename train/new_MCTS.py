@@ -1,12 +1,35 @@
 import numpy as np
 import torch
 import sys
-from game.chess_env import ChessEnv
-from game.features import BoardToFeature
+from chess_env import ChessEnv
+from features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
-from config import Config
-from network.policy_network import PolicyValNetwork_Giraffe
+from chess_project.config import Config
+from policy_network import PolicyValNetwork_Giraffe
 import copy
+import sys
+
+
+def get_size(obj, seen=None):
+    """Recursively finds size of objects"""
+    size = sys.getsizeof(obj)
+    if seen is None:
+        seen = set()
+    obj_id = id(obj)
+    if obj_id in seen:
+        return 0
+    # Important mark as seen *before* entering recursion to gracefully handle
+    # self-referential objects
+    seen.add(obj_id)
+    if isinstance(obj, dict):
+        size += sum([get_size(v, seen) for v in obj.values()])
+        size += sum([get_size(k, seen) for k in obj.keys()])
+    elif hasattr(obj, '__dict__'):
+        size += get_size(obj.__dict__, seen)
+    elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes, bytearray)):
+        size += sum([get_size(i, seen) for i in obj])
+    return size
+
 
 def evaluate_p(list_board, network):
     list_board = [BoardToFeature(list_board[i]) for i in range(len(list_board))]
@@ -54,6 +77,7 @@ class Node(object):
         self.taken_action = None
         self.best_child = None
         self.best_action = None
+        self.new_action = None
         legal_moves = env.board.legal_moves
         for move in legal_moves:
             legal_move_uci = move.uci()
@@ -63,7 +87,7 @@ class Node(object):
 
     @property
     def Q(self):
-        Q =np.divide(self.W, self.N)
+        Q = np.divide(self.W, self.N)
         Q[np.isnan(Q)] = 0
         return Q
 
@@ -71,6 +95,7 @@ class Node(object):
     def U(self):
         return np.multiply(np.multiply(self.explore_factor, self.P),
                            np.divide(np.sqrt(np.sum(self.N)), (np.add(1., self.N))))
+
     @property
     def best_action_update(self):
         if not self.env.white_to_move:
@@ -80,6 +105,9 @@ class Node(object):
 
         max_list = np.argwhere(all_moves[self.legal_move_inds] == np.amax(all_moves[self.legal_move_inds]))
         move = self.legal_moves[np.random.choice(max_list.flatten(), 1)[0]]
+        self.new_action = True
+        if move == self.taken_action:
+            self.new_action = False
 
         self.taken_action = move
         return move
@@ -92,23 +120,36 @@ class Node(object):
         return next_env
 
     def expand(self):
-        children = []
-        for action in self.env.legal_moves:
-            next_env = self.env.copy()
-            next_env.step(str(action))
-            children.append(Node(next_env.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(), self.explore_factor, self))
-        self.children = children
+        # children = []
+        # for action in self.env.legal_moves:
+        #     next_env = self.env.copy()
+        #     next_env.step(str(action))
+        #     children.append(Node(next_env.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(), self.explore_factor, self))
+        # self.children = children
+        # return
+        new_child = self.env.copy()
+        new_child.step(self.best_action_update)
+        self.best_child = Node(new_child.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(),
+                               self.explore_factor, self)
+        self.children.append(self.best_child)
         return
 
-
     def best_child_update(self):
+
         best_child = self.env.copy()
         best_child.step(self.best_action_update)
-        for child in self.children:
-            if child.env.board == best_child.board:
-                self.best_child = child
-                return
-        raise ("Best child does not match with any of children ")
+        if self.new_action:
+            # self.best_child = Node(best_child.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(), self.explore_factor, self)
+            # self.children.append(self.best_child)
+
+            for child in self.children:
+                if child.env.board == best_child.board:
+                    self.best_child = child
+                    return
+            self.best_child = Node(best_child.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(),
+                                   self.explore_factor, self)
+            self.children.append(self.best_child)
+        return
 
     def N_update(self, action_index):
         self.N[action_index] += 1
@@ -118,7 +159,6 @@ class Node(object):
 
     def P_update(self, new_P):
         self.P = new_P
-
 
 
 def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array:
@@ -153,7 +193,7 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array
 def MCTS(env: ChessEnv, temp: float,
          network: PolicyValNetwork_Giraffe,
          dirichlet_alpha=Config.D_ALPHA,
-         batch_size: int = Config.BATCH_SIZE) -> np.ndarray:
+         batch_size: int = Config.BATCH_SIZE) -> tuple:
     """
     Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
     arguments: state: the root state from where the stimulation start. A board.
@@ -179,19 +219,17 @@ def MCTS(env: ChessEnv, temp: float,
     root_node = Node(env, init_W.copy(), init_N.copy(), init_P.copy(), Config.EXPLORE_FACTOR)
     for simulation in range(Config.NUM_SIMULATIONS):
         curr_node, moves, game_over, z = select(root_node, init_W.copy(), init_N.copy(), init_P.copy())
-        v, leaf = expand_and_eval(curr_node, network, game_over, z)
+        v, leaf, flag = expand_and_eval(curr_node, network, game_over, z, moves)
+        if flag:
+            return None, True, v
         backup(leaf, v)
-
-
     N = root_node.N
 
     norm_factor = np.sum(np.power(N, temp))
     # optimum policy
     pi = np.divide(np.power(N, temp), norm_factor)
 
-    return pi
-
-
+    return pi, False, None
 
 
 ########################
@@ -202,11 +240,14 @@ def select(root_node, init_W, init_N, init_P):
     curr_node = root_node
     moves = 0
     game_over, z = curr_node.env.is_game_over(moves)
-    while curr_node.children and not game_over:
+    while curr_node.children: #and not game_over:
         curr_node.best_child_update()
         curr_node = curr_node.best_child
         moves += 1
-        game_over, z = curr_node.env.is_game_over(moves)
+        # print(moves)
+        # game_over, z = curr_node.env.is_game_over(moves)
+
+    # print(len(curr_node.children))
     return curr_node, moves, game_over, z
 
 
@@ -214,26 +255,26 @@ def select(root_node, init_W, init_N, init_P):
 ### Expand and evaluate###
 ##########################
 # Once at a leaf node expand using the network to get it's P values and it's estimated value
-def expand_and_eval(node, network,game_over, z):
-
+def expand_and_eval(node, network, game_over, z, moves):
+    game_over, z = node.env.is_game_over(moves)
+    flag = False
     if game_over:
-        return z, node
-    #expand
+        if not moves: flag = True
+        return z, node, flag
+    # expand
     node.expand()
-    #evaluate
+    # evaluate
     all_move_probs, v = network.forward(torch.from_numpy(BoardToFeature(node.env.board)).unsqueeze(0))
     all_move_probs = all_move_probs.squeeze().data.numpy()
     if node.parent:
-        
+
         legal_move_probs = legal_mask(node.env.board, all_move_probs)
     else:
         legal_move_probs = legal_mask(node.env.board, all_move_probs, dirichlet=True, epsilon=Config.EPS)
     node.P_update(legal_move_probs)
-    #node.best_action_update(True)
+    # node.best_action_update(True)
 
-    return v.squeeze().data.numpy(), node
-
-
+    return v.squeeze().data.numpy(), node, flag
 
 
 ###############
@@ -247,7 +288,7 @@ def backup(leaf_node, v):
     x = 0
 
     while node:
-        x+=1
+        x += 1
         action_index = Config.MOVETOINDEX[node.taken_action]
         node.N_update(action_index)
         node.W_update(v.copy(), action_index)

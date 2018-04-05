@@ -3,7 +3,7 @@ import torch
 
 import os
 from chess_env import ChessEnv
-from config import Config
+from chess_project.config import Config
 from features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
 from policy_network import PolicyValNetwork_Giraffe
@@ -97,7 +97,7 @@ class Leaf(object):
         self.N[action_index] += 1
 
     def W_update(self, V_next, action_index):
-        self.W[action_index] += V_next
+        self.W[action_index] += V_next.data.numpy()
 
     def P_update(self, new_P):
         self.P = new_P
@@ -219,6 +219,7 @@ def select(env, archive):
 
     leaf = False
     while not leaf:
+        print(moves)
         visited, index = state_visited(archive, curr_env.board)
         game_over, z = curr_env.is_game_over(moves)
         if visited and not game_over:
