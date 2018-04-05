@@ -292,5 +292,5 @@ def backup(leaf_node, v):
         x+=1
         action_index = Config.MOVETOINDEX[node.taken_action]
         node.N_update(action_index)
-        node.W_update(v.copy(), action_index)
+        node.W_update(v, action_index)
         node = node.parent
