@@ -1,5 +1,6 @@
 import chess.pgn
 import chess.uci
+from random import shuffle
 # import random
 import torch
 import numpy as np
@@ -11,7 +12,7 @@ from network.policy_network import PolicyValNetwork_Giraffe
 
 
 # engine = chess.uci.popen_engine("./stockfish")
-think_time = 1000  # 1 seconds
+think_time = 10  # 1 seconds
 batch_size = 32
 
 
@@ -23,21 +24,22 @@ batch_size = 32
 # critic_model = Critic_Giraffe(d_in, gf, pc, sc, h1a, h1b, h1c, h2, 1)
 
 # criterion = torch.nn.MSELoss(size_average=False)
-# optimizer = torch.optim.SGD(critic_model.parameters(), lr=1e-4, momentum=0.9)  # change it Adam or Adagrad may be
+# optimizer = torch.optim.SGD(critic_model.parameters(), lr=1e-4, momentum=0.9)   change it Adam or Adagrad may be
 
 
 def cross_entropy(pred, soft_targets):
     return torch.mean(torch.sum(- soft_targets.doble() * torch.log(pred).double(), 1))
 
 def pretrain_model(model=PolicyValNetwork_Giraffe(), games=None):
-    if games is None:
-        game_data = load_kaspagames
-    else:
-        game_data = games
+    #if games is None:
+    #    game_data = load_kaspagames
+    #else:
+    #    game_data = games
 
+    game_date = play_pgn()
     if game_data is not None:
-        for game in game_data:
-            num_batches = int(len(game) / Config.batch_size + 1)
+        for position in game_data:
+            num_batches = int(len(game_data) / Config.batch_size + 1)
             for i in range(num_batches):
                 game = np.array(game)
                 lower_bound = int(I * Config.batch_size)
@@ -58,10 +60,12 @@ def play_pgn():
     board_positions = []
     for i in range(num_games):
         kasgame = chess.pgn.read_game(pgn)
-        board = kasgame.board()
-        board.push(move)
-        board_positions.append(board)
-        return board_positions
+        over = kasgame.is_game_over()
+        while game not over:
+            board = kasgame.board()
+            board.push(move)
+            board_positions.append(board)
+    return board_positions
 
 
 def get_triplet_and_backprop(board_positions):
@@ -76,25 +80,43 @@ def get_triplet_and_backprop(board_positions):
             triplet = []
 
 
+def pretrain(model):
+    training_data = []
+    board_positions = play_pgn()
+    board_positions = shuffle(board_positions)
+
+    for batch in range(Config.PRETRAIN_BATCHES):
+        for index in range(board_positions):
+            if index % batch_size != 0:
+                val = stockfish_eval(board_positions[index], 10)
+                training_data.append([board_positions[index], val])
+            else:
+                do_backprop(training_data, model)
+                training_data = []
+
+
 def stockfish_pol(board_position):
     pass
 
 
-def do_backprop(features, policy, val, model):
+def do_backprop(training_data, model):
+    features, values = [(get_features_from_board_positions(training_data[i][0]), training_data[i][1]) for i in training_data]
+
     criterion1 = torch.nn.MSELoss(size_average=False)
-    criterion2 = torch.nn.NLLLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, momentum=0.9)
+    #criterion2 = torch.nn.NLLLoss()
+    #optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, momentum=0.9)
     nn_policy_out, nn_val_out = model(features)
-    loss1 = criterion1(val, nn_val_out)
-    loss2 = criterion2(policy, nn_policy_out)
-    l2_reg = None
-    for weight in model.parameters():
-        if l2_reg is None:
-            l2_reg = weight.norm(2)
-        else:
-            l2_reg = l2_reg + weight.norm(2)
-    loss3 = 0.1 * l2_reg
-    loss = loss1 + loss2 + loss3
+    loss1 = criterion1(values, nn_val_out)
+    #loss2 = criterion2(policy, nn_policy_out)
+    #l2_reg = None
+    #for weight in model.parameters():
+    #    if l2_reg is None:
+    #        l2_reg = weight.norm(2)
+    #    else:
+    #        l2_reg = l2_reg + weight.norm(2)
+    #loss3 = 0.1 * l2_reg
+    #loss = loss1 + loss2 + loss3
+    loss = loss1
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
