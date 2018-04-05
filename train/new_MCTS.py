@@ -87,9 +87,11 @@ class Node(object):
 
     @property
     def Q(self):
-        Q =np.divide(self.W, self.N)
-        Q[np.isnan(Q)] = 0
-        return Q
+        if self.N == 0:
+            return 0
+        else:
+            Q =np.divide(self.W, self.N)
+            return Q
 
     @property
     def U(self):
