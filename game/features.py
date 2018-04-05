@@ -133,7 +133,7 @@ def get_north_west_mobility(board, pos):
     return bean
 
 
-def BoardToFeature(board):
+def board_to_feature(board):
     feature = np.zeros(384)
     "START: GLOBAL FEATURES"
 

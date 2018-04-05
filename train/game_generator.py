@@ -5,7 +5,7 @@ import numpy as np
 
 from config import Config
 from game.chess_env import ChessEnv
-from game.features import BoardToFeature
+from game.features import board_to_feature
 from network.policy_network import PolicyValNetwork_Giraffe
 from train.new_MCTS import MCTS
 from train.self_challenge import Champion
@@ -36,7 +36,7 @@ class GameGenerator(object):
             pi = MCTS(env, temp=temperature, network=model)
 
             action_index = np.argmax(pi)
-            feature = BoardToFeature(env.board)
+            feature = board_to_feature(env.board)
             triplets.append([feature, pi])
             print('')
             print(env.board)

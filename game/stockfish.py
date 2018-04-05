@@ -1,8 +1,7 @@
 import platform
+from os import path
 
 from chess.uci import popen_engine, InfoHandler
-
-from os import path
 
 basepath = str(path.abspath(path.dirname(__file__)))
 

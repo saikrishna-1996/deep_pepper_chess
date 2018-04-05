@@ -7,7 +7,6 @@ import torch
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
 from config import Config
-from network.policy_network import PolicyValNetwork_Giraffe
 
 
 def load_gamefile(net_number):  # I'm not married to this, I think it could be done better.
@@ -24,7 +23,7 @@ def load_gamefile(net_number):  # I'm not married to this, I think it could be d
         print('Could not load gamefile!')
 
 
-def train_model(model=PolicyValNetwork_Giraffe(), games=None, net_number=0, min_num_games=400):
+def train_model(model, games=None, net_number=0, min_num_games=400):
     if games is None:
         game_data = load_gamefile(net_number)
     else:
