@@ -194,7 +194,7 @@ def MCTS(temp: float,
     root.add_dirichlet()
     #print(np.sum(root.P))
 
-    for simulation in range(Config.NUM_SIMULATIONS-1):
+    for simulation in range(Config.NUM_SIMULATIONS):
         #start_time = time.time()
         curr_node, moves, game_over, z = select(root)
         #print('Select time: {}'.format(time.time()-start_time))
@@ -211,8 +211,8 @@ def MCTS(temp: float,
     # optimum policy
     pi = np.divide(np.power(N, temp), norm_factor)
     action_index = np.argmax(pi)
-    print(pi)
-    print(N)
+    #print(pi)
+    #print(N)
 
     new_pi = np.zeros(Config.d_out,)
     new_pi[root.legal_move_inds] = pi
