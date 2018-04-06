@@ -2,7 +2,7 @@ import os
 
 import chess
 
-from game.heuristics import Stockfish
+from game.stockfish import Stockfish
 
 
 def make_move_maps():
@@ -46,6 +46,7 @@ def make_square_map():
 
 
 class Config(object):
+    PRETRAIN_BATCHES = 10
     SQUAREMAP = {'a1': 0, 'b1': 1, 'c1': 2, 'd1': 3, 'e1': 4, 'f1': 5, 'g1': 6, 'h1': 7, 'a2': 8, 'b2': 9, 'c2': 10,
                  'd2': 11,
                  'e2': 12, 'f2': 13, 'g2': 14, 'h2': 15, 'a3': 16, 'b3': 17, 'c3': 18, 'd3': 19, 'e3': 20, 'f3': 21,
@@ -110,5 +111,3 @@ class Config(object):
     h1a = 32  # no.of first set of neurons in first hidden layer
     h1b = 512  # no.of second set of neurons in first hidden layer
     h1c = 480  # no.of third set of neurons in first hidden layer
-
-    stockfish = Stockfish()

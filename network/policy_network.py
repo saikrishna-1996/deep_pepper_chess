@@ -7,6 +7,7 @@ from torch.autograd import Variable
 # The input is 363-dimensional feature vector as used in the evaluation network for giraffe. The output is 4096-layer. 64x64 = 4096. So, this entire vector indicates the probability of moving from one square to the other square. We know that a piece can't move up from a square and land in the same square. So, technically, it should only be of dimension (4096-64)x1, but, for sanitation purposes let's keep it the way it is.
 # ToDo: compute a value function as well using this network
 from config import Config
+from game.pretrain import pretrain
 
 
 class PolicyNetwork_Full(nn.Module):
@@ -80,6 +81,7 @@ class PolicyValNetwork_Giraffe(nn.Module):
         self.linear2e = nn.Linear(h1a + h1b + h1c, h2e)
         self.linear3p = nn.Linear(h2p, d_out)
         self.linear3e = nn.Linear(h2e, eval_out)
+        #pretrain(self)
 
     def forward(self, x):
         x = Variable(x.float())

@@ -5,9 +5,9 @@ import time
 import numpy as np
 from config import Config
 from game.chess_env import ChessEnv
-from game.features import BoardToFeature
+from game.features import board_to_feature
 from network.policy_network import PolicyValNetwork_Giraffe
-from train.draft_mcts import MCTS, Node
+from train.MCTS import MCTS, Node
 from train.self_challenge import Champion
 import time
 
@@ -38,7 +38,7 @@ class GameGenerator(object):
                 temperature = 10e-6
 
             pi, successor, root_node = MCTS(temp=temperature, network=model, root=root_node)
-            feature = BoardToFeature(root_node.env.board)
+            feature = board_to_feature(root_node.env.board)
             triplets.append([feature, pi])
             print('')
             print(root_node.env.board)

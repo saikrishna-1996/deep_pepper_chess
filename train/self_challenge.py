@@ -3,10 +3,10 @@ from multiprocessing import Manager
 
 import numpy as np
 
-from train.draft_mcts import MCTS, Node
+from train.MCTS import MCTS, Node
 from game.chess_env import ChessEnv
 from config import Config
-
+from game.chess_env import ChessEnv
 
 class Champion(object):
     def __init__(self, current_policy):
