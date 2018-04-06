@@ -3,11 +3,11 @@ from random import shuffle
 import chess.pgn
 import chess.uci
 # import random
+import numpy as np
 import torch
 from torch.optim import optimizer
 
 from config import Config
-from game.chess_env import ChessEnv
 from game.features import board_to_feature
 from game.stockfish import Stockfish
 
@@ -20,45 +20,47 @@ def cross_entropy(pred, soft_targets):
 
 
 def get_board_position():
-    pgn = open("./kasparov.pgn")
+    pgn = open("./game/kasparov.pgn")
     board_positions = []
-    while True:
-        kasgame = chess.pgn.read_game(pgn)
-        if kasgame is None:
-            break
-        board = kasgame.board()
-        board_positions.append(board.copy())
-        for move in kasgame.main_line():
-            board.push(move)
+    try:
+        while True:
+            kasgame = chess.pgn.read_game(pgn)
+            if kasgame is None:
+                break
+            board = kasgame.board()
             board_positions.append(board.copy())
-    return board_positions
+            for move in kasgame.main_line():
+                board.push(move)
+                board_positions.append(board.copy())
+    except Exception:
+        print("We have {} board positions".format(len(board_positions)))
+        return board_positions
 
 
 def pretrain(model):
-    training_data = []
+    feature_batch = []
+    targets_batch = []
     board_positions = get_board_position()
-    board_positions = shuffle(board_positions)
+    shuffled_board_positions = shuffle(board_positions)
+    print("We have {} board positions".format(len(board_positions)))
     stockfish = Stockfish()
 
     for batch in range(Config.PRETRAIN_BATCHES):
         for index, board_position in enumerate(board_positions):
-            if index % batch_size != 0:
-                val = stockfish.stockfish_eval(board_position, 10)
-                training_data.append([board_position, val])
+            if (index + 1) % batch_size != 0:
+                feature_batch.append(board_to_feature(board_position))
+                targets_batch.append(stockfish.stockfish_eval(board_position, 10))
             else:
-                do_backprop(training_data, model)
-                training_data = []
+                feature_batch = torch.from_numpy(np.asarray(feature_batch, dtype=float))
+                targets_batch = torch.from_numpy(np.asarray(targets_batch, dtype=float))
+                do_backprop(feature_batch, np.asarray(targets_batch), model)
+                feature_batch = []
+                targets_batch = []
 
 
-def stockfish_pol(board_position):
-    pass
-
-
-def do_backprop(training_data, model):
-    features, values = [(board_to_feature(training_data[i][0]), training_data[i][1]) for i in training_data]
-
+def do_backprop(batch_features, values, model):
     criterion1 = torch.nn.MSELoss(size_average=False)
-    nn_policy_out, nn_val_out = model(features)
+    nn_policy_out, nn_val_out = model(batch_features)
     loss = criterion1(values, nn_val_out)
     # loss2 = criterion2(policy, nn_policy_out)
     # l2_reg = None
@@ -72,45 +74,3 @@ def do_backprop(training_data, model):
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
-
-# def do_your_shit(board, stock_eval):
-#    optimizer.zero_grad()
-#    critic_eval = critic_model(board)
-#    loss = criterion(critic_eval, stock_eval)
-#    print(loss.data[0])
-#    loss.backward()
-#    optimizer.step()
-
-
-# cunt = 0
-## eval_val = []
-## savepos = []
-# for i in range(5):
-#    kasgame = chess.pgn.read_game(pgn)
-#    board = kasgame.board()
-#    for move in kasgame.main_line():
-#
-#        if move is None:
-#            kasgame = chess.pgn.read_game(pgn)
-#            board = kasgame.board()
-#        cunt = cunt + 1
-#        if cunt == batch_size:
-#            do_your_shit(savepos, eval_val)
-#            cunt = 0
-#            # eval_val = []
-#            # savepos = []
-#        else:
-#            board.push(move)
-#            features = features.BoardToFeature(board)
-#            savepos[cunt, :] = torch.FloatTensor(features)
-#            print(move)
-#            engine.position(board)
-#            evaluation = engine.go(movetime=think_time)
-#            # eval_val[cunt,0] =
-#            shit = handler.info["score"][1].cp / 100.0
-#            print(shit)
-#            print(type(shit))
-#            print(torch.Tensor(shit))
-#            # print(type(handler.info["score"][1].cp/100.0))
-#            # print(torch.FloatTensor(float(handler.info["score"][1].cp/100.0)))
-#            print(eval_val)
