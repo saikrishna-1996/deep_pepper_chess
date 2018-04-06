@@ -138,7 +138,6 @@ def MCTS(temp: float,
     if not root.children:
         root.expand(network)
     root.add_dirichlet()
-
     for simulation in range(Config.NUM_SIMULATIONS):
         #start_time = time.time()
         curr_node, moves, game_over, z = select(root)
@@ -159,7 +158,7 @@ def MCTS(temp: float,
 
     new_pi = np.zeros(Config.d_out,)
     new_pi[root.legal_move_inds] = pi
-    print('MCTS finished {} simulations in {} seconds'.format(simulation,time.time()-start_time))    
+    #print('MCTS finished {} simulations in {} seconds'.format(simulation,time.time()-start_time))    
     return new_pi, root.children[action_index], root
 
 
