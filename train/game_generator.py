@@ -7,7 +7,7 @@ from config import Config
 from game.chess_env import ChessEnv
 from game.features import BoardToFeature
 from network.policy_network import PolicyValNetwork_Giraffe
-from train.draft_mcts import MCTS
+from train.draft_mcts import MCTS, Node
 from train.self_challenge import Champion
 import time
 
@@ -28,7 +28,9 @@ class GameGenerator(object):
         game_over = False
         moves = 0
         #game_over, z = env.is_game_over(moves)
-        root_node = None
+        env = ChessEnv()
+        env.reset()
+        root_node = Node(env,Config.EXPLORE_FACTOR)
         while not game_over:
             moves += 1
             step_game += 1

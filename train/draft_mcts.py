@@ -165,7 +165,7 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array
 
 def MCTS(temp: float,
          network: PolicyValNetwork_Giraffe,
-         root = None,
+         root,
          dirichlet_alpha=Config.D_ALPHA,
          batch_size: int = Config.BATCH_SIZE) -> tuple:
     """
@@ -185,10 +185,7 @@ def MCTS(temp: float,
     #init_N = np.zeros((Config.d_out,))
     #init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
     start_time = time.time()
-    if not root:
-        env = ChessEnv()
-        env = env.reset()
-        root = Node(env, Config.EXPLORE_FACTOR)
+    if not root.children:
         root.expand(network)
     #print(root.P)
     root.add_dirichlet()
