@@ -7,7 +7,9 @@ import torch
 from torch.optim import optimizer
 
 from config import Config
+from game.chess_env import ChessEnv
 from game.features import board_to_feature
+from game.stockfish import Stockfish
 
 think_time = 10  # 1 seconds
 batch_size = 32
@@ -36,12 +38,13 @@ def pretrain(model):
     training_data = []
     board_positions = get_board_position()
     board_positions = shuffle(board_positions)
+    stockfish = Stockfish()
 
     for batch in range(Config.PRETRAIN_BATCHES):
-        for index in range(board_positions):
+        for index, board_position in enumerate(board_positions):
             if index % batch_size != 0:
-                val = stockfish_eval(board_positions[index], 10)
-                training_data.append([board_positions[index], val])
+                val = stockfish.stockfish_eval(board_position, 10)
+                training_data.append([board_position, val])
             else:
                 do_backprop(training_data, model)
                 training_data = []

@@ -5,7 +5,7 @@ import numpy as np
 
 from config import Config
 from game.chess_env import ChessEnv
-from train.MCTS import MCTS
+from train.new_MCTS import MCTS
 
 
 class Champion(object):
