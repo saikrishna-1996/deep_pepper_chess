@@ -48,13 +48,12 @@ class Champion(object):
         game_over = False
 
         while not game_over:
-            if env.white_to_move:
+            if root_node.env.white_to_move:
                 player = white
             else:
                 player = black
 
             pi, successor, root_node = MCTS(temp=temperature, network=player,root=root_node)
-            action_index = np.argmax(pi)
             root_node = successor
             moves += 1
             game_over, z = root_node.env.is_game_over(moves)
