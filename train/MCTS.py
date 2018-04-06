@@ -10,49 +10,6 @@ import copy
 import sys
 import time
 
-
-def get_size(obj, seen=None):
-    """Recursively finds size of objects"""
-    size = sys.getsizeof(obj)
-    if seen is None:
-        seen = set()
-    obj_id = id(obj)
-    if obj_id in seen:
-        return 0
-    # Important mark as seen *before* entering recursion to gracefully handle
-    # self-referential objects
-    seen.add(obj_id)
-    if isinstance(obj, dict):
-        size += sum([get_size(v, seen) for v in obj.values()])
-        size += sum([get_size(k, seen) for k in obj.keys()])
-    elif hasattr(obj, '__dict__'):
-        size += get_size(obj.__dict__, seen)
-    elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes, bytearray)):
-        size += sum([get_size(i, seen) for i in obj])
-    return size
-
-
-def evaluate_p(list_board, network):
-    list_board = [board_to_feature(list_board[i]) for i in range(len(list_board))]
-    tensor = torch.from_numpy(np.array(list_board))
-    # expect that neural net ouput is a vector of probability
-    probability = network.forward(tensor)[0]
-    return probability.data.numpy()
-
-
-def state_visited(state_list, state):
-    if not state_list:
-        return False, None
-    for i in range(len(state_list)):
-        if np.array_equal(state_list[i].env.board, state):
-            return True, i
-    return False, None
-
-
-def Q(N, W):
-    return W / float(N)
-
-
 class Node(object):
     # This class inherit the Board class which control the board representation,
     # find legal move and next board represenation.
@@ -124,10 +81,6 @@ class Node(object):
         all_move_probs = all_move_probs.squeeze().data.numpy()
         child_probs = legal_mask(self.env.board,all_move_probs)[self.legal_move_inds]
         self.P = child_probs
-        #for i, move in enumerate(self.legal_moves):
-        #    next_env = self.env.copy()
-        #    next_env.step(move)
-        #    self.children.append(Node(next_env,self.explore_factor, parent = self, child_id = i))
         self.value = v
 
     def N_update(self, action_index):
@@ -142,7 +95,7 @@ class Node(object):
         self.P = np.add(self.P,d_noise)
         self.P = self.P/self.P.sum(keepdims=1)
 
-def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array:
+def legal_mask(board, all_move_probs) -> np.array:
     legal_moves = board.legal_moves
     mask = np.zeros_like(all_move_probs)
     total_p = 0
@@ -181,15 +134,10 @@ def MCTS(temp: float,
     :return: return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
     """
     # history of archive for all previous runs
-    #init_W = np.zeros((Config.d_out,))
-    #init_N = np.zeros((Config.d_out,))
-    #init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
     start_time = time.time()
     if not root.children:
         root.expand(network)
-    #print(root.P)
     root.add_dirichlet()
-    #print(np.sum(root.P))
 
     for simulation in range(Config.NUM_SIMULATIONS):
         #start_time = time.time()
@@ -208,8 +156,6 @@ def MCTS(temp: float,
     # optimum policy
     pi = np.divide(np.power(N, temp), norm_factor)
     action_index = np.argmax(pi)
-    #print(pi)
-    #print(N)
 
     new_pi = np.zeros(Config.d_out,)
     new_pi[root.legal_move_inds] = pi
