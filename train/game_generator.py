@@ -3,12 +3,12 @@ import multiprocessing
 import time
 
 import numpy as np
-from chess_project.config import Config
-from chess_env import ChessEnv
-from features import BoardToFeature
-from policy_network import PolicyValNetwork_Giraffe
-from draft_mcts import MCTS
-from self_challenge import Champion
+from config import Config
+from game.chess_env import ChessEnv
+from game.features import BoardToFeature
+from network.policy_network import PolicyValNetwork_Giraffe
+from train.draft_mcts import MCTS
+from train.self_challenge import Champion
 import time
 
 class GameGenerator(object):

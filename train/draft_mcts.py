@@ -1,11 +1,11 @@
 import numpy as np
 import torch
 import sys
-from chess_env import ChessEnv
-from features import BoardToFeature
+from game.chess_env import ChessEnv
+from game.features import BoardToFeature
 # this is hypothetical functions and classes that should be created by teamates.
-from chess_project.config import Config
-from policy_network import PolicyValNetwork_Giraffe
+from config import Config
+from network.policy_network import PolicyValNetwork_Giraffe
 import copy
 import sys
 

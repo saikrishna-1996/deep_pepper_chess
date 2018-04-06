@@ -2,7 +2,7 @@ import os
 
 import chess
 
-from heuristics import Stockfish
+from game.heuristics import Stockfish
 
 
 def make_move_maps():

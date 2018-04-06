@@ -5,10 +5,10 @@ import multiprocessing
 
 import torch
 
-from game_generator import GameGenerator
-from policy_improver import PolicyImprover
-from policy_network import PolicyValNetwork_Giraffe
-from self_challenge import Champion
+from train.game_generator import GameGenerator
+from train.policy_improver import PolicyImprover
+from network.policy_network import PolicyValNetwork_Giraffe
+from train.self_challenge import Champion
 
 parser = argparse.ArgumentParser(description='Launcher for distributed Chess trainer')
 
