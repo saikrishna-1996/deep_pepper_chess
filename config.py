@@ -64,7 +64,7 @@ class Config(object):
 
     RESIGN_CHECK_MIN = 60
     RESIGN_CHECK_FREQ = 10
-    NUM_SIMULATIONS = 3
+    NUM_SIMULATIONS = 20
     SF_EVAL_THRESHOLD = 6.5
     BATCH_SIZE = 64
     D_ALPHA = 0.4

@@ -3,7 +3,7 @@ from multiprocessing import Manager
 
 import numpy as np
 
-from train.MCTS import MCTS
+from train.draft_mcts import MCTS
 from game.chess_env import ChessEnv
 from config import Config
 
@@ -51,7 +51,7 @@ class Champion(object):
             else:
                 player = black
 
-            pi = MCTS(env, temp=temperature, network=player)
+            pi = MCTS(temp=temperature, network=player)
             action_index = np.argmax(pi)
             env.step(Config.INDEXTOMOVE[action_index])
             moves += 1

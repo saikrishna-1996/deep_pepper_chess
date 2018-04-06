@@ -8,6 +8,7 @@ from config import Config
 from network.policy_network import PolicyValNetwork_Giraffe
 import copy
 import sys
+import time
 
 
 def get_size(obj, seen=None):
@@ -57,33 +58,37 @@ class Node(object):
     # find legal move and next board represenation.
     # It has the ability to store and update for each leaf the
     #  number of state-action N(s,a), Q(s,a) and P(s,a)
-    def __init__(self, env: ChessEnv, init_W, init_N, init_P, explore_factor, parent=None):
+    def __init__(self, env: ChessEnv,explore_factor,
+                init_W=np.zeros((Config.d_out,)) ,
+                init_N = np.zeros((Config.d_out,)),
+                init_P= np.ones((Config.d_out,)) * (1 / Config.d_out),
+                parent = None,
+                child_id = None):
         assert init_N.shape == (Config.d_out,)
         assert init_W.shape == (Config.d_out,)
         assert init_P.shape == (Config.d_out,)
 
         self.env = env
-        self.init_p = init_P
-        self.init_n = init_N
-        self.init_w = init_W
-        self.P = init_P
-        self.N = init_N
-        self.W = init_W
+
         self.parent = parent
-        self.children = []
+        
         self.explore_factor = explore_factor
+        
+        legal_moves = env.board.legal_moves
         self.legal_move_inds = []
         self.legal_moves = []
-        self.taken_action = None
-        self.best_child = None
-        self.best_action = None
-        self.new_action = None
-        legal_moves = env.board.legal_moves
+        
         for move in legal_moves:
             legal_move_uci = move.uci()
             ind = Config.MOVETOINDEX[legal_move_uci]
             self.legal_moves.append(legal_move_uci)
             self.legal_move_inds.append(ind)
+        self.P = init_P[self.legal_move_inds]
+        self.N = init_N[self.legal_move_inds]
+        self.W = init_W[self.legal_move_inds]
+        self.child_id = child_id
+        self.children = None
+        
 
     @property
     def Q(self):
@@ -96,57 +101,34 @@ class Node(object):
         return np.multiply(np.multiply(self.explore_factor, self.P),
                            np.divide(np.sqrt(np.sum(self.N)), (np.add(1., self.N))))
 
-    def best_action_update(self):
-        if not self.env.white_to_move:
-            all_moves = (np.add(self.U, -self.Q))
+    def select_best_child(self):
+        if self.env.white_to_move:
+            move_UCT = (np.add(self.U, self.Q))
         else:
-            all_moves = (np.add(self.U, self.Q))
+            move_UCT = (np.add(self.U, -self.Q))
 
-        max_list = np.argwhere(all_moves[self.legal_move_inds] == np.amax(all_moves[self.legal_move_inds]))
-        move = self.legal_moves[np.random.choice(max_list.flatten(), 1)[0]]
-        self.new_action = True
-        if move == self.taken_action:
-            self.new_action = False
-
+        max_list = np.argwhere(move_UCT == np.amax(move_UCT))
+        child_id = int(max_list[np.random.randint(0,len(max_list))])
+        move = self.legal_moves[child_id]
         self.taken_action = move
-        return move
+        if self.children[child_id] == None:
+            next_env = self.env.copy()
+            next_env.step(move)
+            self.children[child_id] = Node(next_env,self.explore_factor,parent=self,child_id = child_id)
 
-    @property
-    def next_env(self):
-        best_index = self.taken_action
-        next_env = self.env.copy()
-        next_env.step(best_index)
-        return next_env
+        return self.children[child_id]
 
-    def expand(self):
-        # children = []
-        # for action in self.env.legal_moves:
-        #     next_env = self.env.copy()
-        #     next_env.step(str(action))py(
-        #     children.append(Node(next_env.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(), self.explore_factor, self))
-        # self.children = children
-        # return
-        new_child = self.env.copy()
-        new_child.step(self.best_action_update())
-        self.best_child = Node(new_child.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(),
-                               self.explore_factor, self)
-        self.children.append(self.best_child)
-        return
-
-    def best_child_update(self):
-
-        best_child = self.env.copy()
-        best_child.step(self.best_action_update())
-        if self.new_action:
-
-            for child in self.children:
-                if child.env.board == best_child.board:
-                    self.best_child = child
-                    return
-            self.best_child = Node(best_child.copy(), self.init_w.copy(), self.init_n.copy(), self.init_p.copy(),
-                                   self.explore_factor, self)
-            self.children.append(self.best_child)
-        return
+    def expand(self,network):
+        self.children = [None] * len(self.legal_moves)
+        all_move_probs, v = network.forward(torch.from_numpy(BoardToFeature(self.env.board)).unsqueeze(0))
+        all_move_probs = all_move_probs.squeeze().data.numpy()
+        child_probs = legal_mask(self.env.board,all_move_probs)[self.legal_move_inds]
+        self.P = child_probs
+        #for i, move in enumerate(self.legal_moves):
+        #    next_env = self.env.copy()
+        #    next_env.step(move)
+        #    self.children.append(Node(next_env,self.explore_factor, parent = self, child_id = i))
+        self.value = v
 
     def N_update(self, action_index):
         self.N[action_index] += 1
@@ -154,9 +136,11 @@ class Node(object):
     def W_update(self, V_next, action_index):
         self.W[action_index] += V_next
 
-    def P_update(self, new_P):
-        self.P = new_P
-
+    def add_dirichlet(self):
+        num_legal_moves = len(self.legal_move_inds) + 1
+        d_noise = np.random.dirichlet(Config.D_ALPHA * np.ones(self.P.shape))
+        self.P = np.add(self.P,d_noise)
+        self.P = self.P/self.P.sum(keepdims=1)
 
 def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array:
     legal_moves = board.legal_moves
@@ -174,87 +158,83 @@ def legal_mask(board, all_move_probs, dirichlet=False, epsilon=None) -> np.array
 
     legal_moves_prob = np.divide(legal_moves_prob, total_p)
 
-    if dirichlet:
-        num_legal_moves = sum(mask)
-        z = Config.D_ALPHA * np.ones(legal_moves_prob[inds].shape)
-        d_noise = np.random.dirichlet(Config.D_ALPHA * np.ones(legal_moves_prob[inds].shape))
-        legal_moves_prob[inds] = np.add(np.multiply((1 - epsilon), legal_moves_prob[inds]),
-                                        np.multiply(epsilon, np.add(legal_moves_prob[inds], d_noise)))
-        p_tot = np.sum(legal_moves_prob)
-        legal_moves_prob[inds] = np.divide(legal_moves_prob[inds], p_tot)
     return legal_moves_prob
 
 
 # state type and shape does not matter
 
-def MCTS( temp: float,
+def MCTS(temp: float,
          network: PolicyValNetwork_Giraffe,
+         root = None,
          dirichlet_alpha=Config.D_ALPHA,
-         batch_size: int = Config.BATCH_SIZE,
-         root_node=None) -> tuple:
+         batch_size: int = Config.BATCH_SIZE) -> tuple:
     """
     Monte-Carlo tree search function corresponds to the simulation step in the alpha_zero algorithm
     arguments: state: the root state from where the stimulation start. A board.
 
-    :param env:
     :param temp: temperature constant for the optimum policy to control the level of exploration/
     :param network: policy network for evaluation
     :param explore_factor: hyper parameter to tune the exploration range in UCT
     :param dirichlet_alpha: alpha parameter for the dirichlet process
     :param epsilon: parameter for exploration using dirichlet noise
     :param batch_size:
-    :param init_W:
-    :param init_N:
-    :param init_P:
     :return: return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
     """
     # history of archive for all previous runs
-    # env_copy = env.copy()
-    init_W = np.zeros((Config.d_out,))
-    init_N = np.zeros((Config.d_out,))
-    init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
-    if not root_node:
+    #init_W = np.zeros((Config.d_out,))
+    #init_N = np.zeros((Config.d_out,))
+    #init_P = np.ones((Config.d_out,)) * (1 / Config.d_out)
+    start_time = time.time()
+    if not root:
         env = ChessEnv()
         env = env.reset()
-        root_node = Node(env, init_W.copy(), init_N.copy(), init_P.copy(), Config.EXPLORE_FACTOR)
-    for simulation in range(Config.NUM_SIMULATIONS):
-        curr_node, moves, game_over, z = select(root_node, init_W.copy(), init_N.copy(), init_P.copy())
-        v, leaf = expand_and_eval(curr_node, network, game_over, z, moves)
-        root_node = backup(leaf, v)
+        root = Node(env, Config.EXPLORE_FACTOR)
+        root.expand(network)
+    #print(root.P)
+    root.add_dirichlet()
+    #print(np.sum(root.P))
 
-    N = root_node.N
-
+    for simulation in range(Config.NUM_SIMULATIONS-1):
+        #start_time = time.time()
+        curr_node, moves, game_over, z = select(root)
+        #print('Select time: {}'.format(time.time()-start_time))
+        #print('Root node sum: {}'.format(np.sum(root.N)))
+        #start_time = time.time()
+        leaf = expand_and_eval(curr_node, network, game_over, z, moves)
+        #print('Expand time: {}'.format(time.time()-start_time))
+        #start_time = time.time()
+        backup(leaf,root)
+        #print('Backup time: {}'.format(time.time()-start_time))
+    N = root.N
     norm_factor = np.sum(np.power(N, temp))
+
     # optimum policy
     pi = np.divide(np.power(N, temp), norm_factor)
     action_index = np.argmax(pi)
-    successor = root_node.env.copy()
-    successor.step(Config.INDEXTOMOVE[action_index])
+    print(pi)
+    print(N)
 
-    for child in root_node.children:
-        if np.array_equal(child.env.board, successor.board):
-            child.parent = None
-            return pi, child, root_node
-
-    raise Exception('The Prince should be one of the King''s children')
+    new_pi = np.zeros(Config.d_out,)
+    new_pi[root.legal_move_inds] = pi
+    print('MCTS finished {} simulations in {} seconds'.format(simulation,time.time()-start_time))    
+    return new_pi, root.children[action_index], root
 
 
 ########################
 ######## Select ########
 ########################
 # Traverses from root node to leaf node using UCB selection
-def select(root_node, init_W, init_N, init_P):
+def select(root_node):
     curr_node = root_node
     moves = 0
     game_over, z = curr_node.env.is_game_over(moves)
-    while curr_node.children:  # and not game_over:
-        curr_node.best_child_update()
-        curr_node = curr_node.best_child
+
+    while curr_node.children:
+        
+        curr_node = curr_node.select_best_child()
         moves += 1
-        # print(moves)
         game_over, z = curr_node.env.is_game_over(moves)
 
-    # print(len(curr_node.children))
     return curr_node, moves, game_over, z
 
 
@@ -263,40 +243,27 @@ def select(root_node, init_W, init_N, init_P):
 ##########################
 # Once at a leaf node expand using the network to get it's P values and it's estimated value
 def expand_and_eval(node, network, game_over, z, moves):
-    game_over, z = node.env.is_game_over(moves)
     if game_over:
-        return z, node
+        node.value = z
+        return node
     # expand
-    node.expand()
-    # evaluate
-    all_move_probs, v = network.forward(torch.from_numpy(BoardToFeature(node.env.board)).unsqueeze(0))
-    all_move_probs = all_move_probs.squeeze().data.numpy()
-    if node.parent:
-
-        legal_move_probs = legal_mask(node.env.board, all_move_probs)
-    else:
-        legal_move_probs = legal_mask(node.env.board, all_move_probs, dirichlet=True, epsilon=Config.EPS)
-    node.P_update(legal_move_probs)
-
-    return v.squeeze().data.numpy(), node
+    node.expand(network)
+    return node
 
 
 ###############
 ### Back-up ###
 ###############
 
-def backup(leaf_node, v):
-    z = leaf_node
-    node = leaf_node.parent
-    if not node: return leaf_node
-    x = 0
+def backup(leaf_node,root_node):
+    child_node = leaf_node
+    v = leaf_node.value
+    parent_node = leaf_node.parent
+    if not parent_node: 
+        return leaf_node
 
-    while node:
-        x += 1
-        action_index = Config.MOVETOINDEX[node.taken_action]
-        node.N_update(action_index)
-        node.W_update(v, action_index)
-        root_node = node
-        node = node.parent
-
-    return root_node
+    while child_node != root_node:
+        parent_node.N_update(child_node.child_id)
+        parent_node.W_update(v, child_node.child_id)
+        child_node = parent_node
+        parent_node = parent_node.parent
