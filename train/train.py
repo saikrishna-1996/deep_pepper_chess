@@ -3,10 +3,14 @@ import os
 
 import numpy as np
 import torch
+from logger import Logger
 
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
 from config import Config
+
+#Set the logger
+logger = Logger('./logs')
 
 
 def load_gamefile(net_number):  # I'm not married to this, I think it could be done better.
@@ -29,7 +33,9 @@ def train_model(model, games=None, net_number=0, min_num_games=400):
     else:
         game_data = games
 
+    total_train_iter = 0
     if game_data is not None:
+        curr_train_iter = 0
         for game in game_data:
             num_batches = int(len(game) / Config.minibatch_size + 1)
             game = np.array(game)
@@ -47,7 +53,9 @@ def train_model(model, games=None, net_number=0, min_num_games=400):
 
                     policy = np.vstack(data[:, 1]).astype(float)
                     features = torch.from_numpy(features.astype(float))
-                    do_backprop(features, policy, data[:, 2], model)
+                    do_backprop(features, policy, data[:, 2], model, total_train_iter, curr_train_iter)
+                    total_train_iter = total_train_iter + 1
+                    curr_train_iter = curr_train_iter + 1
     return model
 
 
@@ -55,7 +63,7 @@ def cross_entropy(pred, soft_targets):
     return torch.mean(torch.sum(- soft_targets.double() * pred.double(), 1))
 
 
-def do_backprop(features, policy, act_val, model):
+def do_backprop(features, policy, act_val, model, total_train_iter, curr_train_iter):
     # first convert this batch_board to batch_features
     # batch_board should be of dimension (batch_size, board)
     # batch_feature = Variable(torch.randn(batch_size, 353))
@@ -91,6 +99,17 @@ def do_backprop(features, policy, act_val, model):
     loss3 = 0.1 * l2_reg
 
     loss = loss1.float() - loss2.float() + loss3.float()
+
+    #Logging all the loss values
+    info = {
+            'loss1': loss1.data[0],
+            'loss2': loss2.data[0],
+            'loss3': loss3.data[0]
+            }
+
+    for tag, value in info.items():
+        logger.scalar_summary(tag, value, total_train_iter + 1)
+        logger.scalar_summary(tag, value, curr_train_iter + 1)
 
     optimizer.zero_grad()
     loss.backward()
