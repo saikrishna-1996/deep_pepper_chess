@@ -3,9 +3,10 @@ from multiprocessing import Manager
 
 import numpy as np
 
+from train.MCTS import MCTS, Node
+from game.chess_env import ChessEnv
 from config import Config
 from game.chess_env import ChessEnv
-from train.new_MCTS import MCTS
 
 
 class Champion(object):
@@ -44,19 +45,20 @@ class Champion(object):
         white, black = (self.current_policy, candidate) if p else (candidate, self.current_policy)
         env = ChessEnv()
         env.reset()
-        game_over, z = env.is_game_over(moves)
+        root_node = Node(env,Config.EXPLORE_FACTOR)
+        game_over = False
+
         while not game_over:
             if env.white_to_move:
                 player = white
             else:
                 player = black
 
-            pi = MCTS(env, temp=temperature, network=player)
+            pi, successor, root_node = MCTS(temp=temperature, network=player,root=root_node)
             action_index = np.argmax(pi)
-            env.step(Config.INDEXTOMOVE[action_index])
+            root_node = successor
             moves += 1
-            game_over, z = env.is_game_over(moves)
-            # should be able to give the same state even if no room for legal move
+            game_over, z = root_node.env.is_game_over(moves)
 
         # from white perspective
 

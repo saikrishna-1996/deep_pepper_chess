@@ -67,7 +67,7 @@ class Config(object):
 
     RESIGN_CHECK_MIN = 60
     RESIGN_CHECK_FREQ = 10
-    NUM_SIMULATIONS = 2
+    NUM_SIMULATIONS = 200
     SF_EVAL_THRESHOLD = 6.5
     BATCH_SIZE = 64
     D_ALPHA = 0.4
@@ -77,6 +77,8 @@ class Config(object):
     # Game Generator
     TEMP_REDUCE_STEP = 50
     MINGAMES = 500
+
+    #Self Challenge
     NUM_GAMES = 4
 
     # PATHS
