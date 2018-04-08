@@ -31,20 +31,18 @@ def train_model(model, games=None, net_number=0, min_num_games=400):
 
     if game_data is not None:
         for game in game_data:
-            num_batches = int(len(game) / Config.batch_size + 1)
+            num_batches = int(len(game) / Config.minibatch_size + 1)
             game = np.array(game)
             for i in range(num_batches):
-                
-
-                lower_bound = int(i * Config.batch_size)
+                lower_bound = int(i * Config.minibatch_size)
                 if lower_bound > len(game):
                     break
-                upper_bound = int((i + 1) * Config.batch_size)
+                upper_bound = int((i + 1) * Config.minibatch_size)
                 if upper_bound > len(game):
                     upper_bound = len(game)
-                
+
                 data = game[lower_bound:upper_bound, :]
-                if (data.shape[0]!= 0):
+                if data.shape[0] != 0:
                     features = np.vstack(data[:, 0])
 
                     policy = np.vstack(data[:, 1]).astype(float)

@@ -46,7 +46,9 @@ def make_square_map():
 
 
 class Config(object):
-    PRETRAIN_BATCHES = 10
+    think_time = 10  # 1 seconds
+    minibatch_size = 32
+    PRETRAIN_EPOCHS = 1
     SQUAREMAP = {'a1': 0, 'b1': 1, 'c1': 2, 'd1': 3, 'e1': 4, 'f1': 5, 'g1': 6, 'h1': 7, 'a2': 8, 'b2': 9, 'c2': 10,
                  'd2': 11,
                  'e2': 12, 'f2': 13, 'g2': 14, 'h2': 15, 'a3': 16, 'b3': 17, 'c3': 18, 'd3': 19, 'e3': 20, 'f3': 21,
@@ -83,7 +85,7 @@ class Config(object):
     NETPATH = os.path.join(ROOTDIR, 'saved_nets')
     BESTNET_NAME = 'BestNetwork.pth.tar'  # Example seen here: https://github.com/pytorch/examples/blob/0984955bb8525452d1c0e4d14499756eae76755b/imagenet/main.py#L139-L145
 
-    batch_size = 100
+    minibatch_size = 100
 
     # NETWORK INFO
     d_in = 363

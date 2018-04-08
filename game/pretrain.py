@@ -3,16 +3,12 @@ from random import shuffle
 import chess.pgn
 import chess.uci
 # import random
-import numpy as np
 import torch
-from torch.optim import optimizer
+from torch.autograd import Variable
 
 from config import Config
 from game.features import board_to_feature
 from game.stockfish import Stockfish
-
-think_time = 10  # 1 seconds
-batch_size = 32
 
 
 def cross_entropy(pred, soft_targets):
@@ -41,36 +37,29 @@ def pretrain(model):
     feature_batch = []
     targets_batch = []
     board_positions = get_board_position()
-    shuffled_board_positions = shuffle(board_positions)
-    print("We have {} board positions".format(len(board_positions)))
+    shuffle(board_positions)
+    print("Pretraining on {} board positions...".format(len(board_positions)))
     stockfish = Stockfish()
 
-    for batch in range(Config.PRETRAIN_BATCHES):
+    for batch in range(Config.PRETRAIN_EPOCHS):
         for index, board_position in enumerate(board_positions):
-            if (index + 1) % batch_size != 0:
+            if (index + 1) % Config.minibatch_size != 0:
                 feature_batch.append(board_to_feature(board_position))
                 targets_batch.append(stockfish.stockfish_eval(board_position, 10))
             else:
-                feature_batch = torch.from_numpy(np.asarray(feature_batch, dtype=float))
-                targets_batch = torch.from_numpy(np.asarray(targets_batch, dtype=float))
-                do_backprop(feature_batch, np.asarray(targets_batch), model)
+                feature_batch = torch.FloatTensor(feature_batch)
+                targets_batch = Variable(torch.FloatTensor(targets_batch))
+                do_backprop(feature_batch, targets_batch, model)
                 feature_batch = []
                 targets_batch = []
+        print("Completed batch {} of {}".format(batch, Config.PRETRAIN_EPOCHS))
 
 
-def do_backprop(batch_features, values, model):
+def do_backprop(batch_features, targets, model):
     criterion1 = torch.nn.MSELoss(size_average=False)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
     nn_policy_out, nn_val_out = model(batch_features)
-    loss = criterion1(values, nn_val_out)
-    # loss2 = criterion2(policy, nn_policy_out)
-    # l2_reg = None
-    # for weight in model.parameters():
-    #    if l2_reg is None:
-    #        l2_reg = weight.norm(2)
-    #    else:
-    #        l2_reg = l2_reg + weight.norm(2)
-    # loss3 = 0.1 * l2_reg
-    # loss = loss1 + loss2 + loss3
+    loss = criterion1(nn_val_out, targets)
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()

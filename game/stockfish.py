@@ -44,7 +44,7 @@ class Stockfish(object):
         return eval_val
 
     def check_resignation(self, state):
-        evaluation = self.stockfish_eval(state, t=0.5)
+        evaluation = self.stockfish_eval(state, t=1)
         if abs(evaluation) > 6.5:
             return True, evaluation / abs(evaluation)
         return False, None

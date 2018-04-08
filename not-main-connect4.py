@@ -59,7 +59,7 @@ def did_black_win(board):
                 if i < 3:  # bottom condition.
                     if board[i + 1, j] == -1 and board[i + 2, j] == -1 and board[i + 3, j] == -1:
                         return -1
-                if i < 3 and j >= 3:  # bottom left diagonal condition
+                if i < 3 <= j:  # bottom left diagonal condition
                     if board[i + 1, j - 1] == -1 and board[i + 2, j - 2] == -1 and board[i + 3, j - 3] == -1:
                         return -1
 
