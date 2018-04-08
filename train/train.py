@@ -52,7 +52,7 @@ def train_model(model, games=None, net_number=0, min_num_games=400):
 
 
 def cross_entropy(pred, soft_targets):
-    return torch.mean(torch.sum(- soft_targets.double() * torch.log(pred).double(), 1))
+    return torch.mean(torch.sum(- soft_targets.double() * pred.double(), 1))
 
 
 def do_backprop(features, policy, act_val, model):
