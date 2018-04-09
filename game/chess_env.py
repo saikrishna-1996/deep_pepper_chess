@@ -6,7 +6,7 @@ import chess.pgn
 import numpy as np
 
 from config import Config
-from game.stockfish import Stockfish
+# from game.stockfish import Stockfish
 
 logger = getLogger(__name__)
 
@@ -32,7 +32,7 @@ class ChessEnv:
         self.resigned = False
         self.result = None
         self.state_count = dict()
-        self.stockfish = Stockfish()
+        # self.stockfish = Stockfish()
 
     def reset(self):
         self.board = chess.Board()
@@ -110,8 +110,8 @@ class ChessEnv:
                 return True, 0
             if score == '1-0':
                 return True, 1
-        elif (moves > Config.RESIGN_CHECK_MIN) and (not moves % Config.RESIGN_CHECK_FREQ):
-            return self.stockfish.check_resignation(self.board)
+        # elif (moves > Config.RESIGN_CHECK_MIN) and (not moves % Config.RESIGN_CHECK_FREQ):
+        #     return self.stockfish.check_resignation(self.board)
 
         return False, None
 
