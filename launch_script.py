@@ -32,7 +32,7 @@ torch.manual_seed(args.seed)
 def main():
     print("Launching Deep Pepper...")
     pool = multiprocessing.Pool(args.workers)
-    champion = Champion(PolicyValNetwork_Giraffe(args.pretrain))
+    champion = Champion(PolicyValNetwork_Giraffe(pretrain=False))
     generator = GameGenerator(champion, pool, args.batch_size, args.workers)
     improver = PolicyImprover(champion, args.championship_rounds)
 
