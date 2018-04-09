@@ -7,10 +7,10 @@ import torch
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
 from config import Config
-from logger import Logger
+# from logger import Logger
 
 #Set the logger
-logger = Logger('./logs')
+# logger = Logger('./logs')
 
 
 def load_gamefile(net_number):  # I'm not married to this, I think it could be done better.
@@ -107,9 +107,9 @@ def do_backprop(features, policy, act_val, model, total_train_iter, curr_train_i
             'loss3': loss3.data[0]
             }
 
-    for tag, value in info.items():
-        logger.scalar_summary(tag, value, total_train_iter + 1)
-        logger.scalar_summary(tag, value, curr_train_iter + 1)
+    # for tag, value in info.items():
+    #     logger.scalar_summary(tag, value, total_train_iter + 1)
+    #     logger.scalar_summary(tag, value, curr_train_iter + 1)
 
     optimizer.zero_grad()
     loss.backward()
