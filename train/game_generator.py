@@ -1,15 +1,15 @@
-import os,sys, inspect
 import multiprocessing
 import time
 
 import numpy as np
+
 from config import Config
 from game.chess_env import ChessEnv
 from game.features import board_to_feature
 from network.policy_network import PolicyValNetwork_Giraffe
 from train.MCTS import MCTS, Node
 from train.self_challenge import Champion
-import time
+
 
 class GameGenerator(object):
     def __init__(self, champion: Champion, pool: multiprocessing.Pool, batch_size: int, workers: int):

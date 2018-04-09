@@ -1,9 +1,6 @@
-from copy import copy
-from functools import partial
 from multiprocessing import Pool
 
 import numpy as np
-from chess import Board
 
 from config import Config
 from game.chess_env import ChessEnv

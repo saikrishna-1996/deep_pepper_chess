@@ -3,11 +3,11 @@ import os
 
 import numpy as np
 import torch
-from logger import Logger
 
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
 from config import Config
+from logger import Logger
 
 #Set the logger
 logger = Logger('./logs')

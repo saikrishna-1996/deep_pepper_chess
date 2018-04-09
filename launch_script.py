@@ -5,9 +5,9 @@ import multiprocessing
 
 import torch
 
+from network.policy_network import PolicyValNetwork_Giraffe
 from train.game_generator import GameGenerator
 from train.policy_improver import PolicyImprover
-from network.policy_network import PolicyValNetwork_Giraffe
 from train.self_challenge import Champion
 
 parser = argparse.ArgumentParser(description='Launcher for distributed Chess trainer')
@@ -22,6 +22,7 @@ parser.add_argument('--data-path', type=str, default='./data', help='Path to dat
 parser.add_argument('--workers', type=int, help='Number of workers used for generating games', default=4)
 parser.add_argument('--seed', type=int, default=1, help='random seed (default: 1)')
 parser.add_argument('--no-cuda', action='store_true', default=True, help='Disables GPU use')
+parser.add_argument('--pretrain', action='store_true', default=True, help='Pretrain value function')
 
 args = parser.parse_args()
 args.cuda = True if not args.no_cuda and torch.cuda.is_available() else False
@@ -31,7 +32,7 @@ torch.manual_seed(args.seed)
 def main():
     print("Launching Deep Pepper...")
     pool = multiprocessing.Pool(args.workers)
-    champion = Champion(PolicyValNetwork_Giraffe())
+    champion = Champion(PolicyValNetwork_Giraffe(args.pretrain))
     generator = GameGenerator(champion, pool, args.batch_size, args.workers)
     improver = PolicyImprover(champion, args.championship_rounds)
 

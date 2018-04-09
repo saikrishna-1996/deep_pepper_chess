@@ -2,8 +2,6 @@ import os
 
 import chess
 
-from game.stockfish import Stockfish
-
 
 def make_move_maps():
     MOVETOINDEX = {}

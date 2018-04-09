@@ -58,6 +58,7 @@ class PolicyNetwork_Giraffe(nn.Module):
 
 class PolicyValNetwork_Giraffe(nn.Module):
     def __init__(self,
+                 pretrain=False,
                  d_in=Config.d_in,
                  gf=Config.global_features,
                  pc=Config.piece_centric,
@@ -81,7 +82,8 @@ class PolicyValNetwork_Giraffe(nn.Module):
         self.linear2e = nn.Linear(h1a + h1b + h1c, h2e)
         self.linear3p = nn.Linear(h2p, d_out)
         self.linear3e = nn.Linear(h2e, eval_out)
-        pretrain(self)
+        if pretrain:
+            pretrain(self)
 
     def forward(self, x):
         x = Variable(x.float())
@@ -100,7 +102,7 @@ class PolicyValNetwork_Giraffe(nn.Module):
         h1_relu = torch.cat((h1a_relu, h1b_relu, h1c_relu), dim=1)
 
         h2p_relu = F.relu(self.linear2p(h1_relu))
-        p_out = F.log_softmax(self.linear3p(h2p_relu),dim=1)
+        p_out = F.log_softmax(self.linear3p(h2p_relu), dim=1)
 
         h2e_relu = F.relu(self.linear2e(h1_relu))
         val_out = F.tanh(self.linear3e(h2e_relu))

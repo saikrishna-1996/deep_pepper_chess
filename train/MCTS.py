@@ -15,12 +15,12 @@ class Node(object):
     # find legal move and next board represenation.
     # It has the ability to store and update for each leaf the
     #  number of state-action N(s,a), Q(s,a) and P(s,a)
-    def __init__(self, env: ChessEnv,explore_factor,
-                init_W=np.zeros((Config.d_out,)) ,
-                init_N = np.zeros((Config.d_out,)),
-                init_P= np.ones((Config.d_out,)) * (1 / Config.d_out),
-                parent = None,
-                child_id = None):
+    def __init__(self, env: ChessEnv, explore_factor,
+                 init_W=np.zeros((Config.d_out,)),
+                 init_N=np.zeros((Config.d_out,)),
+                 init_P=np.ones((Config.d_out,)) * (1 / Config.d_out),
+                 parent=None,
+                 child_id=None):
         assert init_N.shape == (Config.d_out,)
         assert init_W.shape == (Config.d_out,)
         assert init_P.shape == (Config.d_out,)
@@ -28,13 +28,13 @@ class Node(object):
         self.env = env
 
         self.parent = parent
-        
+
         self.explore_factor = explore_factor
-        
+
         legal_moves = env.board.legal_moves
         self.legal_move_inds = []
         self.legal_moves = []
-        
+
         for move in legal_moves:
             legal_move_uci = move.uci()
             ind = Config.MOVETOINDEX[legal_move_uci]
@@ -45,7 +45,6 @@ class Node(object):
         self.W = init_W[self.legal_move_inds]
         self.child_id = child_id
         self.children = None
-        
 
     @property
     def Q(self):
@@ -65,21 +64,21 @@ class Node(object):
             move_UCT = (np.add(self.U, -self.Q))
 
         max_list = np.argwhere(move_UCT == np.amax(move_UCT))
-        child_id = int(max_list[np.random.randint(0,len(max_list))])
+        child_id = int(max_list[np.random.randint(0, len(max_list))])
         move = self.legal_moves[child_id]
         self.taken_action = move
         if self.children[child_id] == None:
             next_env = self.env.copy()
             next_env.step(move)
-            self.children[child_id] = Node(next_env,self.explore_factor,parent=self,child_id = child_id)
+            self.children[child_id] = Node(next_env, self.explore_factor, parent=self, child_id=child_id)
 
         return self.children[child_id]
 
-    def expand(self,network):
+    def expand(self, network):
         self.children = [None] * len(self.legal_moves)
         all_move_probs, v = network.forward(torch.from_numpy(board_to_feature(self.env.board)).unsqueeze(0))
         all_move_probs = all_move_probs.squeeze().data.numpy()
-        child_probs = (all_move_probs[self.legal_move_inds] + 1e-12)/np.sum(all_move_probs[self.legal_move_inds] + 1e-12)
+        child_probs = (all_move_probs[self.legal_move_inds] + 1e-12) / np.sum(all_move_probs[self.legal_move_inds] + 1e-12)
         child_probs = np.exp(child_probs)
         self.P = child_probs
         self.value = v
@@ -93,8 +92,9 @@ class Node(object):
     def add_dirichlet(self):
         num_legal_moves = len(self.legal_move_inds) + 1
         d_noise = np.random.dirichlet(Config.D_ALPHA * np.ones(self.P.shape))
-        self.P = np.add(self.P,d_noise)
-        self.P = self.P/self.P.sum(keepdims=1)
+        self.P = np.add(self.P, d_noise)
+        self.P = self.P / self.P.sum(keepdims=1)
+
 
 def legal_mask(board, all_move_probs) -> np.array:
     legal_moves = board.legal_moves
@@ -140,16 +140,16 @@ def MCTS(temp: float,
         root.expand(network)
     root.add_dirichlet()
     for simulation in range(Config.NUM_SIMULATIONS):
-        #start_time = time.time()
+        # start_time = time.time()
         curr_node, moves, game_over, z = select(root)
-        #print('Select time: {}'.format(time.time()-start_time))
-        #print('Simulation: {} Root node sum: {}'.format(simulation,np.sum(root.N)))
-        #start_time = time.time()
+        # print('Select time: {}'.format(time.time()-start_time))
+        # print('Simulation: {} Root node sum: {}'.format(simulation,np.sum(root.N)))
+        # start_time = time.time()
         leaf = expand_and_eval(curr_node, network, game_over, z, moves)
-        #print('Expand time: {}'.format(time.time()-start_time))
-        #start_time = time.time()
-        backup(leaf,root)
-        #print('Backup time: {}'.format(time.time()-start_time))
+        # print('Expand time: {}'.format(time.time()-start_time))
+        # start_time = time.time()
+        backup(leaf, root)
+        # print('Backup time: {}'.format(time.time()-start_time))
     N = root.N
     norm_factor = np.sum(np.power(N, temp))
 
@@ -157,9 +157,9 @@ def MCTS(temp: float,
     pi = np.divide(np.power(N, temp), norm_factor)
     action_index = np.argmax(pi)
 
-    new_pi = np.zeros(Config.d_out,)
+    new_pi = np.zeros(Config.d_out, )
     new_pi[root.legal_move_inds] = pi
-    #print('MCTS finished {} simulations in {} seconds'.format(simulation,time.time()-start_time))    
+    # print('MCTS finished {} simulations in {} seconds'.format(simulation,time.time()-start_time))
     return new_pi, root.children[action_index], root
 
 
@@ -173,7 +173,6 @@ def select(root_node):
     game_over, z = curr_node.env.is_game_over(moves)
 
     while curr_node.children:
-        
         curr_node = curr_node.select_best_child()
         moves += 1
         game_over, z = curr_node.env.is_game_over(moves)
@@ -198,11 +197,11 @@ def expand_and_eval(node, network, game_over, z, moves):
 ### Back-up ###
 ###############
 
-def backup(leaf_node,root_node):
+def backup(leaf_node, root_node):
     child_node = leaf_node
     v = leaf_node.value
     parent_node = leaf_node.parent
-    if not parent_node: 
+    if not parent_node:
         return leaf_node
 
     while child_node != root_node:
