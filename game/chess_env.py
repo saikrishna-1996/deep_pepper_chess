@@ -25,13 +25,13 @@ ind = {pieces_order[i]: i for i in range(12)}
 
 class ChessEnv:
 
-    def __init__(self):
-        self.board = None
+    def __init__(self, board=None):
+        self.board = board
         self.num_halfmoves = 0
         self.winner = None  # type: Winner
         self.resigned = False
         self.result = None
-        self.state_count = None
+        self.state_count = dict()
         self.stockfish = Stockfish()
 
     def reset(self):

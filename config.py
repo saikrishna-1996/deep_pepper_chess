@@ -92,8 +92,8 @@ class Config(object):
     # NETWORK INFO
     d_in = 363
     h1 = 1024  # neurons in first hidden layer
-    h2 = 2048  # nuerons in second hidden layer
-    h2p = 2048  # nuerons in second hidden layer of policy network
+    h2 = 2048  # neurons in second hidden layer
+    h2p = 2048  # neurons in second hidden layer of policy network
     h2e = 512  # neurons in second hidden layer of evaluation network
     d_out = 5120  # without including under promotions. otherwise we have to increase
 
