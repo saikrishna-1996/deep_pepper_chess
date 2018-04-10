@@ -1,11 +1,14 @@
-from random import shuffle
+import os, sys
+parentPath = os.path.abspath("..")
+if parentPath not in sys.path:
+    sys.path.insert(0,parentPath)
 
+from random import shuffle
 import chess.pgn
 import chess.uci
 # import random
 import torch
 from torch.autograd import Variable
-
 from config import Config
 from game.features import board_to_feature
 from game.stockfish import Stockfish
