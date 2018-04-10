@@ -52,8 +52,3 @@ def value_policy(env: ChessEnv):
 
     return value, map
 
-
-env = ChessEnv()
-env = env.reset()
-a, b = value_policy(env)
-c = 1
