@@ -12,7 +12,7 @@ from logger import Logger
 from network.policy_network import PolicyValNetwork_Giraffe
 
 #Set the logger
-logger = Logger('./logs')
+#logger = Logger('./logs')
 
 
 def load_gamefile(net_number):  # I'm not married to this, I think it could be done better.
