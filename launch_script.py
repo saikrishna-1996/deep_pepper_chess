@@ -12,7 +12,7 @@ from network.policy_network import PolicyValNetwork_Giraffe
 from train.game_generator import GameGenerator
 from train.policy_improver import PolicyImprover
 from train.self_challenge import Champion
-from train.train import load_trained, save_trained, load_newest_model
+from train.train import save_trained, load_model
 
 parser = argparse.ArgumentParser(description='Launcher for distributed Chess trainer')
 
@@ -36,7 +36,7 @@ torch.manual_seed(args.seed)
 def main():
     print("Launching Deep Pepper...")
     pool = multiprocessing.Pool(args.workers)
-    model, i = load_newest_model()
+    model, i = load_model()
     champion = Champion(model)
     generator = GameGenerator(champion, pool, args.batch_size, args.workers)
     improver = PolicyImprover(champion, args.championship_rounds)

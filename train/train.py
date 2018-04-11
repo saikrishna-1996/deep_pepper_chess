@@ -157,24 +157,28 @@ def load_trained(model, fname):
 def save_trained(model, iteration):
     torch.save(model.state_dict(), "./{}.pt".format(iteration))
 
-def load_newest_model():
+def load_model(fname = None):
     model = PolicyValNetwork_Giraffe(pretrain=False)
-    list_of_files = glob.glob('./*.pt')
-    if len(list_of_files) != 0:
-        latest_file = max(list_of_files, key = os.path.getctime)
-        print('Loading latest model...')
-        model = load_trained(model,latest_file)
-        i = re.search('./(.+?).pt',latest_file)
-        if i:
-            if (i.group(1)) == 'pretrained':
-                print('Loaded pretrained model')
-                i = 0
-            else:
-                i = int(i.group(1))
-                print('Current model number: {}'.format(i))
-        return model, i
+    if fname == None:
+        list_of_files = glob.glob('./*.pt')
+        if len(list_of_files) != 0:
+            latest_file = max(list_of_files, key = os.path.getctime)
+            print('Loading latest model...')
+            model = load_trained(model,latest_file)
+            i = re.search('./(.+?).pt',latest_file)
+            if i:
+                if (i.group(1)) == 'pretrained':
+                    print('Loaded pretrained model')
+                    i = 0
+                else:
+                    i = int(i.group(1))
+                    print('Current model number: {}'.format(i))
+            return model, i
+        else:
+            print('Using new model')
+            save_trained(model,0)
+            return model, 0
     else:
-        print('Using new model')
-        save_trained(model,0)
-        return model, 0
+        model = load_trained(model,fname)
+        return model
 

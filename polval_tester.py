@@ -1,9 +1,15 @@
 #Goal is to check if our current policy is any better than random policy
-
 import argparse
 import torch
 import time
-#from deep_pepper_chess.config import Config
+from train.train import load_model
+import os
+import glob
+from network.policy_network import PolicyValNetwork_Giraffe
+import numpy as np
+from game.chess_env import ChessEnv
+from train.MCTS import Node, MCTS
+from config import Config
 
 parser = argparse.ArgumentParser(description='Launcher for policy tester')
 parser.add_argument('--newnetwork', type=str, default=None, help='Path to the most recently trained model')
@@ -13,20 +19,21 @@ parser.add_argument('--no-cuda', action='store_true', default=True, help='disabl
 
 args = parser.parse_args()
 args.cuda = True if not args.no_cuda and torch.cuda.is_available() else False
-#torch.manual_seed(args.seed)
+
+
 def main():
-
-    if args.newnetwork == None:
-        new_network = torch.load(args.newnetwork)
-    else:
-        new_network = torch.load('./0.pt')
-
-    #load the network and initialize with random parameters
-    if args.oldnetwork == None:
-        old_network = torch.load('./0.pt')
-    else:
-        old_network = torch.load(args.oldnetwork)
-
+    new_network = PolicyValNetwork_Giraffe(pretrain=False)
+    old_network = PolicyValNetwork_Giraffe(pretrain=False)
+    new_network, _ = load_model(args.newnetwork)
+    if old_network == None:
+        list_of_files = glob.glob('../*.pt')
+        if len(list_of_files) != 0:
+            print('Old network will be oldest network')
+            oldest_file = min(list_of_files, key = os.path.getctime)
+            old_network, _ = load_model(oldest_file)
+        else:
+            print('Old network will be randomly initialized')
+        
 
     score1 = 0
     score2 = 0
@@ -49,6 +56,7 @@ def main():
                 player = black
 
             pi, successor, root_node = MCTS(temp=temperature, network=player, root=root_node)
+
             root_node = successor
             moves = moves + 1
             game_over, z = root_node.env.is_game_over(moves)
@@ -63,10 +71,12 @@ def main():
         else:
             if z <= -1:
                 score1 = score1 + 1
-
             else:
                 score2 = score2 + 1
 
     print("New network score total wins: {} Average Score: {}".format(score1,score1/args.numgames))
     print("Old network score total wins: {} Average Score: {}".format(score2,score2/args.numgames))
+
+if __name__ == '__main__':
+    main()
 
