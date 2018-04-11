@@ -37,9 +37,9 @@ class GameGenerator(object):
             if step_game == 50:
                 temperature = 10e-6
 
-            time = time.time()
+            start = time.time()
             pi, successor, root_node = MCTS(temp=temperature, network=model, root=root_node)
-            print("Calculated next move in {}ms".format(time.time() - time))
+            print("Calculated next move in {}ms".format(time.time() - start))
             feature = board_to_feature(root_node.env.board)
             triplets.append([feature, pi])
             print('')
