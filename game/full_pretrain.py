@@ -18,10 +18,10 @@ import parallel_mcts_test
 
 #set the logger
 logger = Logger('./logs')
-model = PolicyValNetwork_Giraffe
+model = PolicyValNetwork_Giraffe(pretrain=False)
 
 def cross_entropy(pred, soft_targets):
-    return torch.mean(torch.sum(- soft_targets.doble() * torch.log(pred).double(), 1))
+    return torch.mean(torch.sum(- soft_targets.double() * torch.log(pred).double(), 1))
 
 
 def get_board_position():
