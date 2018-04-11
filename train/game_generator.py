@@ -1,4 +1,4 @@
-import multiprocessing
+import multiprocessing as mp
 import time
 
 import numpy as np
@@ -12,7 +12,7 @@ from train.self_challenge import Champion
 
 
 class GameGenerator(object):
-    def __init__(self, champion: Champion, pool: multiprocessing.Pool, batch_size: int, workers: int):
+    def __init__(self, champion: Champion, pool: mp.Pool, batch_size: int, workers: int):
         self.champion = champion
         self.pool = pool
         self.workers = workers
@@ -30,7 +30,7 @@ class GameGenerator(object):
         #game_over, z = env.is_game_over(moves)
         env = ChessEnv()
         env.reset()
-        root_node = Node(env,Config.EXPLORE_FACTOR)
+        root_node = Node(env, Config.EXPLORE_FACTOR)
         while not game_over:
             moves += 1
             step_game += 1
@@ -42,7 +42,7 @@ class GameGenerator(object):
             triplets.append([feature, pi])
             print('')
             print(root_node.env.board)
-            print("Running on {} ".format(multiprocessing.current_process()))
+            print("Running on {} ".format(mp.current_process()))
             root_node = successor
             game_over, z = root_node.env.is_game_over(moves, res_check=True)
         for i in range(len(triplets) - step_game, len(triplets)):

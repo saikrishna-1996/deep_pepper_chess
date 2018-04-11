@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-import multiprocessing
+import multiprocessing as mp
 import os
 import re
 import glob
@@ -35,7 +35,8 @@ torch.manual_seed(args.seed)
 
 def main():
     print("Launching Deep Pepper...")
-    pool = multiprocessing.Pool(args.workers)
+    print("Running {} on {} cores".format(args.workers, mp.cpu_count()))
+    pool = mp.Pool(args.workers)
     model, i = load_model()
     champion = Champion(model)
     generator = GameGenerator(champion, pool, args.batch_size, args.workers)
