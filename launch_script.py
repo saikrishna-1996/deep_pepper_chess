@@ -12,7 +12,7 @@ from train.self_challenge import Champion
 
 parser = argparse.ArgumentParser(description='Launcher for distributed Chess trainer')
 
-parser.add_argument('--batch-size', type=int, default=100, help='input batch size for training (default: 2500)')
+parser.add_argument('--batch-size', type=int, default=2500, help='input batch size for training (default: 2500)')
 parser.add_argument('--epochs', type=int, default=1, help='number of epochs to train (default: 1)')
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate (default: 0.0002)')
 parser.add_argument('--championship-rounds', type=int, default=10,
