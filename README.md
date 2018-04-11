@@ -2,11 +2,12 @@
 
 MCTS-based algorithm for parallel training of a chess engine. 
 
-## Technology Used
+## Technologies Used
 
 * [python-chess](https://github.com/niklasf/python-chess) - For handling the chess environment and gameplay.
 * [pytorch](https://github.com/pytorch/pytorch) - For training and inference.
 * [Stockfish](https://github.com/official-stockfish/stockfish) - For value function and endgame evaluation.
+* [Tensorboard](https://github.com/tensorflow/tensorboard) - For visualizing training progress.
  
 ## Setup Instructions (TO BE REMOVED WHEN REPO IS PUBLIC)
 
