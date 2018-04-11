@@ -35,7 +35,7 @@ torch.manual_seed(args.seed)
 
 def main():
     print("Launching Deep Pepper...")
-    print("Running {} on {} cores".format(args.workers, mp.cpu_count()))
+    print("Running {} workers on {} cores".format(args.workers, mp.cpu_count()))
     pool = mp.Pool(args.workers)
     model, i = load_model()
     champion = Champion(model)
