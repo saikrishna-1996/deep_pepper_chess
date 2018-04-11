@@ -57,8 +57,7 @@ class GameGenerator(object):
 
     def generate_games(self):
         start = time.time()
-        games_per_worker = range(int(self.batch_size / self.workers + 1))
-        games = self.pool.map(self.play_game, games_per_worker)
+        games = self.pool.map(self.play_game, self.batch_size)
         print("Generated {} games in {}".format(len(games), time.time() - start))
         return games
 
