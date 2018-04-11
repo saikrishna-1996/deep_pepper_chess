@@ -43,7 +43,7 @@ class Stockfish(object):
                 eval_val = 100.0
         return eval_val
 
-    def check_resignation(self, state):
+    def check_resignation(self, state)->tuple:
         evaluation = self.stockfish_eval(state, t=1)
         if abs(evaluation) > 6.5:
             return True, evaluation / abs(evaluation)

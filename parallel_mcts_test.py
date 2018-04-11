@@ -5,6 +5,7 @@ import numpy as np
 from config import Config
 from game.chess_env import ChessEnv
 from game.stockfish import Stockfish
+import chess.pgn
 
 
 def softmax(x):
@@ -21,11 +22,11 @@ def evaluate_state(board):
     if game_over:
         return score
     value = env.stockfish.stockfish_eval(env.board, t=100)
-    print(value)
     return value
 
 
-def value_policy(env: ChessEnv):
+def value_policy(board: chess.Board):
+    env = ChessEnv(board)
     game_over, score = env.is_game_over()
     if game_over:
         return score, []
@@ -39,7 +40,6 @@ def value_policy(env: ChessEnv):
 
     p = Pool()
     actions_value = p.map(evaluate_state, next_states)
-    print(actions_value)
     p.close()
     p.join()
 
@@ -49,11 +49,6 @@ def value_policy(env: ChessEnv):
     map = np.zeros((5120,))
     for index, pi in zip(index_list, policy):
         map[index] = pi
-
+    assert policy.sum()>0.999
     return value, map
 
-
-env = ChessEnv()
-env = env.reset()
-a, b = value_policy(env)
-c = 1

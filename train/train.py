@@ -1,5 +1,6 @@
 import glob
 import os
+import re
 
 import numpy as np
 import torch
@@ -7,10 +8,11 @@ import torch
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
 from config import Config
-from logger import Logger
+#from logger import Logger
+from network.policy_network import PolicyValNetwork_Giraffe
 
 #Set the logger
-logger = Logger('./logs')
+#logger = Logger('./logs')
 
 
 def load_gamefile(net_number):  # I'm not married to this, I think it could be done better.
@@ -116,30 +118,67 @@ def do_backprop(features, policy, act_val, model, total_train_iter, curr_train_i
     optimizer.step()
 
 
-def save(model, fname, network_iter):
-    save_info = {
-        'state_dict': model.state_dict(),
-        'iteration': network_iter
-    }
-    fpath = os.path.join(Config.NETPATH, fname)
-    torch.save(save_info, fpath)
+# def save(model, fname, network_iter):
+#     save_info = {
+#         'state_dict': model.state_dict(),
+#         'iteration': network_iter
+#     }
+#     fpath = os.path.join(Config.NETPATH, fname)
+#     torch.save(save_info, fpath)
 
 
-def load(best=False):
-    if best:
-        best_fname = Config.BESTNET_NAME
-        try:
-            model_state = torch.load(Config.NETPATH, best_fname)
-        except:
-            print("Could not load model")
-            return None
+# def load(best=False):
+#     if best:
+#         best_fname = Config.BESTNET_NAME
+#         try:
+#             model_state = torch.load(Config.NETPATH, best_fname)
+#         except:
+#             print("Could not load model")
+#             return None
+#     else:
+#         # get newest file
+#         list_of_files = glob.glob(Config.NETPATH)
+#         latest_file = max(list_of_files, key=os.path.getctime)
+#         try:
+#             model_state = torch.load(latest_file)
+#         except:
+#             print("Could not load file.")
+#             return None
+#     return model_state
+
+
+def load_trained(model, fname):
+    pretrained_state_dict = torch.load(fname)
+    model_dict = model.state_dict()
+    model_dict.update(pretrained_state_dict)
+    model.load_state_dict(pretrained_state_dict)
+    return model
+
+def save_trained(model, iteration):
+    torch.save(model.state_dict(), "./{}.pt".format(iteration))
+
+def load_model(fname = None):
+    model = PolicyValNetwork_Giraffe(pretrain=False)
+    if fname == None:
+        list_of_files = glob.glob('./*.pt')
+        if len(list_of_files) != 0:
+            latest_file = max(list_of_files, key = os.path.getctime)
+            print('Loading latest model...')
+            model = load_trained(model,latest_file)
+            i = re.search('./(.+?).pt',latest_file)
+            if i:
+                if (i.group(1)) == 'pretrained':
+                    print('Loaded pretrained model')
+                    i = 0
+                else:
+                    i = int(i.group(1))
+                    print('Current model number: {}'.format(i))
+            return model, i
+        else:
+            print('Using new model')
+            save_trained(model,0)
+            return model, 0
     else:
-        # get newest file
-        list_of_files = glob.glob(Config.NETPATH)
-        latest_file = max(list_of_files, key=os.path.getctime)
-        try:
-            model_state = torch.load(latest_file)
-        except:
-            print("Could not load file.")
-            return None
-    return model_state
+        model = load_trained(model,fname)
+        return model
+

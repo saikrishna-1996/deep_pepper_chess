@@ -56,7 +56,7 @@ class Champion(object):
             pi, successor, root_node = MCTS(temp=temperature, network=player,root=root_node)
             root_node = successor
             moves += 1
-            game_over, z = root_node.env.is_game_over(moves)
+            game_over, z = root_node.env.is_game_over(moves, res_check=True)
 
         # from white perspective
 
