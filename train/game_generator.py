@@ -27,7 +27,7 @@ class GameGenerator(object):
         # env.reset()
         game_over = False
         moves = 0
-        #game_over, z = env.is_game_over(moves)
+        # game_over, z = env.is_game_over(moves)
         env = ChessEnv()
         env.reset()
         root_node = Node(env, Config.EXPLORE_FACTOR)
@@ -37,7 +37,9 @@ class GameGenerator(object):
             if step_game == 50:
                 temperature = 10e-6
 
+            time = time.time()
             pi, successor, root_node = MCTS(temp=temperature, network=model, root=root_node)
+            print("Calculated next move in {}ms".format(time.time() - time))
             feature = board_to_feature(root_node.env.board)
             triplets.append([feature, pi])
             print('')
