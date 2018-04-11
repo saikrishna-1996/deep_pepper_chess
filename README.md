@@ -1,9 +1,12 @@
-To the completion!
+# Deep Pepper
 
-(If you are bored / exhausted, put in some of your favorite quotes here. For example, "don't throw the papers, upload them on arXiv" )
+MCTS-based algorithm for parallel training of a chess engine. 
 
-# deep_pepper_connect4
-different AI algorithms to solve connect4
+## Technology Used
+
+* [python-chess](https://github.com/niklasf/python-chess) - For handling the chess environment and gameplay.
+* [pytorch](https://github.com/pytorch/pytorch) - For training and inference.
+* [Stockfish](https://github.com/official-stockfish/stockfish) - For value function and endgame evaluation.
  
 ## Setup Instructions (TO BE REMOVED WHEN REPO IS PUBLIC)
 
