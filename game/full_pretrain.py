@@ -41,6 +41,9 @@ def get_board_position():
         print("We have {} board positions".format(len(board_positions)))
         return board_positions
 
+def save_trained(model, iteration):
+    torch.save(model.state_dict(), "./{}.pt".format(iteration))
+
 
 def pretrain(model):
     iters = 0
@@ -102,5 +105,8 @@ def do_backprop(batch_features, targets_val, targets_pol, model, iters):
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
+    save_trained(model, iters)
+
+
 
 pretrain(model)
