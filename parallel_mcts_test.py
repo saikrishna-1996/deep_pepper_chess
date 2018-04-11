@@ -50,7 +50,5 @@ def value_policy(board: chess.Board):
     for index, pi in zip(index_list, policy):
         map[index] = pi
     assert policy.sum()>0.999
-    print(policy)
-    print(value)
     return value, map
 
