@@ -135,7 +135,7 @@ def MCTS(temp: float,
     :return: return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
     """
     # history of archive for all previous runs
-    start_time = time.time()
+    #start_time = time.time()
     if not root.children:
         root.expand(network)
     root.add_dirichlet()
@@ -175,7 +175,7 @@ def select(root_node):
     while curr_node.children:
         curr_node = curr_node.select_best_child()
         moves += 1
-        game_over, z = curr_node.env.is_game_over(moves)
+    game_over, z = curr_node.env.is_game_over(moves)
 
     return curr_node, moves, game_over, z
 

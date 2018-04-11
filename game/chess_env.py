@@ -98,7 +98,7 @@ class ChessEnv:
             else:
                 self.winner = Winner.draw
 
-    def is_game_over(self, moves=0, testing_flag=False)->tuple:
+    def is_game_over(self, moves=0, res_check = False, testing_flag=False)->tuple:
         if testing_flag:
             return True, 0
         if self.board.is_game_over():
@@ -110,9 +110,11 @@ class ChessEnv:
                 return True, 0
             if score == '1-0':
                 return True, 1
-        elif (moves > Config.RESIGN_CHECK_MIN) and (not moves % Config.RESIGN_CHECK_FREQ):
-            return self.stockfish.check_resignation(self.board)
-
+        elif (moves > Config.RESIGN_CHECK_MIN) and (not moves % Config.RESIGN_CHECK_FREQ) and res_check:
+            try:
+                return self.stockfish.check_resignation(self.board)
+            except:
+                print('Failed stockfish resignation check')
         return False, None
 
     def _resign(self):

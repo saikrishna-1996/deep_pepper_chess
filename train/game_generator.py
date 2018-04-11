@@ -44,7 +44,7 @@ class GameGenerator(object):
             print(root_node.env.board)
             print("Running on {} ".format(multiprocessing.current_process()))
             root_node = successor
-            game_over, z = root_node.env.is_game_over(moves)
+            game_over, z = root_node.env.is_game_over(moves, res_check=True)
         for i in range(len(triplets) - step_game, len(triplets)):
             triplets[i].append(z)
 
