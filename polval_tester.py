@@ -59,7 +59,7 @@ def main():
 
             root_node = successor
             moves = moves + 1
-            game_over, z = root_node.env.is_game_over(moves)
+            game_over, z = root_node.env.is_game_over(moves, res_check=True)
 
         #from white perspective
 
