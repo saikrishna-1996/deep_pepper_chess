@@ -25,12 +25,12 @@ def main():
     new_network = PolicyValNetwork_Giraffe(pretrain=False)
     old_network = PolicyValNetwork_Giraffe(pretrain=False)
     new_network, _ = load_model(args.newnetwork)
-    if old_network == None:
-        list_of_files = glob.glob('../*.pt')
+    if args.oldnetwork == None:
+        list_of_files = glob.glob('./*.pt')
         if len(list_of_files) != 0:
-            print('Old network will be oldest network')
             oldest_file = min(list_of_files, key = os.path.getctime)
             old_network, _ = load_model(oldest_file)
+            print('Old network will be: {}'.format(oldest_file))
         else:
             print('Old network will be randomly initialized')
         
