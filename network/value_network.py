@@ -2,16 +2,31 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
+from config import Config
 
 
 # from torch.autograd import Variable
 # fully connected (including the first layer to hidden layer neurons. so, this is different from giraffe network) network with 2 hidden layers.
 
 class Critic_Giraffe(nn.Module):
-    def __init__(self, d_in, gf, pc, sc, h1a, h1b, h1c, h2, eval_out=1):
+    def __init__(self,
+            pretrain = False,
+            d_in = Config.d_in,
+            gf = Config.global_features,
+            pc = Config.piece_centric,
+            sc = Config.square_centric,
+            h1a = Config.h1a,
+            h1b = Config.h1b,
+            h1c = Config.h1c,
+            h2 = Config.h2,
+            d_out = Config.d_out,
+            eval_out=1):
         "We instantiate various modules"
         super(Critic_Giraffe, self).__init__()
-        # gf = self.gf
+        self.gf = gf
+        self.pc = pc
+        self.sc = sc
         self.linear1a = nn.Linear(gf, h1a)
         self.linear1b = nn.Linear(pc, h1b)
         self.linear1c = nn.Linear(sc, h1c)
@@ -19,19 +34,20 @@ class Critic_Giraffe(nn.Module):
         self.linear3 = nn.Linear(h2, eval_out)
 
     def forward(self, x):
+        x = Variable(x.float())
         "Here, we can use modules defined in the constrcutor (__init__ part defined above) as well as arbitrary operators on Variables"
-        # gf = self.gf
-        # pc = self.pc
-        # sc = self.sc
+        gf = self.gf
+        pc = self.pc
+        sc = self.sc
 
-        x1 = x[:, 0:self.gf - 1]
-        x2 = x[:, self.gf:self.gf + self.pc - 1]
-        x3 = x[:, self.gf + self.pc:self.gf + self.pc + self.sc - 1]
+        x1 = x[:, 0:gf]
+        x2 = x[:, gf:gf + pc]
+        x3 = x[:, gf + pc:gf + pc + sc]
 
         h1a_relu = F.relu(self.linear1a(x1))
         h1b_relu = F.relu(self.linear1b(x2))
         h1c_relu = F.relu(self.linear1c(x3))
-        h1_relu = torch.cat(h1a_relu, h1b_relu, h1c_relu, dim=1)
+        h1_relu = torch.cat((h1a_relu, h1b_relu, h1c_relu), dim=1)
         h2_relu = F.relu(self.linear2e(h1_relu))
         val_out = F.Tanh(self.linear3e(h2_relu))
 
