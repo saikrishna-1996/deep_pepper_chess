@@ -10,6 +10,7 @@ import torch
 from config import Config
 #from logger import Logger
 from network.policy_network import PolicyValNetwork_Giraffe
+from network.value_network import Critic_Giraffe
 
 #Set the logger
 #logger = Logger('./logs')
@@ -29,7 +30,7 @@ def load_gamefile(net_number):  # I'm not married to this, I think it could be d
         print('Could not load gamefile!')
 
 
-def train_model(model, games=None, net_number=0, min_num_games=400):
+def train_model(pol_model, val_model, games=None, net_number=0, min_num_games=400):
     if games is None:
         game_data = load_gamefile(net_number)
     else:
@@ -55,7 +56,7 @@ def train_model(model, games=None, net_number=0, min_num_games=400):
 
                     policy = np.vstack(data[:, 1]).astype(float)
                     features = torch.from_numpy(features.astype(float))
-                    do_backprop(features, policy, data[:, 2], model, total_train_iter, curr_train_iter)
+                    do_backprop(features, policy, data[:, 2], pol_model, val_model, total_train_iter, curr_train_iter)
                     total_train_iter = total_train_iter + 1
                     curr_train_iter = curr_train_iter + 1
     return model
@@ -65,13 +66,14 @@ def cross_entropy(pred, soft_targets):
     return torch.mean(torch.sum(- soft_targets.double() * pred.double(), 1))
 
 
-def do_backprop(features, policy, act_val, model, total_train_iter, curr_train_iter):
+def do_backprop(features, policy, act_val, pol_model, val_model, total_train_iter, curr_train_iter):
     # first convert this batch_board to batch_features
     # batch_board should be of dimension (batch_size, board)
     # batch_feature = Variable(torch.randn(batch_size, 353))
     criterion1 = torch.nn.MSELoss(size_average=False)
     # criterion2 = torch.nn.NLLLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    pol_optimizer = torch.optim.Adam(pol_model.parameters(), lr=1e-4)
+    val_optimizer = torch.optim.Adam(val_model.parameters(), lr=1e-4)
 
     ##We can do this cuda part later!?
     # if torch.cuda_is_available():
@@ -85,7 +87,8 @@ def do_backprop(features, policy, act_val, model, total_train_iter, curr_train_i
     # features = features.view(1, -1)
     # act_val = torch.autograd.Variable(act_val)
     # policy = torch.autograd.Variable(policy)
-    nn_policy_out, nn_val_out = model(features)
+    nn_policy_out = pol_model(features)
+    nn_val_out = val_model(features)
     act_val = torch.autograd.Variable(torch.Tensor([act_val])).view(-1, 1)
     policy = torch.autograd.Variable(torch.from_numpy(policy).long())
     loss1 = criterion1(nn_val_out, act_val)
@@ -100,7 +103,10 @@ def do_backprop(features, policy, act_val, model, total_train_iter, curr_train_i
             l2_reg = l2_reg + weight.norm(2)
     loss3 = 0.1 * l2_reg
 
-    loss = loss1.float() - loss2.float() + loss3.float()
+    val_loss = loss1.float() + loss3.float()
+    pol_loss = loss2.float()
+
+    #loss = loss1.float() - loss2.float() + loss3.float()
 
     #Logging all the loss values
     info = {
@@ -113,9 +119,13 @@ def do_backprop(features, policy, act_val, model, total_train_iter, curr_train_i
         logger.scalar_summary(tag, value, total_train_iter + 1)
         logger.scalar_summary(tag, value, curr_train_iter + 1)
 
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+    pol_optimizer.zero_grad()
+    pol_loss.backward()
+    pol_optimizer.step()
+
+    val_optimizer.zero_grad()
+    val_loss.backward()
+    val_optimizer.step()
 
 
 # def save(model, fname, network_iter):
@@ -154,11 +164,13 @@ def load_trained(model, fname):
     model.load_state_dict(pretrained_state_dict)
     return model
 
-def save_trained(model, iteration):
-    torch.save(model.state_dict(), "./{}.pt".format(iteration))
+def save_trained(pol_model, val_model, iteration):
+    torch.save(pol_model.state_dict(), "./{}_pol.pt".format(iteration))
+    torch.save(val_model.state_dict(), "./{}_val.pt".format(iteration))
 
 def load_model(fname = None):
-    model = PolicyValNetwork_Giraffe(pretrain=False)
+    pol_model = PolicyValNetwork_Giraffe(pretrain=False)
+    val_model = Critic_Giraffe(pretrain=False)
     if fname == None:
         list_of_files = glob.glob('./*.pt')
         if len(list_of_files) != 0:
