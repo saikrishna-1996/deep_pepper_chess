@@ -15,6 +15,7 @@ from game.features import board_to_feature
 from game.stockfish import Stockfish
 from logger import Logger
 import parallel_mcts_test
+import policy_value_label_seq
 
 #set the logger
 logger = Logger('./logs')
@@ -60,7 +61,7 @@ def pretrain(model):
             if (index + 1) % Config.minibatch_size != 0:
                 feature_batch.append(board_to_feature(board_position))
                 targets_val_batch.append(stockfish.stockfish_eval(board_position, 10))
-                nvm, mind = parallel_mcts_test.value_policy(board_position)
+                nvm, mind = policy_value_label_seq.value_policy(board_position)
                 targets_pol_batch.append(mind)
             else:
                 feature_batch = torch.FloatTensor(feature_batch)
