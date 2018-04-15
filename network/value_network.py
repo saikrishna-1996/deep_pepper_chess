@@ -48,8 +48,8 @@ class Critic_Giraffe(nn.Module):
         h1b_relu = F.relu(self.linear1b(x2))
         h1c_relu = F.relu(self.linear1c(x3))
         h1_relu = torch.cat((h1a_relu, h1b_relu, h1c_relu), dim=1)
-        h2_relu = F.relu(self.linear2e(h1_relu))
-        val_out = F.Tanh(self.linear3e(h2_relu))
+        h2_relu = F.relu(self.linear2(h1_relu))
+        val_out = F.Tanh(self.linear3(h2_relu))
 
         return val_out
 
