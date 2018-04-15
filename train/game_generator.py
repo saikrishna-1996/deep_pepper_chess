@@ -7,6 +7,7 @@ from config import Config
 from game.chess_env import ChessEnv
 from game.features import board_to_feature
 from network.policy_network import PolicyValNetwork_Giraffe
+from network.value_network import Critic_Giraffe
 from train.MCTS import MCTS, Node
 from train.self_challenge import Champion
 
@@ -18,7 +19,7 @@ class GameGenerator(object):
         self.workers = workers
         self.batch_size = batch_size
 
-    def generate_game(self, model: PolicyValNetwork_Giraffe):
+    def generate_game(self, pol_model: PolicyValNetwork_Giraffe, val_model: Critic_Giraffe):
         np.random.seed()
         triplets = []
         step_game = 0
@@ -37,7 +38,7 @@ class GameGenerator(object):
             if step_game == 50:
                 temperature = 10e-6
 
-            pi, successor, root_node = MCTS(temp=temperature, network=model, root=root_node)
+            pi, successor, root_node = MCTS(temp=temperature, pol_network=pol_model, val_network = val_model, root=root_node)
             feature = board_to_feature(root_node.env.board)
             triplets.append([feature, pi])
             print('')
