@@ -11,6 +11,7 @@ from train.MCTS import MCTS, Node
 class Champion(object):
     def __init__(self, current_policy):
         self.current_policy = current_policy
+        #self.current_value = current_value
 
     def test_candidate(self, candidate, pool):
         print('START TOURNAMENT')
