@@ -12,7 +12,7 @@ from network.policy_network import PolicyValNetwork_Giraffe
 from train.game_generator import GameGenerator
 from train.policy_improver import PolicyImprover
 from train.self_challenge import Champion
-from train.train import save_trained, load_model, load_valmodel
+from train.train import save_trained_pol, save_trained_val, load_model, load_valmodel
 
 parser = argparse.ArgumentParser(description='Launcher for distributed Chess trainer')
 
@@ -46,7 +46,8 @@ def main():
         games = generator.generate_games()
         improver.improve_policy(games, pool)
         i += 1
-        save_trained(pol_model, val_model, i)
+        save_trained_pol(pol_model, i)
+        save_trained_val(val_model, i)
 
 
 if __name__ == '__main__':

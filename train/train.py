@@ -167,8 +167,10 @@ def load_trained(model, fname):
     model.load_state_dict(pretrained_state_dict)
     return model
 
-def save_trained(pol_model, val_model, iteration):
+def save_trained_pol(pol_model, iteration):
     torch.save(pol_model.state_dict(), "./{}_pol.pt".format(iteration))
+
+def save_trained_val(val_model, iteration):
     torch.save(val_model.state_dict(), "./{}_val.pt".format(iteration))
 
 def load_model(fname = None):
@@ -191,7 +193,7 @@ def load_model(fname = None):
             return model, i
         else:
             print('Using new model')
-            save_trained(model,0)
+            save_trained_pol(model,0)
             return model, 0
     else:
         model = load_trained(model,fname)
@@ -216,7 +218,7 @@ def load_valmodel(fname = None):
             return val_model, i
         else:
             print('Using new val model')
-            save_trained(val_model, 0)
+            save_trained_val(val_model, 0)
             return val_model, 0
     else:
         val_model = load_trained(val_model, fname)
