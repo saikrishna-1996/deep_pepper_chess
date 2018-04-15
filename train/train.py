@@ -1,6 +1,9 @@
 import glob
-import os
+import os, sys
 import re
+parentPath = os.path.abspath("..")
+if parentPath not in sys.path:
+    sys.path.insert(0, parentPath)
 
 import numpy as np
 import torch
@@ -8,12 +11,12 @@ import torch
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
 from config import Config
-#from logger import Logger
+from logger import Logger
 from network.policy_network import PolicyValNetwork_Giraffe
 from network.value_network import Critic_Giraffe
 
 #Set the logger
-#logger = Logger('./logs')
+logger = Logger('./logs')
 
 
 def load_gamefile(net_number):  # I'm not married to this, I think it could be done better.
@@ -59,7 +62,7 @@ def train_model(pol_model, val_model, games=None, net_number=0, min_num_games=40
                     do_backprop(features, policy, data[:, 2], pol_model, val_model, total_train_iter, curr_train_iter)
                     total_train_iter = total_train_iter + 1
                     curr_train_iter = curr_train_iter + 1
-    return model
+    return pol_model, val_model
 
 
 def cross_entropy(pred, soft_targets):
@@ -96,7 +99,7 @@ def do_backprop(features, policy, act_val, pol_model, val_model, total_train_ite
     loss2 = cross_entropy(nn_policy_out, policy)
 
     l2_reg = None
-    for weight in model.parameters():
+    for weight in val_model.parameters():
         if l2_reg is None:
             l2_reg = weight.norm(2)
         else:
@@ -169,8 +172,8 @@ def save_trained(pol_model, val_model, iteration):
     torch.save(val_model.state_dict(), "./{}_val.pt".format(iteration))
 
 def load_model(fname = None):
-    pol_model = PolicyValNetwork_Giraffe(pretrain=False)
-    val_model = Critic_Giraffe(pretrain=False)
+    model = PolicyValNetwork_Giraffe(pretrain=False)
+    #val_model = Critic_Giraffe(pretrain=False)
     if fname == None:
         list_of_files = glob.glob('./*.pt')
         if len(list_of_files) != 0:
@@ -194,3 +197,27 @@ def load_model(fname = None):
         model = load_trained(model,fname)
         return model
 
+def loda_valmodel(fname = None):
+    val_model = Critic_Giraffe(pretrain = False)
+    if fname == None:
+        list_of_files = glob.glob('./*_val.pt')
+        if len(list_of_files) != 0:
+            latest_file = max(list_of_files, key = os.path.getctime)
+            print('Loading latest value model...')
+            val_model = load_trained(val_model, latest_file)
+            i = re.search('./(,+?)_val.pt', latest_file)
+            if i:
+                if (i.group(1)) == 'pretrained':
+                    print('Loading pretrained value model')
+                    i = 0
+                else:
+                    i = int(i.group(1))
+                    print('Current value model number: {}'.format(i))
+                return val_model, i
+            else:
+                print('Using new val model')
+                save_trained(val_model, 0)
+                return val_model, 0
+        else:
+            val_model = load_trained(val_model, fname)
+            return val_model
