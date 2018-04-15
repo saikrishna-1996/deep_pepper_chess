@@ -74,9 +74,11 @@ class Node(object):
 
         return self.children[child_id]
 
-    def expand(self, network):
+    def expand(self, pol_network, val_network):
         self.children = [None] * len(self.legal_moves)
-        all_move_probs, v = network.forward(torch.from_numpy(board_to_feature(self.env.board)).unsqueeze(0))
+        all_move_probs = pol_network.forward(torch.from_numpy(board_to_feature(self.env.board)).unsqueeze(0))
+        v = val_network.forward(torch.from_numpy(board_to_feature(self.env.board)).unsqueeze(0))
+        v = v.squeeze().data.numpy()
         all_move_probs = all_move_probs.squeeze().data.numpy()
         child_probs = (all_move_probs[self.legal_move_inds] + 1e-12) / np.sum(all_move_probs[self.legal_move_inds] + 1e-12)
         child_probs = np.exp(child_probs)
