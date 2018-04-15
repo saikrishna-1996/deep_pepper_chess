@@ -8,7 +8,7 @@ from config import Config
 from game.chess_env import ChessEnv
 from game.features import board_to_feature
 from network.policy_network import PolicyValNetwork_Giraffe
-
+from network.value_network import Critic_Giraffe
 
 class Node(object):
     # This class inherit the Board class which control the board representation,
@@ -120,7 +120,8 @@ def legal_mask(board, all_move_probs) -> np.array:
 # state type and shape does not matter
 
 def MCTS(temp: float,
-         network: PolicyValNetwork_Giraffe,
+         pol_network: PolicyValNetwork_Giraffe,
+         val_network: Critic_Giraffe,
          root,
          dirichlet_alpha=Config.D_ALPHA,
          batch_size: int = Config.BATCH_SIZE) -> tuple:
@@ -139,7 +140,7 @@ def MCTS(temp: float,
     # history of archive for all previous runs
     #start_time = time.time()
     if not root.children:
-        root.expand(network)
+        root.expand(pol_network, val_network)
     root.add_dirichlet()
     for simulation in range(Config.NUM_SIMULATIONS):
         # start_time = time.time()
@@ -147,7 +148,7 @@ def MCTS(temp: float,
         # print('Select time: {}'.format(time.time()-start_time))
         # print('Simulation: {} Root node sum: {}'.format(simulation,np.sum(root.N)))
         # start_time = time.time()
-        leaf = expand_and_eval(curr_node, network, game_over, z, moves)
+        leaf = expand_and_eval(curr_node, pol_network, val_network, game_over, z, moves)
         # print('Expand time: {}'.format(time.time()-start_time))
         # start_time = time.time()
         backup(leaf, root)
@@ -186,12 +187,12 @@ def select(root_node):
 ### Expand and evaluate###
 ##########################
 # Once at a leaf node expand using the network to get it's P values and it's estimated value
-def expand_and_eval(node, network, game_over, z, moves):
+def expand_and_eval(node, pol_network, val_network, game_over, z, moves):
     if game_over:
         node.value = z
         return node
     # expand
-    node.expand(network)
+    node.expand(pol_network, val_network)
     return node
 
 
