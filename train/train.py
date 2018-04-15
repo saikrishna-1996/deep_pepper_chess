@@ -11,12 +11,12 @@ import torch
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
 from config import Config
-from logger import Logger
+#from logger import Logger
 from network.policy_network import PolicyValNetwork_Giraffe
 from network.value_network import Critic_Giraffe
 
 #Set the logger
-logger = Logger('./logs')
+#logger = Logger('./logs')
 
 
 def load_gamefile(net_number):  # I'm not married to this, I think it could be done better.
@@ -118,9 +118,9 @@ def do_backprop(features, policy, act_val, pol_model, val_model, total_train_ite
             'loss3': loss3.data[0]
             }
 
-    for tag, value in info.items():
-        logger.scalar_summary(tag, value, total_train_iter + 1)
-        logger.scalar_summary(tag, value, curr_train_iter + 1)
+    #for tag, value in info.items():
+    #    logger.scalar_summary(tag, value, total_train_iter + 1)
+    #    logger.scalar_summary(tag, value, curr_train_iter + 1)
 
     pol_optimizer.zero_grad()
     pol_loss.backward()
@@ -197,7 +197,7 @@ def load_model(fname = None):
         model = load_trained(model,fname)
         return model
 
-def loda_valmodel(fname = None):
+def load_valmodel(fname = None):
     val_model = Critic_Giraffe(pretrain = False)
     if fname == None:
         list_of_files = glob.glob('./*_val.pt')
