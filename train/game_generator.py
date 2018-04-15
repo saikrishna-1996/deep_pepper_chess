@@ -52,7 +52,7 @@ class GameGenerator(object):
         return triplets
 
     def play_game(self, _):
-        return self.generate_game(self.champion.current_policy)
+        return self.generate_game(self.champion.current_policy, self.champion.current_value)
 
     def generate_games(self):
         start = time.time()
