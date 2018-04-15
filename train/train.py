@@ -213,11 +213,11 @@ def load_valmodel(fname = None):
                 else:
                     i = int(i.group(1))
                     print('Current value model number: {}'.format(i))
-                return val_model, i
-            else:
-                print('Using new val model')
-                save_trained(val_model, 0)
-                return val_model, 0
+            return val_model, i
         else:
-            val_model = load_trained(val_model, fname)
-            return val_model
+            print('Using new val model')
+            save_trained(val_model, 0)
+            return val_model, 0
+    else:
+        val_model = load_trained(val_model, fname)
+        return val_model
