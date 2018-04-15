@@ -9,9 +9,9 @@ from train.MCTS import MCTS, Node
 
 
 class Champion(object):
-    def __init__(self, current_policy):
+    def __init__(self, current_policy, current_value):
         self.current_policy = current_policy
-        #self.current_value = current_value
+        self.current_value = current_value
 
     def test_candidate(self, candidate, pool):
         print('START TOURNAMENT')
@@ -42,7 +42,7 @@ class Champion(object):
         temperature = 10e-6
 
         p = np.random.binomial(1, 0.5) == 1
-        white, black = (self.current_policy, candidate) if p else (candidate, self.current_policy)
+        white_pol, white_val,  black_pol, black_val = (self.current_policy, self.current_value, candidate.current_policy, candidate.current_value) if p else (candidate.current_policy, candidate.current_value, self.current_policy, self.current_value)
         env = ChessEnv()
         env.reset()
         root_node = Node(env,Config.EXPLORE_FACTOR)
@@ -50,18 +50,20 @@ class Champion(object):
 
         while not game_over:
             if root_node.env.white_to_move:
-                player = white
+                player_pol = white_pol
+                player_val = white_val
             else:
-                player = black
+                player_pol = black_pol
+                player_val = black_val
 
-            pi, successor, root_node = MCTS(temp=temperature, network=player,root=root_node)
+            pi, successor, root_node = MCTS(temp=temperature, pol_network= player_pol, val_network = player_val, root=root_node)
             root_node = successor
             moves += 1
             game_over, z = root_node.env.is_game_over(moves, res_check=True)
 
         # from white perspective
 
-        if white == candidate:
+        if white_pol == candidate.current_policy:
             candidate_alpha_scores.append(+z)
             incumbent_alpha_scores.append(-z)
             print("Candidate won!")
