@@ -1,4 +1,4 @@
-#Goal is to check if our current policy is any better than random policy
+# Goal is to check if our current policy is any better than random policy
 import argparse
 import torch
 import time
@@ -25,15 +25,14 @@ def main():
     new_network = PolicyValNetwork_Giraffe(pretrain=False)
     old_network = PolicyValNetwork_Giraffe(pretrain=False)
     new_network, _ = load_model(args.newnetwork)
-    if args.oldnetwork == None:
+    if args.oldnetwork is None:
         list_of_files = glob.glob('./*.pt')
         if len(list_of_files) != 0:
-            oldest_file = min(list_of_files, key = os.path.getctime)
+            oldest_file = min(list_of_files, key=os.path.getctime)
             old_network, _ = load_model(oldest_file)
             print('Old network will be: {}'.format(oldest_file))
         else:
             print('Old network will be randomly initialized')
-        
 
     score1 = 0
     score2 = 0
@@ -61,7 +60,7 @@ def main():
             moves = moves + 1
             game_over, z = root_node.env.is_game_over(moves, res_check=True)
 
-        #from white perspective
+        # from white perspective
 
         if white == new_network:
             if z >= 1:
@@ -74,9 +73,9 @@ def main():
             else:
                 score2 = score2 + 1
 
-    print("New network score total wins: {} Average Score: {}".format(score1,score1/args.numgames))
-    print("Old network score total wins: {} Average Score: {}".format(score2,score2/args.numgames))
+    print("New network score total wins: {} Average Score: {}".format(score1, score1 / args.numgames))
+    print("Old network score total wins: {} Average Score: {}".format(score2, score2 / args.numgames))
+
 
 if __name__ == '__main__':
     main()
-
