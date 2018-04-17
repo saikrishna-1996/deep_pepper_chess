@@ -8,11 +8,12 @@ import torch
 # There will need to be some function that calls both of these functions and uses the output from load_gamefile to train a network
 # load_gamefile will return a list of lists containing [state, policy, value] as created in MCTS.
 from config import Config
-#from logger import Logger
+# from logger import Logger
 from network.policy_network import PolicyValNetwork_Giraffe
 
-#Set the logger
-#logger = Logger('./logs')
+
+# Set the logger
+# logger = Logger('./logs')
 
 
 def load_gamefile(net_number):  # I'm not married to this, I think it could be done better.
@@ -102,12 +103,12 @@ def do_backprop(features, policy, act_val, model, total_train_iter, curr_train_i
 
     loss = loss1.float() - loss2.float() + loss3.float()
 
-    #Logging all the loss values
+    # Logging all the loss values
     info = {
-            'loss1': loss1.data[0],
-            'loss2': loss2.data[0],
-            'loss3': loss3.data[0]
-            }
+        'loss1': loss1.data[0],
+        'loss2': loss2.data[0],
+        'loss3': loss3.data[0]
+    }
 
     for tag, value in info.items():
         logger.scalar_summary(tag, value, total_train_iter + 1)
@@ -154,18 +155,20 @@ def load_trained(model, fname):
     model.load_state_dict(pretrained_state_dict)
     return model
 
+
 def save_trained(model, iteration):
     torch.save(model.state_dict(), "./{}.pt".format(iteration))
 
-def load_model(fname = None):
+
+def load_model(fname=None):
     model = PolicyValNetwork_Giraffe(pretrain=False)
-    if fname == None:
+    if fname is None:
         list_of_files = glob.glob('./*.pt')
         if len(list_of_files) != 0:
-            latest_file = max(list_of_files, key = os.path.getctime)
+            latest_file = max(list_of_files, key=os.path.getctime)
             print('Loading latest model...')
-            model = load_trained(model,latest_file)
-            i = re.search('./(.+?).pt',latest_file)
+            model = load_trained(model, latest_file)
+            i = re.search('./(.+?).pt', latest_file)
             if i:
                 if (i.group(1)) == 'pretrained':
                     print('Loaded pretrained model')
@@ -176,9 +179,8 @@ def load_model(fname = None):
             return model, i
         else:
             print('Using new model')
-            save_trained(model,0)
+            save_trained(model, 0)
             return model, 0
     else:
-        model = load_trained(model,fname)
+        model = load_trained(model, fname)
         return model
-
