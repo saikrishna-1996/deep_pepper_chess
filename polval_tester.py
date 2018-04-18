@@ -23,17 +23,16 @@ args.cuda = True if not args.no_cuda and torch.cuda.is_available() else False
 
 
 def main():
-    new_network = PolicyValNetwork_Giraffe(pretrain=False)
     old_network = PolicyValNetwork_Giraffe(pretrain=False)
     new_network, _ = load_model(args.newnetwork)
     if args.oldnetwork is None:
         list_of_files = glob.glob('./*.pt')
-        if len(list_of_files) != 0:
-            oldest_file = min(list_of_files, key=os.path.getctime)
-            old_network, _ = load_model(oldest_file)
-            print('Old network will be: {}'.format(oldest_file))
+        if len(list_of_files) > 0:
+            new_network = load_model(max(list_of_files, key=os.path.getctime))
+            print('New network will be: {}'.format(new_network))
         else:
-            print('Old network will be randomly initialized')
+            print("No new network to test.")
+            quit()
 
     score1 = 0
     score2 = 0
@@ -49,7 +48,7 @@ def main():
         root_node = Node(env, Config.EXPLORE_FACTOR)
         game_over = False
 
-        while not moves < 2:
+        while not game_over:
             if root_node.env.white_to_move:
                 player = white
             else:
@@ -57,7 +56,7 @@ def main():
 
             start = time.time()
             pi, successor, root_node = MCTS(temp=temperature, network=player, root=root_node)
-            print("MCTS finished in: {}".format(time.time() - start))
+            print("MCTS finished move {} in: {}".format(moves, time.time() - start))
 
             root_node = successor
             moves = moves + 1
