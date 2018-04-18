@@ -20,7 +20,7 @@ def evaluate_state(board):
     game_over, score = env.is_game_over()
     if game_over:
         return score
-    value = env.stockfish.stockfish_eval(env.board, t=100)
+    value = env.stockfish.stockfish_eval(env.board, timeout=100)
     return value
 
 
@@ -30,7 +30,7 @@ def value_policy(board: chess.Board):
     if game_over:
         return score, []
     stockfish = Stockfish()
-    value = stockfish.stockfish_eval(env.board, t=100)
+    value = stockfish.stockfish_eval(env.board, timeout=100)
     next_states = []
     for move in env.board.legal_moves:
         board_copy = env.board.copy()

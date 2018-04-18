@@ -29,12 +29,12 @@ class Stockfish(object):
         elif platform.system() == 'Windows':
             self.engine = popen_engine(basepath + "/stockfish-windows")
 
-    def stockfish_eval(self, board, t=500):
+    def stockfish_eval(self, board, timeout=500):
         handler = InfoHandler()
         self.engine.info_handlers.append(handler)
         self.engine.position(board)
-        evaluation = self.engine.go(movetime=t)
-        print(handler.info["score"])
+        self.engine.go(movetime=timeout)
+        print(handler.info["score"]) # Why is this empty?
         if handler.info["score"].__contains__(1) and handler.info["score"][1].mate is None:
             eval_val = handler.info["score"][1].cp / 100.0
         else:
@@ -45,7 +45,7 @@ class Stockfish(object):
         return eval_val
 
     def check_resignation(self, state) -> tuple:
-        evaluation = self.stockfish_eval(state, t=1)
+        evaluation = self.stockfish_eval(state, timeout=1)
         if abs(evaluation) > 6.5:
             return True, evaluation / abs(evaluation)
         return False, None
