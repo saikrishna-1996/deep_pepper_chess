@@ -61,6 +61,7 @@ class Config(object):
 
     MOVETOINDEX, INDEXTOMOVE = make_move_maps()
 
+    GAME_SCORE = 20
     # MCTS
 
     RESIGN_CHECK_MIN = 60

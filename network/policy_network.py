@@ -104,7 +104,7 @@ class PolicyValNetwork_Giraffe(nn.Module):
         p_out = F.log_softmax(self.linear3p(h2p_relu), dim=1)
 
         h2e_relu = F.relu(self.linear2e(h1_relu))
-        val_out = F.tanh(self.linear3e(h2e_relu))
+        val_out = Config.GAME_SCORE*F.tanh(self.linear3e(h2e_relu))
 
         return p_out, val_out
 
