@@ -76,7 +76,7 @@ class Config(object):
     TEMP_REDUCE_STEP = 50
     MINGAMES = 500
 
-    #Self Challenge
+    # Self Challenge
     NUM_GAMES = 4
 
     # PATHS

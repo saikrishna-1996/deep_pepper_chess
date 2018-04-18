@@ -33,8 +33,11 @@ class Stockfish(object):
         handler = InfoHandler()
         self.engine.info_handlers.append(handler)
         self.engine.position(board)
-        self.engine.go(movetime=timeout)
-        print(handler.info["score"]) # Why is this empty?
+
+        # TODO: Why do we need to do this?
+        while not handler.info["score"].__contains__(1):
+            self.engine.go(movetime=timeout)
+
         if handler.info["score"].__contains__(1) and handler.info["score"][1].mate is None:
             eval_val = handler.info["score"][1].cp / 100.0
         else:

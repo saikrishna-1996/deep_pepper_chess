@@ -1,11 +1,11 @@
 from multiprocessing import Pool
 
+import chess.pgn
 import numpy as np
 
 from config import Config
 from game.chess_env import ChessEnv
 from game.stockfish import Stockfish
-import chess.pgn
 
 
 def softmax(x):
@@ -49,6 +49,5 @@ def value_policy(board: chess.Board):
     map = np.zeros((5120,))
     for index, pi in zip(index_list, policy):
         map[index] = pi
-    assert policy.sum()>0.999
+    assert policy.sum() > 0.999
     return value, map
-

@@ -2,13 +2,9 @@
 
 import argparse
 import multiprocessing as mp
-import os
-import re
-import glob
 
 import torch
 
-from network.policy_network import PolicyValNetwork_Giraffe
 from train.game_generator import GameGenerator
 from train.policy_improver import PolicyImprover
 from train.self_challenge import Champion
@@ -46,7 +42,7 @@ def main():
         games = generator.generate_games()
         improver.improve_policy(games, pool)
         i += 1
-        save_trained(model,i)
+        save_trained(model, i)
 
 
 if __name__ == '__main__':

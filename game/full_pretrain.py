@@ -1,7 +1,9 @@
-import os, sys
+import os
+import sys
+
 parentPath = os.path.abspath("..")
 if parentPath not in sys.path:
-    sys.path.insert(0,parentPath)
+    sys.path.insert(0, parentPath)
 
 from random import shuffle
 from network.policy_network import PolicyValNetwork_Giraffe
@@ -16,9 +18,10 @@ from game.stockfish import Stockfish
 from logger import Logger
 import parallel_mcts_test
 
-#set the logger
+# set the logger
 logger = Logger('./logs')
 model = PolicyValNetwork_Giraffe(pretrain=False)
+
 
 def cross_entropy(pred, soft_targets):
     return torch.mean(torch.sum(- soft_targets.double() * torch.log(pred).double(), 1))
@@ -40,6 +43,7 @@ def get_board_position():
     except Exception:
         print("We have {} board positions".format(len(board_positions)))
         return board_positions
+
 
 def save_trained(model, iteration):
     torch.save(model.state_dict(), "./{}.pt".format(iteration))
@@ -93,20 +97,18 @@ def do_backprop(batch_features, targets_val, targets_pol, model, iters):
     loss = loss1.float() - loss2.float() + loss3.float()
     print(iters)
     info = {
-            'full_pt_loss1': loss1.data[0],
-            'full_pt_loss2': loss2.data[0],
-            'full_pt_loss3': loss3.data[0]
-            }
+        'full_pt_loss1': loss1.data[0],
+        'full_pt_loss2': loss2.data[0],
+        'full_pt_loss3': loss3.data[0]
+    }
 
     for tag, value in info.items():
         logger.scalar_summary(tag, value, iters)
-
 
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
     save_trained(model, iters)
-
 
 
 pretrain(model)

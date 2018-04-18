@@ -1,16 +1,17 @@
 # Goal is to check if our current policy is any better than random policy
 import argparse
+import glob
+import os
 import time
 
-import torch
-from train.train import load_model
-import os
-import glob
-from network.policy_network import PolicyValNetwork_Giraffe
 import numpy as np
-from game.chess_env import ChessEnv
-from train.MCTS import Node, MCTS
+import torch
+
 from config import Config
+from game.chess_env import ChessEnv
+from network.policy_network import PolicyValNetwork_Giraffe
+from train.MCTS import Node, MCTS
+from train.train import load_model
 
 parser = argparse.ArgumentParser(description='Launcher for policy tester')
 parser.add_argument('--newnetwork', type=str, default=None, help='Path to the most recently trained model')
