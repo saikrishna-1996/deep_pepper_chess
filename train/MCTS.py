@@ -67,7 +67,7 @@ class Node(object):
         child_id = int(max_list[np.random.randint(0, len(max_list))])
         move = self.legal_moves[child_id]
         self.taken_action = move
-        if self.children[child_id] == None:
+        if self.children[child_id] is None:
             next_env = self.env.copy()
             next_env.step(move)
             self.children[child_id] = Node(next_env, self.explore_factor, parent=self, child_id=child_id)
@@ -135,21 +135,24 @@ def MCTS(temp: float,
     :return: return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
     """
     # history of archive for all previous runs
-    #start_time = time.time()
+    mcts_start = time.time()
     if not root.children:
         root.expand(network)
     root.add_dirichlet()
+    avg_backup_time = 0.
+    avg_expand_time = 0.
+    avg_select_time = 0.
     for simulation in range(Config.NUM_SIMULATIONS):
-        # start_time = time.time()
+        start_time = time.time()
         curr_node, moves, game_over, z = select(root)
-        # print('Select time: {}'.format(time.time()-start_time))
-        # print('Simulation: {} Root node sum: {}'.format(simulation,np.sum(root.N)))
-        # start_time = time.time()
+        avg_select_time += (time.time() - start_time) / Config.NUM_SIMULATIONS
+        # print('Simulation: {} Root node sum: {}'.format(simulation, np.sum(root.N)))
+        start_time = time.time()
         leaf = expand_and_eval(curr_node, network, game_over, z, moves)
-        # print('Expand time: {}'.format(time.time()-start_time))
-        # start_time = time.time()
+        avg_expand_time += (time.time() - start_time) / Config.NUM_SIMULATIONS
+        start_time = time.time()
         backup(leaf, root)
-        # print('Backup time: {}'.format(time.time()-start_time))
+        avg_backup_time += (time.time() - start_time) / Config.NUM_SIMULATIONS
     N = root.N
     norm_factor = np.sum(np.power(N, temp))
 
@@ -159,7 +162,10 @@ def MCTS(temp: float,
 
     new_pi = np.zeros(Config.d_out, )
     new_pi[root.legal_move_inds] = pi
-    # print('MCTS finished {} simulations in {} seconds'.format(simulation,time.time()-start_time))
+    print('Average Select time: {}'.format(avg_select_time))
+    print('Average Expand time: {}'.format(avg_expand_time))
+    print('Average Backup time: {}'.format(avg_backup_time))
+    print('MCTS finished {} simulations in {} seconds'.format(Config.NUM_SIMULATIONS, (time.time() - mcts_start)))
     return new_pi, root.children[action_index], root
 
 

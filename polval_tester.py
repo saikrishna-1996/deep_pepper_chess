@@ -56,7 +56,7 @@ def main():
 
             start = time.time()
             pi, successor, root_node = MCTS(temp=temperature, network=player, root=root_node)
-            print("MCTS finished move {} in: {}".format(moves, time.time() - start))
+            print("MCTS completed move {} in: {}".format(moves, time.time() - start))
 
             root_node = successor
             moves = moves + 1
