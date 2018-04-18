@@ -1,7 +1,8 @@
 # Goal is to check if our current policy is any better than random policy
 import argparse
-import torch
 import time
+
+import torch
 from train.train import load_model
 import os
 import glob
@@ -48,16 +49,19 @@ def main():
         root_node = Node(env, Config.EXPLORE_FACTOR)
         game_over = False
 
-        while not game_over:
+        while not moves < 2:
             if root_node.env.white_to_move:
                 player = white
             else:
                 player = black
 
+            start = time.time()
             pi, successor, root_node = MCTS(temp=temperature, network=player, root=root_node)
+            print("MCTS finished in: {}".format(time.time() - start))
 
             root_node = successor
             moves = moves + 1
+
             game_over, z = root_node.env.is_game_over(moves, res_check=True)
 
         # from white perspective

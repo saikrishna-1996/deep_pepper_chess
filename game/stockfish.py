@@ -34,7 +34,8 @@ class Stockfish(object):
         self.engine.info_handlers.append(handler)
         self.engine.position(board)
         evaluation = self.engine.go(movetime=t)
-        if handler.info["score"][1].mate is None:
+        print(handler.info["score"])
+        if handler.info["score"].__contains__(1) and handler.info["score"][1].mate is None:
             eval_val = handler.info["score"][1].cp / 100.0
         else:
             if handler.info["score"][1].mate < 0:
