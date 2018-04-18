@@ -105,11 +105,11 @@ class ChessEnv:
             score = self.board.result()
             # print(score)
             if score == '0-1':
-                return True, -1
+                return True, -Config.GAME_SCORE
             if score == '1/2-1/2':
                 return True, 0
             if score == '1-0':
-                return True, 1
+                return True, Config.GAME_SCORE
         elif (moves > Config.RESIGN_CHECK_MIN) and (not moves % Config.RESIGN_CHECK_FREQ) and res_check:
             return self.stockfish.check_resignation(self.board)
         return False, None
