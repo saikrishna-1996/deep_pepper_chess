@@ -64,6 +64,8 @@ def main():
 
             game_over, z = root_node.env.is_game_over(moves, res_check=True)
 
+        print("Game {} complete. New: {} Old: {}")
+
         # from white perspective
 
         if white == new_network:
@@ -76,6 +78,8 @@ def main():
                 score1 = score1 + 1
             else:
                 score2 = score2 + 1
+
+        print("Game {} complete. New: {} Old: {}".format(game, score1, score2))
 
     print("New network score total wins: {} Average Score: {}".format(score1, score1 / args.numgames))
     print("Old network score total wins: {} Average Score: {}".format(score2, score2 / args.numgames))
