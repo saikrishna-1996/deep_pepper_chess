@@ -7,8 +7,8 @@ import pickle
 labeled_board=[]
 index = 0
 
-f = '/u/gottipav/labeled_boards'
-labeled_board = (pickle.load(f))
+with open('/u/gottipav/labeled_boards','rb') as f:
+    labeled_board = pickle.load(f)
 
 boards_data=[]
 for boards in labeled_board:
