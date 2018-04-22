@@ -11,61 +11,52 @@ import chess.pgn
 import chess.uci
 # import random
 import torch
+import pickle
 from torch.autograd import Variable
 from config import Config
 from game.features import board_to_feature
 from game.stockfish import Stockfish
 from logger import Logger
 import parallel_mcts_test
-
+import argparse
 # set the logger
 logger = Logger('./logs')
 model = PolicyValNetwork_Giraffe(pretrain=False)
 
 
+
+parser = argparse.ArgumentParser(description='Launcher for distributed Chess trainer')
+parser.add_argument('--load-path', type=str, default=os.path.dirname(os.path.realpath(__file__)), help='path of files')
+
+args = parser.parse_args()
 def cross_entropy(pred, soft_targets):
     return torch.mean(torch.sum(- soft_targets.double() * torch.log(pred).double(), 1))
 
-
-def get_board_position():
-    pgn = open("kasparov.pgn")
-    board_positions = []
-    try:
-        while True:
-            kasgame = chess.pgn.read_game(pgn)
-            if kasgame is None:
-                break
-            board = kasgame.board()
-            board_positions.append(board.copy())
-            for move in kasgame.main_line():
-                board.push(move)
-                board_positions.append(board.copy())
-    except Exception:
-        print("We have {} board positions".format(len(board_positions)))
-        return board_positions
 
 
 def save_trained(model, iteration):
     torch.save(model.state_dict(), "./{}.pt".format(iteration))
 
 
-def pretrain(model):
+def pretrain(model,boards):
+
+
     iters = 0
     feature_batch = []
     targets_val_batch = []
     targets_pol_batch = []
-    board_positions = get_board_position()
-    shuffle(board_positions)
-    print("Pretraining on {} board positions...".format(len(board_positions)))
+    shuffle(boards)
+    print("Pretraining on {} board positions...".format(len(boards)))
     stockfish = Stockfish()
 
     for batch in range(Config.PRETRAIN_EPOCHS):
-        for index, board_position in enumerate(board_positions):
+        for index, board_position in enumerate(boards):
             if (index + 1) % Config.minibatch_size != 0:
+                value, policy, board = board_position
+                targets_pol_batch.append(policy)
+                targets_val_batch.append(value)
                 feature_batch.append(board_to_feature(board_position))
-                targets_val_batch.append(stockfish.stockfish_eval(board_position, 10))
-                nvm, mind = parallel_mcts_test.value_policy(board_position)
-                targets_pol_batch.append(mind)
+
             else:
                 feature_batch = torch.FloatTensor(feature_batch)
                 targets_val_batch = Variable(torch.FloatTensor(targets_val_batch))
@@ -110,5 +101,9 @@ def do_backprop(batch_features, targets_val, targets_pol, model, iters):
     optimizer.step()
     save_trained(model, iters)
 
+with open(args.load_path , 'rb') as f:
+    boards = pickle.load(f)
 
-pretrain(model)
+
+pretrain(model,boards)
+
