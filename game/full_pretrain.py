@@ -55,7 +55,7 @@ def pretrain(model,boards):
                 value, policy, board = board_position
                 targets_pol_batch.append(policy)
                 targets_val_batch.append(value)
-                feature_batch.append(board_to_feature(board_position))
+                feature_batch.append(board_to_feature(board))
 
             else:
                 feature_batch = torch.FloatTensor(feature_batch)
