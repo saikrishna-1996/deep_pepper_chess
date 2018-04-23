@@ -52,7 +52,10 @@ def pretrain(model,boards):
     for batch in range(Config.PRETRAIN_EPOCHS):
         for index, board_position in enumerate(boards):
             if (index + 1) % Config.minibatch_size != 0:
-                value, policy, board = board_position
+                try:
+                    value, policy, board = board_position
+                except:
+                    pass
                 targets_pol_batch.append(policy)
                 targets_val_batch.append(value)
                 feature_batch.append(board_to_feature(board))
