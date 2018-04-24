@@ -42,12 +42,10 @@ def value_policy(board: chess.Board):
     actions_value = p.map(evaluate_state, next_states)
     p.close()
     p.join()
-
     policy = softmax(actions_value)
-
     index_list = [Config.MOVETOINDEX[move.uci()] for move in env.board.legal_moves]
     map = np.zeros((5120,))
     for index, pi in zip(index_list, policy):
         map[index] = pi
     assert policy.sum() > 0.999
-    return value, map
+    return value, map, env.board
