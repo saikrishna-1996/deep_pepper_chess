@@ -45,7 +45,7 @@ def make_square_map():
 
 
 class Config(object):
-    default_workers = 4 if platform.system() != 'Linux' else 100
+    default_workers = 4 if platform.system() != 'Linux' else 10
     think_time = 10  # 1 seconds
     minibatch_size = 32
     PRETRAIN_EPOCHS = 1
