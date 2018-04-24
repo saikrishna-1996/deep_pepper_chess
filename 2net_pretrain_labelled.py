@@ -17,21 +17,30 @@ from game.features import board_to_feature
 from game.stockfish import Stockfish
 from logger import Logger
 import pickle
-
 import policy_value_label_seq
 
-#set the logger
-logger = Logger('./logs')
-model_pol = PolicyValNetwork_Giraffe(pretrain=False)
-model_val = Critic_Giraffe(pretrain = False)
+
+
+
+
+def load_trained(model, fname):
+    pretrained_state_dict = torch.load(fname)
+    model_dict = model.state_dict()
+    model_dict.update(pretrained_state_dict)
+    model.load_state_dict(pretrained_state_dict)
+    return model
+
+
 
 def cross_entropy(pred, soft_targets):
     return torch.mean(torch.sum(- soft_targets.double() * torch.log(pred).double(), 1))
 
 def save_trained_val(model_val, iteration_val):
+    iteration_val += 672
     torch.save(model_val.state_dict(), "./{}_val.pt".format(iteration_val))
 
 def save_trained_pol(model_pol, iteration_pol):
+    iteration_pol += 672
     torch.save(model_pol.state_dict(), "./{}_pol.pt".format(iteration_pol))
 
 
@@ -42,9 +51,9 @@ def pretrain(model_pol, model_val):
     feature_batch_pol = []
     targets_val_batch = []
     targets_pol_batch = []
-    board_positions_Shi = pickle.load(open('../../Shirov_board_labels','rb'))
-    board_positions_Karpov = pickle.load(open('../../Karpov_board_labels','rb'))
-    board_positions_Anand = pickle.load(open('../../Anand_board_labels', 'rb'))
+    board_positions_Shi = pickle.load(open('./labeled_boards','rb'))
+    board_positions_Karpov = pickle.load(open('./Aronian_labels','rb'))
+    board_positions_Anand = pickle.load(open('./Ivanchuk_labels', 'rb'))
     board_positions = board_positions_Anand + board_positions_Karpov + board_positions_Shi
     board_positions = np.array(board_positions) 
     shuffle(board_positions)
@@ -54,13 +63,16 @@ def pretrain(model_pol, model_val):
         #print(batch)
         for index, board_data in enumerate(board_positions):
             if (index + 1) % Config.minibatch_size != 0:
-                board_position = board_data[0]
-                if len(board_data[2]) == 5120:
-                    feature_batch_val.append(board_to_feature(board_position))
-                    feature_batch_pol.append(board_to_feature(board_position))
-                    targets_val_batch.append(board_data[1])
+                if (len(board_data)==3):
+                    board_position = board_data[2]
+                    if len(board_data[1]) == 5120:
+                        feature_batch_val.append(board_to_feature(board_position))
+                        feature_batch_pol.append(board_to_feature(board_position))
+                        targets_val_batch.append(board_data[0])
                 #nvm, mind = policy_value_label_seq.value_policy(board_position)
-                    targets_pol_batch.append(board_data[2])
+                        targets_pol_batch.append(board_data[1])
+                else:
+                    print('Poorly configured board data')
             else:
                 feature_batch_pol = torch.FloatTensor(feature_batch_pol)
                 feature_batch_val = torch.FloatTensor(feature_batch_val)
@@ -129,5 +141,10 @@ def do_backprop_pol(batch_features, targets_pol, model_pol, iters_pol):
     optimizer.step()
     save_trained_pol(model_pol, iters_pol)
 
-
+#set the logger
+logger = Logger('./logs')
+model_pol = PolicyValNetwork_Giraffe(pretrain=False)
+model_pol = load_trained(model_pol, './671_pol.pt')
+model_val = Critic_Giraffe(pretrain = False)
+model_val = load_trained(model_val, './671_val.pt')
 pretrain(model_pol, model_val)
