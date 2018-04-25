@@ -16,14 +16,14 @@ from train.train import save_trained_pol, save_trained_val, load_model, load_val
 
 parser = argparse.ArgumentParser(description='Launcher for distributed Chess trainer')
 
-parser.add_argument('--batch-size', type=int, default=100, help='input batch size for training (default: 2500)')
+parser.add_argument('--batch-size', type=int, default=15, help='input batch size for training (default: 2500)')
 parser.add_argument('--epochs', type=int, default=1, help='number of epochs to train (default: 1)')
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate (default: 0.0002)')
 parser.add_argument('--championship-rounds', type=int, default=10,
                     help='Number of rounds in the championship. Default=10')
 parser.add_argument('--checkpoint-path', type=str, default=None, help='Path for checkpointing')
 parser.add_argument('--data-path', type=str, default='./data', help='Path to data')
-parser.add_argument('--workers', type=int, help='Number of workers used for generating games', default=2)
+parser.add_argument('--workers', type=int, help='Number of workers used for generating games', default=3)
 parser.add_argument('--seed', type=int, default=1, help='random seed (default: 1)')
 parser.add_argument('--no-cuda', action='store_true', default=True, help='Disables GPU use')
 parser.add_argument('--pretrain', action='store_true', default=True, help='Pretrain value function')
@@ -36,8 +36,9 @@ torch.manual_seed(args.seed)
 def main():
     print("Launching Deep Pepper...")
     pool = multiprocessing.Pool(args.workers)
-    pol_model, i = load_model()
     val_model, i = load_valmodel()
+    pol_model, i = load_model()
+    print('Loaded models: {}'.format(i))
     champion = Champion(pol_model, val_model)
     generator = GameGenerator(champion, pool, args.batch_size, args.workers)
     improver = PolicyImprover(champion, args.championship_rounds)

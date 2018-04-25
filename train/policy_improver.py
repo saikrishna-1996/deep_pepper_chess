@@ -17,5 +17,5 @@ class PolicyImprover(object):
     def improve_policy(self, games, pool):
         start = time.time()
         new_policy, new_value = self.train_model(games)
-        self.champion.test_candidate(new_policy, new_value, pool)
+        #self.champion.test_candidate(new_policy, new_value, pool)
         print("Improved policy in: {}".format(time.time() - start))

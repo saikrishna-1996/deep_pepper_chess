@@ -90,7 +90,7 @@ def do_backprop(features, policy, act_val, pol_model, val_model, total_train_ite
     # features = features.view(1, -1)
     # act_val = torch.autograd.Variable(act_val)
     # policy = torch.autograd.Variable(policy)
-    nn_policy_out = pol_model(features)
+    nn_policy_out, _ = pol_model(features)
     nn_val_out = val_model(features)
     act_val = torch.autograd.Variable(torch.Tensor([act_val])).view(-1, 1)
     policy = torch.autograd.Variable(torch.from_numpy(policy).long())
@@ -182,7 +182,7 @@ def load_model(fname = None):
             latest_file = max(list_of_files, key = os.path.getctime)
             print('Loading latest model...')
             model = load_trained(model,latest_file)
-            i = re.search('./(.+?).pt',latest_file)
+            i = re.search('./(.+?)_pol.pt',latest_file)
             if i:
                 if (i.group(1)) == 'pretrained':
                     print('Loaded pretrained model')
