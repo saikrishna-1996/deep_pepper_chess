@@ -119,7 +119,6 @@ class PolicyValNetwork_Giraffe(nn.Module):
 
         h2p_relu = F.relu(self.linear2p(h1_relu))
         p_out = F.log_softmax(self.linear3p(h2p_relu), dim=1)
-
         h2e_relu = F.relu(self.linear2e(h1_relu))
         val_out = F.tanh(self.linear3e(h2e_relu))
 

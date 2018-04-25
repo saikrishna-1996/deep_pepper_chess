@@ -177,7 +177,7 @@ def load_model(fname = None):
     model = PolicyValNetwork_Giraffe(pretrain=False)
     #val_model = Critic_Giraffe(pretrain=False)
     if fname == None:
-        list_of_files = glob.glob('./*.pt')
+        list_of_files = glob.glob('./*_pol.pt')
         if len(list_of_files) != 0:
             latest_file = max(list_of_files, key = os.path.getctime)
             print('Loading latest model...')
