@@ -1,0 +1,7 @@
+Running on leto24
+Traceback (most recent call last):
+  File "launch_script.py", line 9, in <module>
+    import torch
+  File "/u/gottipav/.conda/envs/chess/lib/python3.6/site-packages/torch/__init__.py", line 56, in <module>
+    from torch._C import *
+ImportError: numpy.core.multiarray failed to import
