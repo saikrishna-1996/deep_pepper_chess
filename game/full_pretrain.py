@@ -12,6 +12,7 @@ import chess.uci
 # import random
 import torch
 import pickle
+from game.chess_env import ChessEnv
 from torch.autograd import Variable
 from config import Config
 from game.features import board_to_feature
@@ -56,8 +57,10 @@ def pretrain(model,boards):
                     value, policy, board = board_position
                 except:
                     pass
+
                 targets_pol_batch.append(policy)
                 targets_val_batch.append(value)
+                print(index)
                 feature_batch.append(board_to_feature(board))
 
             else:
@@ -104,9 +107,8 @@ def do_backprop(batch_features, targets_val, targets_pol, model, iters):
     optimizer.step()
     save_trained(model, iters)
 
-with open(args.load_path , 'rb') as f:
+with open('labeled_boards' , 'rb') as f:
     boards = pickle.load(f)
 
 
 pretrain(model,boards)
-

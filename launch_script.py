@@ -34,6 +34,7 @@ def main():
     print("Launching Deep Pepper...")
     print("Running {} workers on {} cores".format(args.workers, mp.cpu_count()))
     pool = mp.Pool(args.workers)
+    print("Created processing pool of size {}...".format(args.workers))
     model, i = load_model()
     champion = Champion(model)
     generator = GameGenerator(champion, pool, args.batch_size, args.workers)
@@ -44,6 +45,7 @@ def main():
         improver.improve_policy(games, pool)
         i += 1
         save_trained(model, i)
+        print("Saving model {}".format(i))
 
 
 if __name__ == '__main__':

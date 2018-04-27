@@ -110,9 +110,9 @@ def do_backprop(features, policy, act_val, model, total_train_iter, curr_train_i
         'loss3': loss3.data[0]
     }
 
-    for tag, value in info.items():
-        logger.scalar_summary(tag, value, total_train_iter + 1)
-        logger.scalar_summary(tag, value, curr_train_iter + 1)
+#     for tag, value in info.items():
+#         logger.scalar_summary(tag, value, total_train_iter + 1)
+#         logger.scalar_summary(tag, value, curr_train_iter + 1)
 
     optimizer.zero_grad()
     loss.backward()

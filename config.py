@@ -45,7 +45,7 @@ def make_square_map():
 
 
 class Config(object):
-    default_workers = 4 if platform.system() != 'Linux' else 100
+    default_workers = 4 if platform.system() != 'Linux' else 10
     think_time = 10  # 1 seconds
     minibatch_size = 32
     PRETRAIN_EPOCHS = 1
@@ -68,9 +68,9 @@ class Config(object):
 
     RESIGN_CHECK_MIN = 60
     RESIGN_CHECK_FREQ = 10
-    NUM_SIMULATIONS = 100
+    NUM_SIMULATIONS = 800
     SF_EVAL_THRESHOLD = 6.5
-    BATCH_SIZE = 100
+    BATCH_SIZE = default_workers
     D_ALPHA = 0.4
     EPS = 0.1
     EXPLORE_FACTOR = 2
