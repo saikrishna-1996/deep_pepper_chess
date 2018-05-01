@@ -104,7 +104,7 @@ def do_backprop(features, policy, act_val, pol_model, val_model, total_train_ite
             l2_reg = weight.norm(2)
         else:
             l2_reg = l2_reg + weight.norm(2)
-    loss3 = 0.1 * l2_reg
+    loss3 = 0.0001 * l2_reg
 
     val_loss = loss1.float() + loss3.float()
     pol_loss = -loss2.float()
