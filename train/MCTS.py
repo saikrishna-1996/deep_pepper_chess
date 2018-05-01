@@ -48,7 +48,8 @@ class Node(object):
 
     @property
     def Q(self):
-        Q = np.divide(self.W, self.N)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            Q = np.divide(self.W, self.N)
         Q[np.isnan(Q)] = 0
         return Q
 
