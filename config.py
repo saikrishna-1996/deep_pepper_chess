@@ -66,9 +66,9 @@ class Config(object):
     GAME_SCORE = 20
     # MCTS
 
-    RESIGN_CHECK_MIN = 60
+    RESIGN_CHECK_MIN = 40
     RESIGN_CHECK_FREQ = 10
-    NUM_SIMULATIONS = 800
+    NUM_SIMULATIONS = 10
     SF_EVAL_THRESHOLD = 6.5
     BATCH_SIZE = default_workers
     D_ALPHA = 0.4
@@ -76,14 +76,14 @@ class Config(object):
     EXPLORE_FACTOR = 2
 
     # Game Generator
-    TEMP_REDUCE_STEP = 50
-    MINGAMES = 500
+    TEMP_REDUCE_STEP = 20
+    MINGAMES = 10
 
     # Self Challenge
     NUM_GAMES = 4
 
     # PATHS
-    ROOTDIR = '~\home'  ##### DEFINE AS REQ'd
+    ROOTDIR = '/u/gottipav/deep_pepper_chess'  ##### DEFINE AS REQ'd
     GAMEPATH = os.path.join(ROOTDIR, 'saved_games')
     NETPATH = os.path.join(ROOTDIR, 'saved_nets')
     BESTNET_NAME = 'BestNetwork.pth.tar'  # Example seen here: https://github.com/pytorch/examples/blob/0984955bb8525452d1c0e4d14499756eae76755b/imagenet/main.py#L139-L145

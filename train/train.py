@@ -36,6 +36,7 @@ def train_model(model, games=None, net_number=0, min_num_games=400):
     else:
         game_data = games
 
+    print("entered train_model\n")
     total_train_iter = 0
     if game_data is not None:
         curr_train_iter = 0
@@ -70,6 +71,7 @@ def do_backprop(features, policy, act_val, model, total_train_iter, curr_train_i
     # first convert this batch_board to batch_features
     # batch_board should be of dimension (batch_size, board)
     # batch_feature = Variable(torch.randn(batch_size, 353))
+    print("entered do_backprop\n")
     criterion1 = torch.nn.MSELoss(size_average=False)
     # criterion2 = torch.nn.NLLLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
@@ -157,6 +159,7 @@ def load_trained(model, fname):
 
 
 def save_trained(model, iteration):
+    print("entered save_trained\n")
     torch.save(model.state_dict(), "./{}.pt".format(iteration))
 
 

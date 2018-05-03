@@ -39,12 +39,12 @@ class GameGenerator(object):
 
             start = time.time()
             pi, successor, root_node = MCTS(temp=temperature, network=model, root=root_node)
-            print("Calculated next move in {}ms".format(time.time() - start))
+            #print("Calculated next move in {}ms".format(time.time() - start))
             feature = board_to_feature(root_node.env.board)
             triplets.append([feature, pi])
-            print('')
-            print(root_node.env.board)
-            print("Running on {} ".format(mp.current_process()))
+            #print('')
+            #print(root_node.env.board)
+            #print("Running on {} ".format(mp.current_process()))
             root_node = successor
             game_over, z = root_node.env.is_game_over(moves, res_check=True)
         for i in range(len(triplets) - step_game, len(triplets)):

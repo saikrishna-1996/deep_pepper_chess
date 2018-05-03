@@ -163,10 +163,10 @@ def MCTS(temp: float,
 
     new_pi = np.zeros(Config.d_out, )
     new_pi[root.legal_move_inds] = pi
-    print('Average Select time: {}'.format(avg_select_time))
-    print('Average Expand time: {}'.format(avg_expand_time))
-    print('Average Backup time: {}'.format(avg_backup_time))
-    print('MCTS finished {} simulations in {} seconds'.format(Config.NUM_SIMULATIONS, (time.time() - mcts_start)))
+    #print('Average Select time: {}'.format(avg_select_time))
+    #print('Average Expand time: {}'.format(avg_expand_time))
+    #print('Average Backup time: {}'.format(avg_backup_time))
+    #print('MCTS finished {} simulations in {} seconds'.format(Config.NUM_SIMULATIONS, (time.time() - mcts_start)))
     return new_pi, root.children[action_index], root
 
 
