@@ -3,134 +3,138 @@ import chess.uci
 import numpy as np
 
 
+# get_north_mobility(), get_south_mobility(), get_east_mobility(), get_west_mobility(), get_north_east_mobility(), get_south_east_mobility(), get_south_west_mobility(), get_north_west_mobility() gives
+# the mobility of sliding pieces (queen or rook or bishop) in each of those directions. Mobility is defined as the number of squares the particular sliding piece under consideration can move in the
+# above mentioned directions before encountering any piece.
+ 
 def get_north_mobility(board, pos):
-    cpos = int(pos)
-    bean = 0
-    cpos = cpos + 8
-    while cpos <= 63:
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+    pos_copy = int(pos)
+    count_temp = 0
+    pos_copy = pos_copy + 8
+    while pos_copy <= 63:
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
-        cpos = cpos + 8
-    return bean
+        pos_copy = pos_copy + 8
+    return count_temp
 
 
 def get_south_mobility(board, pos):
-    cpos = int(pos)
-    bean = 0
-    cpos = cpos - 8
-    while cpos >= 0:
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+    pos_copy = int(pos)
+    count_temp = 0
+    pos_copy = pos_copy - 8
+    while pos_copy >= 0:
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
-        cpos = cpos - 8
-    return bean
+        pos_copy = pos_copy - 8
+    return count_temp
 
 
 def get_east_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     col = col + 1
     while col < 8:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         col = col + 1
-    return bean
+    return count_temp
 
 
 def get_west_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     col = col - 1
     while col >= 0:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         col = col - 1
-    return bean
+    return count_temp
 
 
 def get_north_east_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     row = row + 1
     col = col + 1
     while col < 8 and row < 8:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         row = row + 1
         col = col + 1
-    return bean
+    return count_temp
 
 
 def get_south_east_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     row = row - 1
     col = col + 1
     while col < 8 and row >= 0:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         row = row - 1
         col = col + 1
-    return bean
+    return count_temp
 
 
 def get_south_west_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     row = row - 1
     col = col - 1
     while col >= 0 and row >= 0:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         row = row - 1
         col = col - 1
-    return bean
+    return count_temp
 
 
 def get_north_west_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     row = row + 1
     col = col - 1
     while col >= 0 and row < 8:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         row = row + 1
         col = col - 1
-    return bean
+    return count_temp
 
 
 def board_to_feature(board):
@@ -140,13 +144,13 @@ def board_to_feature(board):
     # side-to-move
     feature[0] = board.turn
 
-    # castling rights
+    # castling rights (whether each side has kingside / queenside castling rights)
     feature[1] = board.has_kingside_castling_rights(chess.WHITE)
     feature[2] = board.has_queenside_castling_rights(chess.WHITE)
     feature[3] = board.has_kingside_castling_rights(chess.BLACK)
     feature[4] = board.has_queenside_castling_rights(chess.BLACK)
 
-    # material configuration
+    # material configuration (number of pieces of each type present on the board)
     feature[5] = len(board.pieces(chess.KING, chess.WHITE))
     feature[6] = len(board.pieces(chess.QUEEN, chess.WHITE))
     feature[7] = len(board.pieces(chess.ROOK, chess.WHITE))
@@ -161,7 +165,9 @@ def board_to_feature(board):
     feature[16] = len(board.pieces(chess.PAWN, chess.BLACK))
 
     "START: PIECE LIST"
-    # should probably take extra care for bishops
+    ## should probably take extra care for bishops
+
+    ## In piece lists, we have 5 slots alloted for each of 1 king, 1 queen, 2 rooks, 2 bishops, 2 knights and 8 pawns for white and black. 
 
     # white king
     feature[17] = 1
