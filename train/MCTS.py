@@ -1,9 +1,7 @@
 import time
-
 import numpy as np
 import torch
 
-# this is hypothetical functions and classes that should be created by teamates.
 from config import Config
 from game.chess_env import ChessEnv
 from game.features import board_to_feature
@@ -11,10 +9,17 @@ from network.policy_network import PolicyValNetwork_Giraffe
 
 
 class Node(object):
-    # This class inherit the Board class which control the board representation,
-    # find legal move and next board represenation.
-    # It has the ability to store and update for each leaf the
-    #  number of state-action N(s,a), Q(s,a) and P(s,a)
+    ''' Represent and store statistics of each node in the search tree.
+    #arguments: 
+        ChessEnv: Chess env object,
+        explore_factor: float number used as hyperparameter to control  range of exploration ,
+        init_W: initial cumulative value function 'W',
+        init_N: initial visit action counter, 
+        init_P: inital probability distribution for actions space,
+        parent: parent node which is another instance of the class Node,
+        child_id = best child index. 
+    '''
+    
     def __init__(self, env: ChessEnv, explore_factor,
                  init_W=np.zeros((Config.d_out,)),
                  init_N=np.zeros((Config.d_out,)),
