@@ -180,6 +180,14 @@ def MCTS(temp: float,
 ########################
 # Traverses from root node to leaf node using UCB selection
 def select(root_node):
+    '''
+    Selection phase function. It is the first part of the MCTS process. The selection is done according to the UCB score.
+    It stops when reaching a leaf node.
+    : param root_node the nest object root_node which stores the stats of the whole descendent tree.
+    :return the last node before the leaf node(object), number of selectiom moves(int), game_over (bool) and the score if 
+            game over is true ( float).
+    
+    '''
     curr_node = root_node
     moves = 0
     game_over, z = curr_node.env.is_game_over(moves)
