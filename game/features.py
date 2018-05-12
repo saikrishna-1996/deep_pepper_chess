@@ -2,6 +2,9 @@ import chess
 import chess.uci
 import numpy as np
 
+# input: board
+# output: feature representation of the board
+
 
 def get_north_mobility(board, pos):
     cpos = int(pos)
