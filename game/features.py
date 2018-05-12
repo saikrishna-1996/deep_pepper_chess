@@ -9,7 +9,7 @@ import numpy as np
 # get_north_mobility(), get_south_mobility(), get_east_mobility(), get_west_mobility(), get_north_east_mobility(), get_south_east_mobility(), get_south_west_mobility(), get_north_west_mobility() gives
 # the mobility of sliding pieces (queen or rook or bishop) in each of those directions. Mobility is defined as the number of squares the particular sliding piece under consideration can move in the
 # above mentioned directions before encountering any piece.
- 
+
 def get_north_mobility(board, pos):
     pos_copy = int(pos)
     count_temp = 0
@@ -170,7 +170,7 @@ def board_to_feature(board):
     "START: PIECE LIST"
     ## should probably take extra care for bishops
 
-    ## In piece lists, we have 5 slots alloted for each of 1 king, 1 queen, 2 rooks, 2 bishops, 2 knights and 8 pawns for white and black. 
+    ## In piece lists, we have 5 slots alloted for each of 1 king, 1 queen, 2 rooks, 2 bishops, 2 knights and 8 pawns for white and black.
 
     # white king
     feature[17] = 1
@@ -891,26 +891,27 @@ def board_to_feature(board):
         fc = fc + 5
 
     "START: Attack and Defend Maps (square-centric features)"
+    ## For each square, we encode the values of the lowest valued attacker and lowest valued defender of that square. Since we have 64 squares, there are a total of 128 slots used here. So, in the slots 225-288, we will encode the least-valued white piece attacking each of the sqaures on the board. For the slots 289-352, we encode the least-valued black piece attacking each of the squares on the board.
 
     # White-attacker
-    for i in range(63):
-        shooters = list(board.attackers(chess.WHITE, i))
-        min_val = 10
-        for j in range(len(shooters)):
-            curr_val = board.piece_type_at(shooters[j])
+    for i in range(63): # iterating through every square
+        attackers_list = list(board.attackers(chess.WHITE, i)) # list of all white pieces attacking that particular square
+        min_val = 10    # if there is no white piece attacking that square, we will store value of 10
+        for j in range(len(attackers_list)):
+            curr_val = board.piece_type_at(attackers_list[j])
             if curr_val < min_val:
                 min_val = curr_val
         feature[225 + i] = min_val
 
     # Black-attacker
-    for i in range(63):
-        shooters = list(board.attackers(chess.BLACK, i))
-        min_val = 10
-        for j in range(len(shooters)):
-            curr_val = board.piece_type_at(shooters[j])
+    for i in range(63): # iterating through every square
+        attackers_list = list(board.attackers(chess.BLACK, i)) # list of all black pieces attacking that particular square
+        min_val = 10    # if there is no black piece attacking that square, we will store value of 10
+        for j in range(len(attackers_list)):
+            curr_val = board.piece_type_at(attackers_list[j])
             if curr_val < min_val:
                 min_val = curr_val
         feature[289 + i] = min_val
 
+    ## Done with computing the feature vector.
     return feature
-    # We should make sure that bishops are not messed up.
