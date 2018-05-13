@@ -205,10 +205,18 @@ def select(root_node):
 ##########################
 # Once at a leaf node expand using the network to get it's P values and it's estimated value
 def expand_and_eval(node, network, game_over, z, moves):
+    '''
+    find all  children considering all legal moves
+    :param node: leaf node
+    :param network: neural network model used to evaluate the leaf node value
+    :param game_over: boolean  variable to avoid expanding when the game is over
+    :param z: the game score if game is over
+    :param moves: number of moves in the last selection phase.
+    :return expanded node
+    '''
     if game_over:
         node.value = z
         return node
-    # expand
     node.expand(network)
     return node
 
@@ -216,7 +224,9 @@ def expand_and_eval(node, network, game_over, z, moves):
 ###############
 ### Back-up ###
 ###############
-
+'''
+update the the total value function and state action counter for each node encoutered during the selection phase.
+'''
 def backup(leaf_node, root_node):
     child_node = leaf_node
     v = leaf_node.value
