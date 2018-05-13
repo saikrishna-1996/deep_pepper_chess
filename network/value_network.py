@@ -1,12 +1,10 @@
-# import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
+from config import Config
 
-import config import Config
-
-# from torch.autograd import Variable
-# fully connected (including the first layer to hidden layer neurons. so, this is different from giraffe network) network with 2 hidden layers.
+## Refer to our paper for understanding architectures of these networks
 
 class Critic_Giraffe(nn.Module):
     def __init__(self,
@@ -20,8 +18,9 @@ class Critic_Giraffe(nn.Module):
             h1c = Config.h1c,
             h2 = Config.h2,
             eval_out=1):
-        "We instantiate various modules"
+
         super(Critic_Giraffe, self).__init__()
+
         self.gf = gf
         self.pc = pc
         self.sc = sc
@@ -31,9 +30,13 @@ class Critic_Giraffe(nn.Module):
         self.linear2 = nn.Linear(h1a + h1b + h1c, h2)
         self.linear3 = nn.Linear(h2, eval_out)
 
+        if pretrain:
+            pretrain(self)
+
     def forward(self, x):
+
         x = Variable(x.float())
-        "Here, we can use modules defined in the constrcutor (__init__ part defined above) as well as arbitrary operators on Variables"
+
         gf = self.gf
         pc = self.pc
         sc = self.sc
@@ -52,25 +55,27 @@ class Critic_Giraffe(nn.Module):
         return val_out
 
 
-class Critic_FCGiraffe(nn.Module):
+class Critic_FCGiraffe(nn.Module): # Critic fully connected
     def __init_(self,
             pretrain = False,
             d_in = Config.d_in,
             h1 = Config.h1,
             h2 = Config.h2,
             eval_out=1):
+
         super(Critic_FCGiraffe, self).__init__()
+
         self.linear1 = nn.Linear(d_in, h1)
         self.linear2 = nn.Linear(h1, h2)
         self.linear3 = nn.Linear(h2, eval_out)
+
         if pretrain:
             pretrain(self)
 
     def forward(self, x):
         x = Variable(x.float())
-        "Here, we will use modules defined in the constructor (__init__ part defined above) as well as arbitray operators on Variables"
-        h1_relu = F.relu(self.linear1(x))
 
+        h1_relu = F.relu(self.linear1(x))
         h2_relu = F.relu(self.linear2(h1_relu))
         v_out = F.Tanh(self.linear3(h2_relu))
 
