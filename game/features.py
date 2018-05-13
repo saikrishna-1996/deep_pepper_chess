@@ -172,6 +172,16 @@ def board_to_feature(board):
 
     ## In piece lists, we have 5 slots alloted for each of 1 king, 1 queen, 2 rooks, 2 bishops, 2 knights and 8 pawns for white and black.
 
+    ## 17-176: For every piece, we determine whether the piece is existant (1 slot), normalized x-coordinate (1 slot), normalized y-coordinate (1 slot), lowest valued attacker of that piece (1 slot), and lowest valued defender of that piece (1 slot). So, we use 5 slots for every piece. And, there are a total of 32 pieces. (2 kings, 2 queens, 4 rooks, 4 bishops, 4 knights, 16 pawns). So, a total of 160 slots.
+
+    ## 177-224: For each sliding piece, this encodes how far they can go in each direction. So 8 slots for a queen, 4 slots for a rook and 4 slots for a bishop. Since there are 2 queens, 4 rooks and 4 bishops, we need a total of 48 slots.
+
+    ## For king, knights and pawns (which are classified as non-sliding pieces according to Giraffe), we don't encode how far they move in each direction. So, for determining the corresponding features for a non-sliding piece, we make a list of all the existing pieces of that particular type (for example, a maximum of 2 knights), and then for each of those pieces, we compute it's normalized x-coordinate and y-coordinate by using "float(row)/ 8.0", "float(col)/ 8.0" and then compute
+    # the least valued attacker and defender of that square (where the piece is present) by looping over all the attackers and defenders respectively of that square.
+
+    ## For queen, rooks and bishops (which are classified as sliding pieces according to Giraffe), we also encode how far they can move in their possible directions before they encounter an obstacle. All this is computed in the mobility functions defined at the beginning of this code. For example, a rook can move north or east or west or south. So, we compute it's mobility in all the 4 directions, where as a queen can move in 8 directions.
+
+
     # white king
     feature[17] = 1
     wk_squares = board.pieces(chess.KING, chess.WHITE)
