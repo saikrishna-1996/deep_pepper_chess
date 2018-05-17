@@ -120,9 +120,6 @@ def legal_mask(board, all_move_probs) -> np.array:
 
     return legal_moves_prob
 
-
-# state type and shape does not matter
-
 def MCTS(temp: float,
          network: PolicyValNetwork_Giraffe,
          root,
@@ -140,7 +137,6 @@ def MCTS(temp: float,
     :param batch_size:
     :return: return: pi: vector of policy(action) with the same shape of legale move. Shape: 4096x1
     """
-    # history of archive for all previous runs
     mcts_start = time.time()
     if not root.children:
         root.expand(network)
@@ -152,7 +148,6 @@ def MCTS(temp: float,
         start_time = time.time()
         curr_node, moves, game_over, z = select(root)
         avg_select_time += (time.time() - start_time) / Config.NUM_SIMULATIONS
-        # print('Simulation: {} Root node sum: {}'.format(simulation, np.sum(root.N)))
         start_time = time.time()
         leaf = expand_and_eval(curr_node, network, game_over, z, moves)
         avg_expand_time += (time.time() - start_time) / Config.NUM_SIMULATIONS
@@ -162,16 +157,11 @@ def MCTS(temp: float,
     N = root.N
     norm_factor = np.sum(np.power(N, temp))
 
-    # optimum policy
     pi = np.divide(np.power(N, temp), norm_factor)
     action_index = np.argmax(pi)
 
     new_pi = np.zeros(Config.d_out, )
     new_pi[root.legal_move_inds] = pi
-    #print('Average Select time: {}'.format(avg_select_time))
-    #print('Average Expand time: {}'.format(avg_expand_time))
-    #print('Average Backup time: {}'.format(avg_backup_time))
-    #print('MCTS finished {} simulations in {} seconds'.format(Config.NUM_SIMULATIONS, (time.time() - mcts_start)))
     return new_pi, root.children[action_index], root
 
 
@@ -203,7 +193,7 @@ def select(root_node):
 ##########################
 ### Expand and evaluate###
 ##########################
-# Once at a leaf node expand using the network to get it's P values and it's estimated value
+# Once at a leaf node expand using the network
 def expand_and_eval(node, network, game_over, z, moves):
     '''
     find all  children considering all legal moves
@@ -225,7 +215,7 @@ def expand_and_eval(node, network, game_over, z, moves):
 ### Back-up ###
 ###############
 '''
-update the the total value function and state action counter for each node encoutered during the selection phase.
+Update the the total value function and state action counter for each node encoutered during the selection phase.
 '''
 def backup(leaf_node, root_node):
     child_node = leaf_node
