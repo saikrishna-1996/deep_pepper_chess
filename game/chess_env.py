@@ -1,6 +1,6 @@
 
 """
-Chess environment used for playing games. 
+Chess environment used for playing games. Adapted from https://github.com/Zeta36/chess-alpha-zero
 """
 
 import copy
