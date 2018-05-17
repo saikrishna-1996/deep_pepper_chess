@@ -1,6 +1,6 @@
 # Deep Pepper
 
-MCTS-based algorithm for parallel training of a chess engine. Adapted from the approach used by existing deep learning engines such as Giraffe and AlphaZero, Deep Pepper is a clean-room implementation of a chess engine that leverages Stockfish for opening and closing book, and learns a policy through self-play.
+MCTS-based algorithm for parallel training of a chess engine. Adapted from existing deep learning game engines such as Giraffe and AlphaZero, Deep Pepper is a clean-room implementation of a chess engine that leverages Stockfish for the opening and closing book, and learns a policy entirely through self-play.
 
 ## Technologies Used
 
@@ -14,7 +14,7 @@ We use the following technologies to train the model and interface with the Stoc
 ## Setup Instructions
 
 1. Run `pip install -r requirements.txt` to install the necessary dependencies.
-2. Run `python launch_script.py` to start training of the Chess Engine.
+2. Run `python launch_script.py` to start training the Chess Engine.
 
 ## Acknowledgements
 
