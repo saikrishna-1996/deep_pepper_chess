@@ -30,7 +30,7 @@ def load_gamefile(net_number):  # I'm not married to this, I think it could be d
         print('Could not load gamefile!')
 
 
-def train_model(model, games=None, net_number=0, min_num_games=400):
+def train_model(model: PolicyValNetwork_Giraffe, games=None, net_number=0, min_num_games=400):
     if games is None:
         game_data = load_gamefile(net_number)
     else:
@@ -150,7 +150,7 @@ def do_backprop(features, policy, act_val, model, total_train_iter, curr_train_i
 #     return model_state
 
 
-def load_trained(model, fname):
+def load_trained(model: PolicyValNetwork_Giraffe, fname):
     pretrained_state_dict = torch.load(fname)
     model_dict = model.state_dict()
     model_dict.update(pretrained_state_dict)

@@ -5,14 +5,26 @@ import numpy as np
 
 from config import Config
 from game.chess_env import ChessEnv
+from network.policy_network import PolicyValNetwork_Giraffe
 from train.MCTS import MCTS, Node
+
+'''
+Holds the best policy during training. This may be updated if the candidate shows a statistical advantage over the champion during the policy improvement phase.
+'''
 
 
 class Champion(object):
-    def __init__(self, current_policy):
+    def __init__(self, current_policy: PolicyValNetwork_Giraffe):
+        """
+        :type current_policy: PolicyValNetwork_Giraffe The initial champion.
+        """
         self.current_policy = current_policy
 
-    def test_candidate(self, candidate, pool):
+    def test_candidate(self, candidate: PolicyValNetwork_Giraffe, pool):
+        """
+
+        :type candidate: PolicyValNetwork_Giraffe The candidate policy to test
+        """
         print('START TOURNAMENT')
 
         with Manager() as manager:
