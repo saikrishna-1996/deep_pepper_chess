@@ -2,135 +2,142 @@ import chess
 import chess.uci
 import numpy as np
 
+# input: board
+# output: feature representation of the board
+
+
+# get_north_mobility(), get_south_mobility(), get_east_mobility(), get_west_mobility(), get_north_east_mobility(), get_south_east_mobility(), get_south_west_mobility(), get_north_west_mobility() gives
+# the mobility of sliding pieces (queen or rook or bishop) in each of those directions. Mobility is defined as the number of squares the particular sliding piece under consideration can move in the
+# above mentioned directions before encountering any piece.
 
 def get_north_mobility(board, pos):
-    cpos = int(pos)
-    bean = 0
-    cpos = cpos + 8
-    while cpos <= 63:
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+    pos_copy = int(pos)
+    count_temp = 0
+    pos_copy = pos_copy + 8
+    while pos_copy <= 63:
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
-        cpos = cpos + 8
-    return bean
+        pos_copy = pos_copy + 8
+    return count_temp
 
 
 def get_south_mobility(board, pos):
-    cpos = int(pos)
-    bean = 0
-    cpos = cpos - 8
-    while cpos >= 0:
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+    pos_copy = int(pos)
+    count_temp = 0
+    pos_copy = pos_copy - 8
+    while pos_copy >= 0:
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
-        cpos = cpos - 8
-    return bean
+        pos_copy = pos_copy - 8
+    return count_temp
 
 
 def get_east_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     col = col + 1
     while col < 8:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         col = col + 1
-    return bean
+    return count_temp
 
 
 def get_west_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     col = col - 1
     while col >= 0:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         col = col - 1
-    return bean
+    return count_temp
 
 
 def get_north_east_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     row = row + 1
     col = col + 1
     while col < 8 and row < 8:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         row = row + 1
         col = col + 1
-    return bean
+    return count_temp
 
 
 def get_south_east_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     row = row - 1
     col = col + 1
     while col < 8 and row >= 0:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         row = row - 1
         col = col + 1
-    return bean
+    return count_temp
 
 
 def get_south_west_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     row = row - 1
     col = col - 1
     while col >= 0 and row >= 0:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         row = row - 1
         col = col - 1
-    return bean
+    return count_temp
 
 
 def get_north_west_mobility(board, pos):
-    cpos = int(pos)
-    row = int(int(cpos) / int(8))
-    col = cpos % 8
-    bean = 0
+    pos_copy = int(pos)
+    row = int(int(pos_copy) / int(8))
+    col = pos_copy % 8
+    count_temp = 0
     row = row + 1
     col = col - 1
     while col >= 0 and row < 8:
-        cpos = row * 8 + col
-        if board.piece_type_at(cpos) == 0:
-            bean = bean + 1
+        pos_copy = row * 8 + col
+        if board.piece_type_at(pos_copy) == 0:
+            count_temp = count_temp + 1
         else:
             break
         row = row + 1
         col = col - 1
-    return bean
+    return count_temp
 
 
 def board_to_feature(board):
@@ -140,13 +147,13 @@ def board_to_feature(board):
     # side-to-move
     feature[0] = board.turn
 
-    # castling rights
+    # castling rights (whether each side has kingside / queenside castling rights)
     feature[1] = board.has_kingside_castling_rights(chess.WHITE)
     feature[2] = board.has_queenside_castling_rights(chess.WHITE)
     feature[3] = board.has_kingside_castling_rights(chess.BLACK)
     feature[4] = board.has_queenside_castling_rights(chess.BLACK)
 
-    # material configuration
+    # material configuration (number of pieces of each type present on the board)
     feature[5] = len(board.pieces(chess.KING, chess.WHITE))
     feature[6] = len(board.pieces(chess.QUEEN, chess.WHITE))
     feature[7] = len(board.pieces(chess.ROOK, chess.WHITE))
@@ -161,7 +168,19 @@ def board_to_feature(board):
     feature[16] = len(board.pieces(chess.PAWN, chess.BLACK))
 
     "START: PIECE LIST"
-    # should probably take extra care for bishops
+    ## should probably take extra care for bishops
+
+    ## In piece lists, we have 5 slots alloted for each of 1 king, 1 queen, 2 rooks, 2 bishops, 2 knights and 8 pawns for white and black.
+
+    ## 17-176: For every piece, we determine whether the piece is existant (1 slot), normalized x-coordinate (1 slot), normalized y-coordinate (1 slot), lowest valued attacker of that piece (1 slot), and lowest valued defender of that piece (1 slot). So, we use 5 slots for every piece. And, there are a total of 32 pieces. (2 kings, 2 queens, 4 rooks, 4 bishops, 4 knights, 16 pawns). So, a total of 160 slots.
+
+    ## 177-224: For each sliding piece, this encodes how far they can go in each direction. So 8 slots for a queen, 4 slots for a rook and 4 slots for a bishop. Since there are 2 queens, 4 rooks and 4 bishops, we need a total of 48 slots.
+
+    ## For king, knights and pawns (which are classified as non-sliding pieces according to Giraffe), we don't encode how far they move in each direction. So, for determining the corresponding features for a non-sliding piece, we make a list of all the existing pieces of that particular type (for example, a maximum of 2 knights), and then for each of those pieces, we compute it's normalized x-coordinate and y-coordinate by using "float(row)/ 8.0", "float(col)/ 8.0" and then compute
+    # the least valued attacker and defender of that square (where the piece is present) by looping over all the attackers and defenders respectively of that square.
+
+    ## For queen, rooks and bishops (which are classified as sliding pieces according to Giraffe), we also encode how far they can move in their possible directions before they encounter an obstacle. All this is computed in the mobility functions defined at the beginning of this code. For example, a rook can move north or east or west or south. So, we compute it's mobility in all the 4 directions, where as a queen can move in 8 directions.
+
 
     # white king
     feature[17] = 1
@@ -882,26 +901,27 @@ def board_to_feature(board):
         fc = fc + 5
 
     "START: Attack and Defend Maps (square-centric features)"
+    ## For each square, we encode the values of the lowest valued attacker and lowest valued defender of that square. Since we have 64 squares, there are a total of 128 slots used here. So, in the slots 225-288, we will encode the least-valued white piece attacking each of the sqaures on the board. For the slots 289-352, we encode the least-valued black piece attacking each of the squares on the board.
 
     # White-attacker
-    for i in range(63):
-        shooters = list(board.attackers(chess.WHITE, i))
-        min_val = 10
-        for j in range(len(shooters)):
-            curr_val = board.piece_type_at(shooters[j])
+    for i in range(63): # iterating through every square
+        attackers_list = list(board.attackers(chess.WHITE, i)) # list of all white pieces attacking that particular square
+        min_val = 10    # if there is no white piece attacking that square, we will store value of 10
+        for j in range(len(attackers_list)):
+            curr_val = board.piece_type_at(attackers_list[j])
             if curr_val < min_val:
                 min_val = curr_val
         feature[225 + i] = min_val
 
     # Black-attacker
-    for i in range(63):
-        shooters = list(board.attackers(chess.BLACK, i))
-        min_val = 10
-        for j in range(len(shooters)):
-            curr_val = board.piece_type_at(shooters[j])
+    for i in range(63): # iterating through every square
+        attackers_list = list(board.attackers(chess.BLACK, i)) # list of all black pieces attacking that particular square
+        min_val = 10    # if there is no black piece attacking that square, we will store value of 10
+        for j in range(len(attackers_list)):
+            curr_val = board.piece_type_at(attackers_list[j])
             if curr_val < min_val:
                 min_val = curr_val
         feature[289 + i] = min_val
 
+    ## Done with computing the feature vector.
     return feature
-    # We should make sure that bishops are not messed up.

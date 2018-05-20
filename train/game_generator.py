@@ -10,9 +10,21 @@ from network.policy_network import PolicyValNetwork_Giraffe
 from train.MCTS import MCTS, Node
 from train.self_challenge import Champion
 
+'''
+The Game Generator is responsible for generating a history of games (consisting of a list of moves) through self-play. This game generator is completely parallelizable. Callers are able to set workers to the number of available CPU cores, and it will use each core to play an independent game. These will be then used to train a new champion, which will generate new games, and so forth.
+'''
 
 class GameGenerator(object):
     def __init__(self, champion: Champion, pool: mp.Pool, batch_size: int, workers: int):
+        """
+        Takes the most recent champion (which should correspond to the best policy), a multiprocessing pool on which to run games, and generates a number of games equal to batch_size.
+
+        :type champion: Champion The "best" policy up to a certain point
+        :type pool: mp.Pool This is the multiprocessing pool which games are generated from
+        :type batch_size: int The number of games to generate
+        :type workers: int The number of workers to run in parallel
+        """
+
         self.champion = champion
         self.pool = pool
         self.workers = workers

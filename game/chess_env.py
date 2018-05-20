@@ -1,6 +1,10 @@
+
+"""
+Chess environment used for playing games. Adapted from https://github.com/Zeta36/chess-alpha-zero
+"""
+
 import copy
 import enum
-from logging import getLogger
 
 import chess.pgn
 import numpy as np
@@ -8,20 +12,13 @@ import numpy as np
 from config import Config
 from game.stockfish import Stockfish
 
-logger = getLogger(__name__)
-
 # noinspection PyArgumentList
 Winner = enum.Enum("Winner", "black white draw")
 
-# input planes
-# noinspection SpellCheckingInspection
-pieces_order = 'KQRBNPkqrbnp'  # 12x8x8
-castling_order = 'KQkq'  # 4x8x8
-# fifty-move-rule             # 1x8x8
-# en en_passant               # 1x8x8
+pieces_order = 'KQRBNPkqrbnp'
+castling_order = 'KQkq'
 
 ind = {pieces_order[i]: i for i in range(12)}
-
 
 class ChessEnv:
 
@@ -84,8 +81,6 @@ class ChessEnv:
         self.num_halfmoves += 1
 
         if check_over and self.board.result(claim_draw=True) != "*":
-            #    print('Board resultd')
-            #    print(self.board.result(claim_draw=True))
             self._game_over()
 
     def _game_over(self):
@@ -99,11 +94,16 @@ class ChessEnv:
                 self.winner = Winner.draw
 
     def is_game_over(self, moves=0, res_check=False, testing_flag=False) -> tuple:
+        """
+        :param moves number of half moves since games start
+        :param res_check indicate whether to check resignation via stockfish
+        :param testing_flag flag automatically ending game if true
+        :return tuple where first element indicates if game is over, second element indicates end game score
+        """
         if testing_flag:
             return True, 0
         if self.board.is_game_over():
             score = self.board.result()
-            # print(score)
             if score == '0-1':
                 return True, -Config.GAME_SCORE
             if score == '1/2-1/2':
@@ -116,7 +116,7 @@ class ChessEnv:
 
     def _resign(self):
         self.resigned = True
-        if self.white_to_move:  # WHITE RESIGNED!
+        if self.white_to_move:
             self.winner = Winner.black
             self.result = "0-1"
         else:
@@ -176,16 +176,6 @@ class ChessEnv:
 
     def testeval(self, absolute=False) -> float:
         return testeval(self.board.fen(), absolute)
-
-    # def get_planes(self):
-    #     move_count_plane = np.full((8,8), self.num_halfmoves, dtype=np.float32)
-    #     player_colour_plane = np.full((8,8),(self.num_halfmoves%2)+1,dtype = np.float32) # 1 when white, 0 when black
-    #
-    #     piece_planes, aux_planes = canonical_input_planes()
-    #     rep_planes = repetition_planes(self)
-    #     curr_planes = np.vstack((piece_planes,rep_planes,player_colour_plane,move_count_plane,aux_planes))
-    #     assert curr_planes.shape == (21,8,8)
-    #     return curr_planes
 
     # returns 2 planes, one for each repetition of state
     def repetition_planes(self):
