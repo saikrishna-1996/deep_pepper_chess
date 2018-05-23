@@ -20,4 +20,4 @@ We use the following technologies to train the model and interface with the Stoc
 
 * [Giraffe](https://arxiv.org/abs/1509.01549)
 * [Alpha Zero](https://arxiv.org/pdf/1712.01815.pdf)
-* [StockFish] (https://stockfishchess.org)
+* [StockFish](https://stockfishchess.org)
