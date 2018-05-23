@@ -6,8 +6,8 @@ from config import Config
 from game.chess_env import ChessEnv
 from game.features import board_to_feature
 from network.policy_network import PolicyValNetwork_Giraffe
-
-
+from game.stockfish import Stockfish
+stockfish = Stockfish()
 class Node(object):
     ''' Represent and store statistics of each node in the search tree.
     #arguments: 
@@ -83,6 +83,7 @@ class Node(object):
     def expand(self, network):
         self.children = [None] * len(self.legal_moves)
         all_move_probs, v = network.forward(torch.from_numpy(board_to_feature(self.env.board)).unsqueeze(0))
+        v = stockfish.stockfish_eval(self.env.board,10)
         all_move_probs = all_move_probs.squeeze().data.numpy()
         child_probs = (all_move_probs[self.legal_move_inds] + 1e-12) / np.sum(all_move_probs[self.legal_move_inds] + 1e-12)
         child_probs = np.exp(child_probs)
