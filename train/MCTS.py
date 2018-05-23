@@ -83,7 +83,7 @@ class Node(object):
     def expand(self, network):
         self.children = [None] * len(self.legal_moves)
         all_move_probs, v = network.forward(torch.from_numpy(board_to_feature(self.env.board)).unsqueeze(0))
-        v = stockfish.stockfish_eval(self.env.board,10)
+        #v = stockfish.stockfish_eval(self.env.board,10)
         all_move_probs = all_move_probs.squeeze().data.numpy()
         child_probs = (all_move_probs[self.legal_move_inds] + 1e-12) / np.sum(all_move_probs[self.legal_move_inds] + 1e-12)
         child_probs = np.exp(child_probs)
@@ -220,7 +220,7 @@ Update the the total value function and state action counter for each node encou
 '''
 def backup(leaf_node, root_node):
     child_node = leaf_node
-    v = leaf_node.value
+    v = 20.0 * leaf_node.value
     parent_node = leaf_node.parent
     if not parent_node:
         return leaf_node
