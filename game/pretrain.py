@@ -7,8 +7,8 @@ import torch
 from torch.autograd import Variable
 
 from config import Config
-from game.features import board_to_feature
-from game.stockfish import Stockfish
+from features import board_to_feature
+from stockfish import Stockfish
 
 
 def cross_entropy(pred, soft_targets):
@@ -60,6 +60,9 @@ def do_backprop(batch_features, targets, model):
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
     nn_policy_out, nn_val_out = model(batch_features)
     loss = criterion1(nn_val_out, targets)
+    print(loss)
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
+
+pretrain()
