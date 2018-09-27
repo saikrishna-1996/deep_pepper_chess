@@ -52,3 +52,6 @@ class Stockfish(object):
         if abs(evaluation) > 6.5:
             return True, evaluation / abs(evaluation)
         return False, None
+
+    def kill_me(self):
+        self.engine.kill()
