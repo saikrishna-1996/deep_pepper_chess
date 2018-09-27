@@ -46,13 +46,17 @@ class generate_data(object):
         targets_batch = []
         board_positions = self.get_board_position()
         shuffle(board_positions)
+        print("done shuffling")
         print("generating evaluations on {} board positions...".format(len(board_positions)))
-        stockfish = Stockfish()
+        # stockfish = Stockfish()
 
         
         for index, board_position in enumerate(board_positions):
-            feature_batch.append(board_to_feature(board_position))
-            targets_batch.append(stockfish.stockfish_eval(board_position, 10))
+        	print(index)
+        	stockfish = Stockfish()
+        	feature_batch.append(board_to_feature(board_position))
+        	targets_batch.append(stockfish.stockfish_eval(board_position, 10))
+        	stockfish.kill_me()
         feature_arr = np.asarray(feature_batch)
         targets_arr = np.asarray(targets_batch)
         np.save('features.txt', feature_arr)
