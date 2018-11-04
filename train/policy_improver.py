@@ -17,8 +17,8 @@ class PolicyImprover(object):
         model = copy.copy(self.champion.current_policy)
         return train_model(model=model, games=new_games, min_num_games=self.championship_rounds)
 
-    def improve_policy(self, games, pool):
+    def improve_policy(self, games):
         start = time.time()
         new_policy = self.train_model(games)
-        self.champion.test_candidate(new_policy, pool)
+        self.champion.test_candidate(new_policy)
         print("Improved policy in: {}".format(time.time() - start))

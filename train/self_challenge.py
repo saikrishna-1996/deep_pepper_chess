@@ -20,7 +20,7 @@ class Champion(object):
         """
         self.current_policy = current_policy
 
-    def test_candidate(self, candidate: PolicyValNetwork_Giraffe, pool):
+    def test_candidate(self, candidate: PolicyValNetwork_Giraffe):
         """
 
         :type candidate: PolicyValNetwork_Giraffe The candidate policy to test
@@ -31,9 +31,9 @@ class Champion(object):
             candidate_alpha_scores = manager.list()
             incumbent_alpha_scores = manager.list()
 
-            games_per_worker = range(int(Config.NUM_GAMES / pool._processes + 1))
+            games_per_worker = range(int(Config.NUM_GAMES))
             func = partial(self.run_tournament, candidate, candidate_alpha_scores, incumbent_alpha_scores)
-            pool.map(func, games_per_worker)
+            map(func, games_per_worker)
 
             candidate_total = sum(candidate_alpha_scores)
             incumbent_total = sum(incumbent_alpha_scores)

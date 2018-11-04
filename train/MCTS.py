@@ -7,7 +7,34 @@ from game.chess_env import ChessEnv
 from game.features import board_to_feature
 from network.policy_network import PolicyValNetwork_Giraffe
 from game.stockfish import Stockfish
-stockfish = Stockfish()
+
+def call_counter(func):
+    def helper(*args, **kwargs):
+        helper.calls += 1
+        return func(*args, **kwargs)
+    helper.calls = 0
+    helper.__name__= func.__name__
+    return helper
+
+
+
+
+def move2index(move):
+    legal_move_uci = move.uci()
+    ind = Config.MOVETOINDEX[legal_move_uci]
+    return ind
+
+def legal_mask(board, all_move_probs) -> np.array:
+
+    legal_moves = board.legal_moves
+    mask = np.zeros_like(all_move_probs)
+    inds = list(map(move2index, legal_moves))
+    mask[inds] = 1
+    total_p = np.sum(all_move_probs[inds])
+    legal_moves_prob = np.multiply(mask, all_move_probs)
+    legal_moves_prob = np.divide(legal_moves_prob, total_p)
+    return legal_moves_prob
+
 class Node(object):
     ''' Represent and store statistics of each node in the search tree.
     #arguments: 
@@ -31,20 +58,10 @@ class Node(object):
         assert init_P.shape == (Config.d_out,)
 
         self.env = env
-
         self.parent = parent
-
         self.explore_factor = explore_factor
-
-        legal_moves = env.board.legal_moves
-        self.legal_move_inds = []
-        self.legal_moves = []
-
-        for move in legal_moves:
-            legal_move_uci = move.uci()
-            ind = Config.MOVETOINDEX[legal_move_uci]
-            self.legal_moves.append(legal_move_uci)
-            self.legal_move_inds.append(ind)
+        self.legal_moves = list(map(lambda x:x.uci(), env.board.legal_moves))
+        self.legal_move_inds = list(map(move2index, env.board.legal_moves))
         self.P = init_P[self.legal_move_inds]
         self.N = init_N[self.legal_move_inds]
         self.W = init_W[self.legal_move_inds]
@@ -62,7 +79,7 @@ class Node(object):
     def U(self):
         return np.multiply(np.multiply(self.explore_factor, self.P),
                            np.divide(np.sqrt(np.sum(self.N)), (np.add(1., self.N))))
-
+    #Doubt about this!!!!!(self.U)
     def select_best_child(self):
         if self.env.white_to_move:
             move_UCT = (np.add(self.U, self.Q))
@@ -83,7 +100,11 @@ class Node(object):
     def expand(self, network):
         self.children = [None] * len(self.legal_moves)
         all_move_probs, v = network.forward(torch.from_numpy(board_to_feature(self.env.board)).unsqueeze(0))
-        #v = stockfish.stockfish_eval(self.env.board,10)
+
+        stockfish = Stockfish()
+        v = stockfish.stockfish_eval(self.env.board, 100)
+        stockfish.engine.kill()
+
         all_move_probs = all_move_probs.squeeze().data.numpy()
         child_probs = (all_move_probs[self.legal_move_inds] + 1e-12) / np.sum(all_move_probs[self.legal_move_inds] + 1e-12)
         child_probs = np.exp(child_probs)
@@ -103,23 +124,7 @@ class Node(object):
         self.P = self.P / self.P.sum(keepdims=1)
 
 
-def legal_mask(board, all_move_probs) -> np.array:
-    legal_moves = board.legal_moves
-    mask = np.zeros_like(all_move_probs)
-    total_p = 0
-    inds = []
-    for legal_move in legal_moves:
-        legal_move_uci = legal_move.uci()
-        ind = Config.MOVETOINDEX[legal_move_uci]
-        mask[ind] = 1
-        inds.append(ind)
-        total_p += all_move_probs[ind]
 
-    legal_moves_prob = np.multiply(mask, all_move_probs)
-
-    legal_moves_prob = np.divide(legal_moves_prob, total_p)
-
-    return legal_moves_prob
 
 def MCTS(temp: float,
          network: PolicyValNetwork_Giraffe,
@@ -155,6 +160,10 @@ def MCTS(temp: float,
         start_time = time.time()
         backup(leaf, root)
         avg_backup_time += (time.time() - start_time) / Config.NUM_SIMULATIONS
+
+    # print("The function expand was called {} in {} simulations".format(expand_and_eval.calls, Config.NUM_SIMULATIONS))
+    assert(expand_and_eval.calls == Config.NUM_SIMULATIONS, 'The expansion times is not equal to the simulation')
+    
     N = root.N
     norm_factor = np.sum(np.power(N, temp))
 
@@ -195,6 +204,7 @@ def select(root_node):
 ### Expand and evaluate###
 ##########################
 # Once at a leaf node expand using the network
+@call_counter
 def expand_and_eval(node, network, game_over, z, moves):
     '''
     find all  children considering all legal moves
@@ -218,9 +228,10 @@ def expand_and_eval(node, network, game_over, z, moves):
 '''
 Update the the total value function and state action counter for each node encoutered during the selection phase.
 '''
+@call_counter
 def backup(leaf_node, root_node):
     child_node = leaf_node
-    v = 20.0 * leaf_node.value
+    v = leaf_node.value #* 20.0  why on earth!!!!!!
     parent_node = leaf_node.parent
     if not parent_node:
         return leaf_node

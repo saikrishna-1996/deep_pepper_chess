@@ -68,12 +68,12 @@ class Config(object):
 
     RESIGN_CHECK_MIN = 40
     RESIGN_CHECK_FREQ = 10
-    NUM_SIMULATIONS = 10
+    NUM_SIMULATIONS = 600
     SF_EVAL_THRESHOLD = 6.5
     BATCH_SIZE = default_workers
     D_ALPHA = 0.4
     EPS = 0.1
-    EXPLORE_FACTOR = 2
+    EXPLORE_FACTOR = 0#2
 
     # Game Generator
     TEMP_REDUCE_STEP = 20
