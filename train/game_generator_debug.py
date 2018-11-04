@@ -7,7 +7,7 @@ from config import Config
 from game.chess_env import ChessEnv
 from game.features import board_to_feature
 from network.policy_network import PolicyValNetwork_Giraffe
-from train.MCTS import MCTS, Node
+from train.MCTS_debug import MCTS, Node
 from train.self_challenge import Champion
 from train.human_play import human_play
 from game.stockfish import Stockfish
@@ -17,7 +17,7 @@ The Game Generator is responsible for generating a history of games (consisting 
 '''
 
 class GameGenerator(object):
-    def __init__(self, champion: Champion, batch_size: int, workers: int):
+    def __init__(self, batch_size: int, workers: int):#, champion: Champion
         """
         Takes the most recent champion (which should correspond to the best policy), a multiprocessing pool on which to run games, and generates a number of games equal to batch_size.
 
@@ -27,11 +27,11 @@ class GameGenerator(object):
         :type workers: int The number of workers to run in parallel
         """
 
-        self.champion = champion
+        # self.champion = champion
         self.workers = workers
         self.batch_size = batch_size
 
-    def generate_game(self, model: PolicyValNetwork_Giraffe):
+    def generate_game(self):
         np.random.seed()
         triplets = []
         step_game = 0
@@ -74,7 +74,7 @@ class GameGenerator(object):
         return
 
     def play_game(self, _):
-        return self.generate_game(self.champion.current_policy)
+        return self.generate_game()#self.champion.current_policy
 
     def generate_games(self):
         start = time.time()

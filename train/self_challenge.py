@@ -6,7 +6,7 @@ import numpy as np
 from config import Config
 from game.chess_env import ChessEnv
 from network.policy_network import PolicyValNetwork_Giraffe
-from train.MCTS import MCTS, Node
+from train.MCTS_debug import MCTS, Node
 
 '''
 Holds the best policy during training. This may be updated if the candidate shows a statistical advantage over the champion during the policy improvement phase.

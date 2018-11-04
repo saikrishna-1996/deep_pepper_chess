@@ -32,17 +32,16 @@ torch.manual_seed(args.seed)
 def main():
     print("Launching Deep Pepper...")
     print("Created processing pool of size {}...".format(args.workers))
-    model, i = load_model()
-    champion = Champion(model)
-    generator = GameGenerator(champion, args.batch_size, args.workers)
-    improver = PolicyImprover(champion, args.championship_rounds)
+    # model, i = load_model()
+    # champion = Champion(model)
+    generator = GameGenerator( args.batch_size, args.workers)
+    improver = PolicyImprover(None, args.championship_rounds)
 
     while True:
         games = generator.generate_games()
-        improver.improve_policy(games)
-        i += 1
-        save_trained(model, i)
-        print("Saving model {}".format(i))
+        # improver.improve_policy(games)
+        # save_trained(model, i)
+        # print("Saving model {}".format(i))
 
 
 if __name__ == '__main__':

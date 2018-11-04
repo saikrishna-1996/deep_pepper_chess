@@ -97,18 +97,18 @@ class Node(object):
 
         return self.children[child_id]
 
-    def expand(self, network):
+    def expand(self):#network
         self.children = [None] * len(self.legal_moves)
-        all_move_probs, v = network.forward(torch.from_numpy(board_to_feature(self.env.board)).unsqueeze(0))
+        # all_move_probs, v = network.forward(torch.from_numpy(board_to_feature(self.env.board)).unsqueeze(0))
 
         stockfish = Stockfish()
         v = stockfish.stockfish_eval(self.env.board, 100)
         stockfish.engine.kill()
 
-        all_move_probs = all_move_probs.squeeze().data.numpy()
-        child_probs = (all_move_probs[self.legal_move_inds] + 1e-12) / np.sum(all_move_probs[self.legal_move_inds] + 1e-12)
-        child_probs = np.exp(child_probs)
-        self.P = child_probs
+        # all_move_probs = all_move_probs.squeeze().data.numpy()
+        # child_probs = (all_move_probs[self.legal_move_inds] + 1e-12) / np.sum(all_move_probs[self.legal_move_inds] + 1e-12)
+        # child_probs = np.exp(child_probs)
+        self.P = None #child_probs
         self.value = v
 
     def N_update(self, action_index):
@@ -127,7 +127,7 @@ class Node(object):
 
 
 def MCTS(temp: float,
-         network: PolicyValNetwork_Giraffe,
+
          root,
          dirichlet_alpha=Config.D_ALPHA,
          batch_size: int = Config.BATCH_SIZE) -> tuple:
@@ -145,7 +145,7 @@ def MCTS(temp: float,
     """
     mcts_start = time.time()
     if not root.children:
-        root.expand(network)
+        root.expand()
     root.add_dirichlet()
     avg_backup_time = 0.
     avg_expand_time = 0.
@@ -155,7 +155,7 @@ def MCTS(temp: float,
         curr_node, moves, game_over, z = select(root)
         avg_select_time += (time.time() - start_time) / Config.NUM_SIMULATIONS
         start_time = time.time()
-        leaf = expand_and_eval(curr_node, network, game_over, z, moves)
+        leaf = expand_and_eval(curr_node, game_over, z, moves)
         avg_expand_time += (time.time() - start_time) / Config.NUM_SIMULATIONS
         start_time = time.time()
         backup(leaf, root)
@@ -205,7 +205,7 @@ def select(root_node):
 ##########################
 # Once at a leaf node expand using the network
 @call_counter
-def expand_and_eval(node, network, game_over, z, moves):
+def expand_and_eval(node, game_over, z, moves):
     '''
     find all  children considering all legal moves
     :param node: leaf node
@@ -218,7 +218,7 @@ def expand_and_eval(node, network, game_over, z, moves):
     if game_over:
         node.value = z
         return node
-    node.expand(network)
+    node.expand()
     return node
 
 

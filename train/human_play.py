@@ -1,5 +1,5 @@
 
-from train.MCTS import Node
+from train.MCTS_debug import Node
 
 def human_play(root, explore_factor):
 
