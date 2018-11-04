@@ -77,14 +77,15 @@ class Node(object):
 
     @property
     def U(self):
-        return np.multiply(np.multiply(self.explore_factor, self.P),
-                           np.divide(np.sqrt(np.sum(self.N)), (np.add(1., self.N))))
+        return
+        # return np.multiply(np.multiply(self.explore_factor, self.P),
+        #                    np.divide(np.sqrt(np.sum(self.N)), (np.add(1., self.N))))
     #Doubt about this!!!!!(self.U)
     def select_best_child(self):
         if self.env.white_to_move:
-            move_UCT = (np.add(self.U, self.Q))
+            move_UCT = self.Q#(np.add(self.U, self.Q))
         else:
-            move_UCT = (np.add(self.U, -self.Q))
+            move_UCT = -self.Q #(np.add(self.U, -self.Q))
 
         max_list = np.argwhere(move_UCT == np.amax(move_UCT))
         child_id = int(max_list[np.random.randint(0, len(max_list))])
@@ -117,12 +118,12 @@ class Node(object):
     def W_update(self, V_next, action_index):
         self.W[action_index] += V_next
 
-    def add_dirichlet(self):
-        num_legal_moves = len(self.legal_move_inds) + 1
-        d_noise = np.random.dirichlet(Config.D_ALPHA * np.ones(self.P.shape))
-        self.P = np.add(self.P, d_noise)
-        self.P = self.P / self.P.sum(keepdims=1)
-
+    # def add_dirichlet(self):
+    #     num_legal_moves = len(self.legal_move_inds) + 1
+    #     d_noise = np.random.dirichlet(Config.D_ALPHA * np.ones(self.P.shape))
+    #     self.P = np.add(self.P, d_noise)
+    #     self.P = self.P / self.P.sum(keepdims=1)
+    #
 
 
 
@@ -146,7 +147,7 @@ def MCTS(temp: float,
     mcts_start = time.time()
     if not root.children:
         root.expand()
-    root.add_dirichlet()
+    # root.add_dirichlet()
     avg_backup_time = 0.
     avg_expand_time = 0.
     avg_select_time = 0.
